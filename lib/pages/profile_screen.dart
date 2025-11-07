@@ -1,0 +1,228 @@
+import 'package:flutter/material.dart';
+import 'package:probeauty_app/resources/AppColors.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Scaffold(
+      backgroundColor: AppColors.softIvory,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18.0),
+          child: ListView(
+            controller: _scrollController,
+            physics: const BouncingScrollPhysics(),
+            children: [
+              SizedBox(height: screenHeight * 0.04),
+
+              // Profile title
+              Text(
+                'Profile',
+                style: TextStyle(
+                  fontFamily: 'PlayfairDisplayBold',
+                  color: Colors.black,
+                  fontSize: screenHeight * 0.06,
+                ),
+              ),
+
+              SizedBox(height: screenHeight * 0.03),
+
+              // Profile card with border
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 30),
+                decoration: BoxDecoration(
+                  color: AppColors.softIvory,
+                  border: Border.all(color: Colors.black, width: 2.5),
+                  borderRadius: BorderRadius.circular(22),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 65,
+                      height: 65,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.rusticSunset,
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'JS',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 30,
+                              fontFamily: "PoppinsMedium"),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 18),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'John son',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontFamily: 'PoppinsSemiBold',
+                              color: Colors.black,
+                            ),
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            'Edit profile',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black,
+                              fontFamily: 'PoppinsRegular',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 25),
+
+              // Menu Items
+              _buildMenuItem(Icons.favorite_border, 'Favourites', () {}),
+              _buildMenuItem(
+                  Icons.location_on_outlined, 'Saved addresses', () {}),
+              _buildMenuItem(Icons.shopping_bag_outlined, 'Orders', () {}),
+              _buildMenuItem(
+                  Icons.credit_card_outlined, 'Payment methods', () {}),
+              _buildMenuItem(Icons.card_giftcard_outlined, 'Gift card', () {}),
+              _buildMenuItem(
+                  Icons.notifications_outlined, 'Notifications', () {}),
+              _buildMenuItem(Icons.settings_outlined, 'Settings', () {}),
+
+              const SizedBox(height: 8),
+
+              // Bottom Actions
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  TextButton.icon(
+                    onPressed: () {},
+                    icon: SvgPicture.asset(
+                      'assets/images/icons/english_icon.svg',
+                      height: 22,
+                      colorFilter: const ColorFilter.mode(
+                        AppColors.rusticSunset,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                    label: const Text(
+                      'English',
+                      style: TextStyle(
+                        color: AppColors.rusticSunset,
+                        fontFamily: 'PoppinsMedium',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 15), // space between buttons
+                  TextButton.icon(
+                    onPressed: () {},
+                    icon: SvgPicture.asset(
+                      'assets/images/icons/support_icon.svg',
+                      height: 22,
+                      colorFilter: const ColorFilter.mode(
+                        AppColors.rusticSunset,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                    label: const Text(
+                      'Support',
+                      style: TextStyle(
+                        color: AppColors.rusticSunset,
+                        fontFamily: 'PoppinsMedium',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              // Logout Button
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.rusticSunset,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  child: const Text(
+                    'Logout',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontFamily: 'PoppinsSemiBold',
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 25),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuItem(IconData icon, String title, VoidCallback onTap) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 7),
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: AppColors.softIvory,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            offset: Offset(0, 1),
+            blurRadius: 2,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: ListTile(
+        leading: Icon(icon, color: Colors.black),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 17,
+            fontFamily: 'PoppinsMedium',
+            color: Colors.black,
+          ),
+        ),
+        trailing: const Icon(Icons.chevron_right, color: Colors.black),
+        onTap: onTap,
+      ),
+    );
+  }
+}

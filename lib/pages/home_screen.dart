@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:probeauty_app/pages/appointments_screen.dart';
+import 'package:probeauty_app/pages/profile_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,30 +17,31 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _screens = const [
     Center(
-        child: Text('My precut',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold))),
+      child: Text('My Precut',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+    ),
     Center(
-        child: Text('Explore',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold))),
+      child: Text('Explore',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+    ),
     Center(
-        child: Text('Shop',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold))),
+      child: Text('Shop',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+    ),
     AppointmentsScreen(),
-    Center(
-        child: Text('Profile',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold))),
+    ProfileScreen(),
   ];
 
-  final List<IconData> _navIcons = const [
-    Icons.home,
-    Icons.search,
-    Icons.shopping_bag_outlined,
-    Icons.location_on_outlined,
-    Icons.person_outline,
+  final List<String> _iconPaths = [
+    'assets/images/icons/home_icon.svg',
+    'assets/images/icons/search_icon.svg',
+    'assets/images/icons/cart_icon.svg',
+    'assets/images/icons/location_icon.svg',
+    'assets/images/icons/profile_icon.svg',
   ];
 
   final List<String> _labels = const [
-    'My precut',
+    'My Precut',
     'Explore',
     'Shop',
     'Appointments',
@@ -54,17 +57,23 @@ class _HomeScreenState extends State<HomeScreen> {
         clipBehavior: Clip.none,
         children: [
           CurvedNavigationBar(
-            backgroundColor: AppColors.softIvory2,
-            color: AppColors.softIvory,
-            buttonBackgroundColor: const Color(0xFFFF5722), // Deep orange color
-            height: 65, // Reduced height for smaller button
+            backgroundColor: AppColors.softIvory,
+            color: AppColors.softIvory2,
+            buttonBackgroundColor: AppColors.rusticSunset,
+            height: 70,
             index: _selectedIndex,
-            items: List.generate(_navIcons.length, (index) {
+            items: List.generate(_iconPaths.length, (index) {
               bool isSelected = index == _selectedIndex;
-              return Icon(
-                _navIcons[index],
-                size: isSelected ? 28 : 25, // Slightly smaller icons
-                color: isSelected ? Colors.white : Colors.black,
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: SvgPicture.asset(
+                  _iconPaths[index],
+                  height: isSelected ? 25 : 22,
+                  colorFilter: ColorFilter.mode(
+                    isSelected ? Colors.white : Colors.black87,
+                    BlendMode.srcIn,
+                  ),
+                ),
               );
             }),
             animationDuration: const Duration(milliseconds: 300),
@@ -75,26 +84,31 @@ class _HomeScreenState extends State<HomeScreen> {
               });
             },
           ),
-          // Label below the selected item
+          // Label for selected item
           Positioned(
-            bottom: 9,
+            bottom: 7,
             left: 0,
             right: 0,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(_navIcons.length, (index) {
+              children: List.generate(_labels.length, (index) {
                 bool isSelected = index == _selectedIndex;
                 return Expanded(
                   child: Center(
-                    child: isSelected
-                        ? Text(
-                            _labels[index],
-                            style: const TextStyle(
+                    child: AnimatedOpacity(
+                      opacity: isSelected ? 1.0 : 0.0,
+                      duration: const Duration(milliseconds: 200),
+                      child: isSelected
+                          ? Text(
+                              _labels[index],
+                              style: const TextStyle(
                                 fontSize: 11,
                                 color: AppColors.rusticSunset,
-                                fontFamily: "PoppinsRegular"),
-                          )
-                        : const SizedBox.shrink(),
+                                fontFamily: "PoppinsRegular",
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
                   ),
                 );
               }),

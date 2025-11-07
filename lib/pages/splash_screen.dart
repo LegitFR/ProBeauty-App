@@ -9,8 +9,7 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen> {
   final List<String> _images = [
     'assets/images/splash/Frame 4-6.png',
     'assets/images/splash/Frame 4-5.png',
@@ -23,40 +22,32 @@ class _SplashScreenState extends State<SplashScreen>
 
   int _currentIndex = 0;
   Timer? _imageTimer;
-  late AnimationController _controller;
-  late Animation<double> _moveUpAnimation;
-  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    // 🎞 Total animation duration for full splash (matches total frames)
-    const totalDuration = Duration(milliseconds: 3850);
-    _controller = AnimationController(vsync: this, duration: totalDuration);
+    // Total duration for smooth transition
+    const totalDuration = Duration(milliseconds: 3500);
 
-    // ⏱ Automatically calculate frame change interval
+    // Smoothly calculated frame duration
     final frameInterval = Duration(
       milliseconds: (totalDuration.inMilliseconds / _images.length).round(),
     );
 
-    // 🌀 Change frame at fixed intervals (no looping)
+    // Change frames smoothly
     _imageTimer = Timer.periodic(frameInterval, (timer) {
-      setState(() {
-        if (_currentIndex < _images.length - 1) {
+      if (_currentIndex < _images.length - 1) {
+        setState(() {
           _currentIndex++;
-        } else {
-          _imageTimer?.cancel();
-        }
-      });
+        });
+      } else {
+        _imageTimer?.cancel();
+      }
     });
 
-    // 🎬 Start movement + scale animation
-    _controller.forward();
-
-    // 🚀 Move to next screen after animation completes
-    Future.delayed(totalDuration + const Duration(milliseconds: 250), () {
-      _imageTimer?.cancel();
+    // Go to next screen after all frames are shown
+    Future.delayed(totalDuration + const Duration(milliseconds: 400), () {
       Navigator.pushReplacementNamed(context, '/decision');
     });
   }
@@ -64,53 +55,27 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void dispose() {
     _imageTimer?.cancel();
-    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-
-    _moveUpAnimation = Tween<double>(
-      begin: 0.0,
-      end: -screenHeight * 0.45, // Move towards top
-    ).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic),
-    );
-
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.4, // Shrink to 40%
-    ).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic),
-    );
-
     return Scaffold(
       backgroundColor: AppColors.rusticSunset,
-      body: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return Center(
-            child: Transform.translate(
-              offset: Offset(0, _moveUpAnimation.value),
-              child: Transform.scale(
-                scale: _scaleAnimation.value,
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 100),
-                  transitionBuilder: (child, animation) =>
-                      FadeTransition(opacity: animation, child: child),
-                  child: Image.asset(
-                    _images[_currentIndex],
-                    key: ValueKey<String>(_images[_currentIndex]),
-                    width: 200,
-                    height: 200,
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
+      body: Center(
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 250),
+          switchInCurve: Curves.easeInOut,
+          switchOutCurve: Curves.easeInOut,
+          transitionBuilder: (child, animation) =>
+              FadeTransition(opacity: animation, child: child),
+          child: Image.asset(
+            _images[_currentIndex],
+            key: ValueKey<String>(_images[_currentIndex]),
+            width: 220,
+            height: 220,
+          ),
+        ),
       ),
     );
   }
