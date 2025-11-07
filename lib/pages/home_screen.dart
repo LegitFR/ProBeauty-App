@@ -1,65 +1,106 @@
-import "package:flutter/material.dart";
-import "package:probeauty_app/pages/appointments_screen.dart";
-import "package:probeauty_app/pages/notification_screen.dart";
+import 'package:flutter/material.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:probeauty_app/pages/appointments_screen.dart';
+import 'package:probeauty_app/resources/AppColors.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _screens = const [
+    Center(
+        child: Text('My precut',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold))),
+    Center(
+        child: Text('Explore',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold))),
+    Center(
+        child: Text('Shop',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold))),
+    AppointmentsScreen(),
+    Center(
+        child: Text('Profile',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold))),
+  ];
+
+  final List<IconData> _navIcons = const [
+    Icons.home,
+    Icons.search,
+    Icons.shopping_bag_outlined,
+    Icons.location_on_outlined,
+    Icons.person_outline,
+  ];
+
+  final List<String> _labels = const [
+    'My precut',
+    'Explore',
+    'Shop',
+    'Appointments',
+    'Profile',
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const NotificationScreen(),
-                    ),
-                  );
-                },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  child: Text(
-                    "Notification Screen",
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AppointmentsScreen(),
-                    ),
-                  );
-                },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  child: Text(
-                    "Appointments Screen",
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+      backgroundColor: AppColors.softIvory,
+      body: _screens[_selectedIndex],
+      bottomNavigationBar: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          CurvedNavigationBar(
+            backgroundColor: AppColors.softIvory2,
+            color: AppColors.softIvory,
+            buttonBackgroundColor: const Color(0xFFFF5722), // Deep orange color
+            height: 65, // Reduced height for smaller button
+            index: _selectedIndex,
+            items: List.generate(_navIcons.length, (index) {
+              bool isSelected = index == _selectedIndex;
+              return Icon(
+                _navIcons[index],
+                size: isSelected ? 28 : 25, // Slightly smaller icons
+                color: isSelected ? Colors.white : Colors.black,
+              );
+            }),
+            animationDuration: const Duration(milliseconds: 300),
+            animationCurve: Curves.easeInOut,
+            onTap: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
           ),
-        ),
+          // Label below the selected item
+          Positioned(
+            bottom: 9,
+            left: 0,
+            right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: List.generate(_navIcons.length, (index) {
+                bool isSelected = index == _selectedIndex;
+                return Expanded(
+                  child: Center(
+                    child: isSelected
+                        ? Text(
+                            _labels[index],
+                            style: const TextStyle(
+                                fontSize: 11,
+                                color: AppColors.rusticSunset,
+                                fontFamily: "PoppinsRegular"),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ],
       ),
     );
   }
