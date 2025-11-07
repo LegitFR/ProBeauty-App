@@ -30,7 +30,6 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       backgroundColor: AppColors.softIvory,
       appBar: AppBar(
         backgroundColor: AppColors.softIvory,
-        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () {
