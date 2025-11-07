@@ -5,6 +5,7 @@ import 'package:probeauty_app/pages/login_screen.dart';
 import 'package:probeauty_app/pages/notification_settings.dart';
 import 'package:probeauty_app/pages/onboarding_screen.dart';
 import 'package:probeauty_app/pages/otp_screen.dart';
+import 'package:probeauty_app/pages/profile_details.dart';
 import 'package:probeauty_app/pages/signup_screen.dart';
 import 'package:probeauty_app/pages/splash_screen.dart';
 import 'pages/appointments_screen.dart';
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
         '/notification_settings': (context) => const NotificationSettings(),
         '/appointments': (context) => const AppointmentsScreen(),
         '/appointment_info': (context) => const AppointmentInfo(),
+        '/profile_details': (context) => const ProfileDetails(),
       },
     );
   }

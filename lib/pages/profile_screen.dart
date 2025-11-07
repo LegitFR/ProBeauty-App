@@ -33,73 +33,81 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: TextStyle(
                   fontFamily: 'PlayfairDisplayBold',
                   color: Colors.black,
-                  fontSize: screenHeight * 0.06,
+                  fontSize: screenHeight * 0.04,
                 ),
               ),
 
               SizedBox(height: screenHeight * 0.03),
 
               // Profile card with border
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 18, vertical: 30),
-                decoration: BoxDecoration(
-                  color: AppColors.softIvory,
-                  border: Border.all(color: Colors.black, width: 2.5),
-                  borderRadius: BorderRadius.circular(22),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 65,
-                      height: 65,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.rusticSunset,
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    "/profile_details",
+                  );
+                },
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 18, vertical: 30),
+                  decoration: BoxDecoration(
+                    color: AppColors.softIvory,
+                    border: Border.all(color: Colors.black, width: 2.5),
+                    borderRadius: BorderRadius.circular(22),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
                       ),
-                      child: const Center(
-                        child: Text(
-                          'JS',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 30,
-                              fontFamily: "PoppinsMedium"),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 65,
+                        height: 65,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.rusticSunset,
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'JS',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 30,
+                                fontFamily: "PoppinsMedium"),
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 18),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'John son',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontFamily: 'PoppinsSemiBold',
-                              color: Colors.black,
+                      const SizedBox(width: 18),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'John son',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontFamily: 'PoppinsSemiBold',
+                                color: Colors.black,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 6),
-                          Text(
-                            'Edit profile',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.black,
-                              fontFamily: 'PoppinsRegular',
+                            SizedBox(height: 6),
+                            Text(
+                              'Edit profile',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black,
+                                fontFamily: 'PoppinsRegular',
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
 
