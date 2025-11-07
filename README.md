@@ -48,6 +48,3 @@ To create a release build (APK):
 flutter build apk --release
 ```
 
-swift
-Copy code
-build/app/outputs/flutter-apk/app-release.apk
