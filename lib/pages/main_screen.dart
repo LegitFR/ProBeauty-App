@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:probeauty_app/pages/appointments_screen.dart';
+import 'package:probeauty_app/pages/home_screen.dart';
 import 'package:probeauty_app/pages/profile_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
@@ -16,10 +17,7 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = const [
-    Center(
-      child: Text('My Precut',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-    ),
+    HomeScreen(),
     Center(
       child: Text('Explore',
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
