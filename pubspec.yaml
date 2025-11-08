@@ -70,6 +70,7 @@ flutter:
     - assets/images/appointments/
     - assets/images/categories/
     - assets/images/saloons/
+    - assets/images/shop/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

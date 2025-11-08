@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:probeauty_app/pages/appointments_screen.dart';
 import 'package:probeauty_app/pages/home_screen.dart';
 import 'package:probeauty_app/pages/profile_screen.dart';
+import 'package:probeauty_app/pages/shop_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
 class MainScreen extends StatefulWidget {
@@ -22,10 +23,7 @@ class _MainScreenState extends State<MainScreen> {
       child: Text('Explore',
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
     ),
-    Center(
-      child: Text('Shop',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-    ),
+    ShopScreen(),
     AppointmentsScreen(),
     ProfileScreen(),
   ];
