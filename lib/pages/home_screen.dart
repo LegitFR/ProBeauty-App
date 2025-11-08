@@ -1,3 +1,4 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
@@ -68,23 +69,24 @@ class HomeScreen extends StatelessWidget {
               SizedBox(height: height * 0.03),
 
               // === Offers carousel ===
-              SizedBox(
-                height: height * 0.25,
-                child: PageView.builder(
-                  controller: PageController(viewportFraction: 0.8),
-                  itemCount: 5,
-                  itemBuilder: (context, index) {
-                    final images = [
-                      'assets/images/offers/offer1.png',
-                      'assets/images/offers/offer2.png',
-                      'assets/images/offers/offer3.png',
-                      'assets/images/offers/offer4.png',
-                      'assets/images/offers/offer5.png',
-                    ];
-
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Container(
+              CarouselSlider(
+                options: CarouselOptions(
+                  height: height * 0.20,
+                  autoPlay: true,
+                  enlargeCenterPage: true,
+                  viewportFraction: 0.85,
+                  aspectRatio: 16 / 9,
+                  autoPlayInterval: const Duration(seconds: 3),
+                ),
+                items: [
+                  'assets/images/offers/offer1.png',
+                  'assets/images/offers/offer2.png',
+                  'assets/images/offers/offer3.png',
+                ].map((imagePath) {
+                  return Builder(
+                    builder: (BuildContext context) {
+                      return Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 6),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
@@ -95,14 +97,14 @@ class HomeScreen extends StatelessWidget {
                             ),
                           ],
                           image: DecorationImage(
-                            image: AssetImage(images[index]),
+                            image: AssetImage(imagePath),
                             fit: BoxFit.cover,
                           ),
                         ),
-                      ),
-                    );
-                  },
-                ),
+                      );
+                    },
+                  );
+                }).toList(),
               ),
 
               SizedBox(height: height * 0.04),

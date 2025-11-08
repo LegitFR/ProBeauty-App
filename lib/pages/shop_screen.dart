@@ -1,3 +1,4 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
@@ -83,22 +84,33 @@ class ShopScreen extends StatelessWidget {
                 SizedBox(height: height * 0.025),
 
                 // ==== Placeholder for Carousel ====
-                Container(
-                  height: height * 0.20,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(18),
+                CarouselSlider(
+                  options: CarouselOptions(
+                    height: height * 0.20,
+                    autoPlay: true,
+                    enlargeCenterPage: true,
+                    viewportFraction: 0.85,
+                    aspectRatio: 16 / 9,
+                    autoPlayInterval: const Duration(seconds: 3),
                   ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    "Carousel Placeholder",
-                    style: TextStyle(
-                      color: Colors.grey[700],
-                      fontFamily: "PoppinsRegular",
-                      fontSize: width * 0.04,
-                    ),
-                  ),
+                  items: [
+                    'assets/images/shop/banner1.png',
+                    'assets/images/shop/banner2.png',
+                    'assets/images/shop/banner3.png',
+                  ].map((imagePath) {
+                    return Builder(
+                      builder: (BuildContext context) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(18),
+                          child: Image.asset(
+                            imagePath,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                          ),
+                        );
+                      },
+                    );
+                  }).toList(),
                 ),
 
                 SizedBox(height: height * 0.035),
