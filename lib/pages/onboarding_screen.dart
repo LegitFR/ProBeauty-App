@@ -29,7 +29,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     setState(() => _isLoading = true);
     await Future.delayed(const Duration(seconds: 2)); // simulate loading delay
     setState(() => _isLoading = false);
-    Navigator.pushReplacementNamed(context, "/home");
+    Navigator.pushReplacementNamed(context, "/main");
   }
 
   @override

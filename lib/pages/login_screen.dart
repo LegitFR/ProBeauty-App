@@ -37,7 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     Future.delayed(const Duration(seconds: 2), () {
       if (!mounted) return;
-      Navigator.pushNamedAndRemoveUntil(context, "/home", (route) => false);
+      Navigator.pushNamedAndRemoveUntil(context, "/main", (route) => false);
     });
   }
 

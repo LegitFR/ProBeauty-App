@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:probeauty_app/pages/appointment_info.dart';
-import 'package:probeauty_app/pages/home_screen.dart';
+import 'package:probeauty_app/pages/main_screen.dart';
 import 'package:probeauty_app/pages/login_screen.dart';
 import 'package:probeauty_app/pages/notification_settings.dart';
 import 'package:probeauty_app/pages/onboarding_screen.dart';
@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignupScreen(),
         '/OTP': (context) => const OTPScreen(),
-        '/home': (context) => const HomeScreen(),
+        '/main': (context) => const MainScreen(),
         '/onboarding': (context) => const OnboardingScreen(),
         '/notification': (context) => const NotificationScreen(),
         '/notification_settings': (context) => const NotificationSettings(),
