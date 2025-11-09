@@ -1,6 +1,5 @@
 import "package:flutter/material.dart";
 import 'package:probeauty_app/pages/appointment_info.dart';
-import 'package:probeauty_app/pages/home_screen.dart';
 import 'package:probeauty_app/pages/main_screen.dart';
 import 'package:probeauty_app/pages/login_screen.dart';
 import 'package:probeauty_app/pages/notification_settings.dart';
@@ -25,7 +24,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const MainScreen(),
+      home: const SplashScreen(),
       routes: {
         '/decision': (context) => const DecisionScreen(),
         '/login': (context) => const LoginScreen(),

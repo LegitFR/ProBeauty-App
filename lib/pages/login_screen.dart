@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:probeauty_app/resources/AppColors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -27,18 +30,64 @@ class _LoginScreenState extends State<LoginScreen> {
     _passwordController.addListener(_onFocusChange);
   }
 
-  void _onFocusChange() {
-    setState(() {}); // rebuild UI when focus or text changes
-  }
+  void _onFocusChange() => setState(() {});
 
-  void _simulateLogin() {
+  // 🟢 Login function integrated with backend
+  Future<void> _login() async {
     if (_isLoading) return;
+    final identifier = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (identifier.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter email/phone and password")),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
 
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
-      Navigator.pushNamedAndRemoveUntil(context, "/main", (route) => false);
-    });
+    try {
+      final url = Uri.parse("http://192.168.0.3:5000/api/v1/auth/login");
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"identifier": identifier, "password": password}),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        // Save tokens in SharedPreferences for persistent login
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString("accessToken", data['accessToken']);
+        await prefs.setString("refreshToken", data['refreshToken']);
+        await prefs.setString("userId", data['user']['id']);
+        await prefs.setString("userName", data['user']['name']);
+        await prefs.setString("userEmail", data['user']['email']);
+        if (data['user']['phone'] != null) {
+          await prefs.setString("userPhone", data['user']['phone']);
+        }
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Login successful!")),
+        );
+
+        Navigator.pushNamedAndRemoveUntil(context, "/main", (route) => false);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? "Login failed")),
+        );
+      }
+    } catch (e) {
+      debugPrint("Login error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   Widget _buildDot(Color color) {
@@ -213,50 +262,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
-                  SizedBox(height: screenHeight * 0.015),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: _rememberMe,
-                            activeColor: AppColors.rusticSunset,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(2.5),
-                            ),
-                            onChanged: (value) {
-                              setState(() {
-                                _rememberMe = value!;
-                              });
-                            },
-                          ),
-                          Text(
-                            "Remember me",
-                            style: TextStyle(
-                              fontSize: screenWidth * 0.028,
-                              fontFamily: "PoppinsBold",
-                              color: AppColors.greyTone,
-                            ),
-                          ),
-                        ],
-                      ),
-                      GestureDetector(
-                        onTap: () {},
-                        child: Text(
-                          "Forgot Password?",
-                          style: TextStyle(
-                            decoration: TextDecoration.underline,
-                            color: AppColors.greyTone,
-                            fontFamily: "PoppinsBold",
-                            fontSize: screenWidth * 0.028,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
                   SizedBox(height: screenHeight * 0.035),
 
                   // 🔘 Login Button
@@ -271,7 +276,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         elevation: 2,
                       ),
-                      onPressed: _simulateLogin,
+                      onPressed: _login,
                       child: _isLoading
                           ? Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -292,114 +297,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                     ),
-                  ),
-
-                  SizedBox(height: screenHeight * 0.04),
-
-                  // ⚫ Divider with "OR"
-                  Row(
-                    children: [
-                      const Expanded(
-                        child: Divider(
-                          color: AppColors.greyTone,
-                          thickness: 1,
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.03),
-                        child: Text(
-                          "OR",
-                          style: TextStyle(
-                            fontFamily: "PoppinsBold",
-                            fontSize: screenWidth * 0.03,
-                            color: AppColors.greyTone,
-                          ),
-                        ),
-                      ),
-                      const Expanded(
-                        child: Divider(
-                          color: AppColors.greyTone,
-                          thickness: 1,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: screenHeight * 0.04),
-
-                  Text(
-                    "Sign in with",
-                    style: TextStyle(
-                      color: AppColors.rusticSunset,
-                      fontSize: screenWidth * 0.03,
-                      fontFamily: "PoppinsBold",
-                    ),
-                  ),
-
-                  SizedBox(height: screenHeight * 0.02),
-
-                  // 🧠 Social Icons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () {},
-                        child: Image.asset(
-                          "assets/images/icons/google.png",
-                          width: 40,
-                          height: 40,
-                        ),
-                      ),
-                      const SizedBox(width: 30),
-                      GestureDetector(
-                        onTap: () {},
-                        child: Image.asset(
-                          "assets/images/icons/facebook.png",
-                          width: 40,
-                          height: 40,
-                        ),
-                      ),
-                      const SizedBox(width: 30),
-                      GestureDetector(
-                        onTap: () {},
-                        child: Image.asset(
-                          "assets/images/icons/apple.png",
-                          width: 40,
-                          height: 40,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: screenHeight * 0.03),
-
-                  // 🩶 Signup Text
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Don't have an account? ",
-                        style: TextStyle(
-                          color: AppColors.greyTone,
-                          fontSize: screenWidth * 0.03,
-                          fontFamily: "PoppinsBold",
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.popAndPushNamed(context, "/signup");
-                        },
-                        child: Text(
-                          "Sign Up",
-                          style: TextStyle(
-                            color: AppColors.rusticSunset,
-                            fontSize: screenWidth * 0.03,
-                            fontFamily: "PoppinsBold",
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),

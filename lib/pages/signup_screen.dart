@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:probeauty_app/resources/AppColors.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -26,7 +28,6 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   void initState() {
     super.initState();
-    // Listen for focus changes to rebuild icons color
     _firstNameFocus.addListener(() => setState(() {}));
     _lastNameFocus.addListener(() => setState(() {}));
     _contactFocus.addListener(() => setState(() {}));
@@ -51,6 +52,67 @@ class _SignupScreenState extends State<SignupScreen> {
       return AppColors.rusticSunset;
     } else {
       return AppColors.greyTone;
+    }
+  }
+
+  // 🔹 Backend Integration Function
+  Future<void> _signupUser() async {
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    final contact = _contactController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (firstName.isEmpty ||
+        lastName.isEmpty ||
+        contact.isEmpty ||
+        password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all fields')),
+      );
+      return;
+    }
+
+    final url = Uri.parse("http://192.168.0.3:5000/api/v1/auth/signup");
+
+    final Map<String, dynamic> bodyData = {
+      "name": "$firstName $lastName",
+      "password": password,
+      "role": "customer",
+    };
+
+    if (contact.contains("@")) {
+      bodyData["email"] = contact;
+    } else {
+      bodyData["phone"] = contact;
+    }
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(bodyData),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 201 || data['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Signup successful!")),
+        );
+        Navigator.pushNamed(
+          context,
+          "/OTP",
+          arguments: contact,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? "Signup failed")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
     }
   }
 
@@ -268,7 +330,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                   SizedBox(height: screenHeight * 0.03),
 
-                  // 🔘 Get OTP Button
+                  // 🔘 Get OTP Button (Backend connected)
                   SizedBox(
                     width: screenWidth * 0.65,
                     height: 45,
@@ -280,9 +342,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         elevation: 2,
                       ),
-                      onPressed: () {
-                        Navigator.pushNamed(context, "/OTP");
-                      },
+                      onPressed: _signupUser, // 🔥 Backend integrated
                       child: Text(
                         "Get OTP",
                         style: TextStyle(
@@ -293,9 +353,6 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                     ),
                   ),
-
-                  SizedBox(height: screenHeight * 0.03),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -401,6 +458,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
 
                   SizedBox(height: screenHeight * 0.05),
+                  // ... rest of your UI (Login text, social icons, etc.)
                 ],
               ),
             ),

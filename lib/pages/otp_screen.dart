@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:probeauty_app/resources/AppColors.dart';
 
 class OTPScreen extends StatefulWidget {
@@ -10,7 +12,7 @@ class OTPScreen extends StatefulWidget {
 
 class _OTPScreenState extends State<OTPScreen> {
   final List<TextEditingController> _otpControllers =
-      List.generate(4, (_) => TextEditingController());
+      List.generate(6, (_) => TextEditingController());
   bool _isLoading = false;
 
   @override
@@ -29,19 +31,72 @@ class _OTPScreenState extends State<OTPScreen> {
     );
   }
 
-  void _simulateLogin() {
+  Future<void> _verifyOtp(String contact) async {
     if (_isLoading) return;
     setState(() => _isLoading = true);
 
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
-      Navigator.pushNamedAndRemoveUntil(
-          context, "/onboarding", (route) => false);
-    });
+    final otp = _otpControllers.map((c) => c.text).join();
+
+    if (otp.length != 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a valid 6-digit OTP")),
+      );
+      setState(() => _isLoading = false);
+      return;
+    }
+
+    final url =
+        Uri.parse("http://192.168.0.3:5000/api/v1/auth/confirm-registration");
+
+    final Map<String, dynamic> bodyData = {"otp": otp};
+    if (contact.contains("@")) {
+      bodyData["email"] = contact;
+    } else {
+      bodyData["phone"] = contact;
+    }
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(bodyData),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Account verified successfully!")),
+        );
+        // Navigate to onboarding after short delay
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (!mounted) return;
+          Navigator.pushNamedAndRemoveUntil(
+              context, "/onboarding", (route) => false);
+        });
+      } else {
+        final data = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? "Verification failed")),
+        );
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final contact = ModalRoute.of(context)?.settings.arguments as String?;
+    if (contact == null) {
+      return const Scaffold(
+        body: Center(child: Text("No contact information provided")),
+      );
+    }
+
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -55,7 +110,7 @@ class _OTPScreenState extends State<OTPScreen> {
             children: [
               SizedBox(height: screenHeight * 0.06),
 
-              // 🔹 Title (Left Aligned)
+              // Title
               Text(
                 "Enter OTP",
                 style: TextStyle(
@@ -63,38 +118,38 @@ class _OTPScreenState extends State<OTPScreen> {
                   fontFamily: "PoppinsSemiBold",
                   fontSize: screenWidth * 0.06,
                 ),
-                textAlign: TextAlign.left,
               ),
 
               SizedBox(height: screenHeight * 0.01),
 
-              // 🔸 Subtitle (Left Aligned)
+              // Subtitle
               Text(
-                "A 4 digit code has been sent to\n+91 9940510872",
+                contact.contains("@")
+                    ? "A 6-digit code has been sent to\n$contact"
+                    : "A 6-digit code has been sent to\n+91 $contact",
                 style: TextStyle(
                   color: Colors.black,
                   fontFamily: "PoppinsRegular",
                   fontSize: screenWidth * 0.034,
                 ),
-                textAlign: TextAlign.left,
               ),
 
               SizedBox(height: screenHeight * 0.04),
 
-              // 🔢 OTP Boxes (Centered Row)
+              // OTP Inputs
               Center(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(4, (index) {
+                  children: List.generate(6, (index) {
                     return SizedBox(
-                      width: screenWidth * 0.15,
+                      width: screenWidth * 0.10,
                       child: TextField(
                         controller: _otpControllers[index],
                         keyboardType: TextInputType.number,
                         textAlign: TextAlign.center,
                         maxLength: 1,
                         style: TextStyle(
-                          fontSize: screenWidth * 0.06,
+                          fontSize: screenWidth * 0.05,
                           fontFamily: "PoppinsBold",
                           color: Colors.black,
                         ),
@@ -116,7 +171,7 @@ class _OTPScreenState extends State<OTPScreen> {
                           ),
                         ),
                         onChanged: (value) {
-                          if (value.isNotEmpty && index < 3) {
+                          if (value.isNotEmpty && index < 7) {
                             FocusScope.of(context).nextFocus();
                           }
                           if (value.isEmpty && index > 0) {
@@ -131,7 +186,7 @@ class _OTPScreenState extends State<OTPScreen> {
 
               SizedBox(height: screenHeight * 0.06),
 
-              // 🔘 Verify Button (Centered)
+              // Verify Button
               Center(
                 child: SizedBox(
                   width: screenWidth * 0.65,
@@ -144,7 +199,7 @@ class _OTPScreenState extends State<OTPScreen> {
                       ),
                       elevation: 2,
                     ),
-                    onPressed: _simulateLogin,
+                    onPressed: () => _verifyOtp(contact),
                     child: _isLoading
                         ? Row(
                             mainAxisAlignment: MainAxisAlignment.center,
