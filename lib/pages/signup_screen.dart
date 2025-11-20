@@ -72,7 +72,8 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    final url = Uri.parse("http://192.168.0.3:5000/api/v1/auth/signup");
+    final url =
+        Uri.parse("https://probeauty-backend.onrender.com/api/v1/auth/signup");
 
     final Map<String, dynamic> bodyData = {
       "name": "$firstName $lastName",

@@ -45,8 +45,8 @@ class _OTPScreenState extends State<OTPScreen> {
       return;
     }
 
-    final url =
-        Uri.parse("http://192.168.0.3:5000/api/v1/auth/confirm-registration");
+    final url = Uri.parse(
+        "https://probeauty-backend.onrender.com/api/v1/auth/confirm-registration");
 
     final Map<String, dynamic> bodyData = {"otp": otp};
     if (contact.contains("@")) {
@@ -58,7 +58,10 @@ class _OTPScreenState extends State<OTPScreen> {
     try {
       final response = await http.post(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
         body: jsonEncode(bodyData),
       );
 

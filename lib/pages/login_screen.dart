@@ -48,10 +48,14 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final url = Uri.parse("http://192.168.0.3:5000/api/v1/auth/login");
+      final url =
+          Uri.parse("https://probeauty-backend.onrender.com/api/v1/auth/login");
       final response = await http.post(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
         body: jsonEncode({"identifier": identifier, "password": password}),
       );
 
