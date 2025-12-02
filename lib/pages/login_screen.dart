@@ -32,9 +32,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _onFocusChange() => setState(() {});
 
-  // 🟢 Login function integrated with backend
+  // 🟢 Login function
   Future<void> _login() async {
     if (_isLoading) return;
+
     final identifier = _emailController.text.trim();
     final password = _passwordController.text;
 
@@ -50,27 +51,33 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final url =
           Uri.parse("https://probeauty-backend.onrender.com/api/v1/auth/login");
+
       final response = await http.post(
         url,
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
         },
-        body: jsonEncode({"identifier": identifier, "password": password}),
+        body: jsonEncode({
+          "identifier": identifier,
+          "password": password,
+        }),
       );
 
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        // Save tokens in SharedPreferences for persistent login
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString("accessToken", data['accessToken']);
-        await prefs.setString("refreshToken", data['refreshToken']);
-        await prefs.setString("userId", data['user']['id']);
-        await prefs.setString("userName", data['user']['name']);
-        await prefs.setString("userEmail", data['user']['email']);
-        if (data['user']['phone'] != null) {
-          await prefs.setString("userPhone", data['user']['phone']);
+
+        await prefs.setString("accessToken", data["accessToken"]);
+        await prefs.setString("refreshToken", data["refreshToken"]);
+
+        await prefs.setString("userId", data["user"]["id"]);
+        await prefs.setString("userName", data["user"]["name"]);
+        await prefs.setString("userEmail", data["user"]["email"]);
+
+        if (data["user"]["phone"] != null) {
+          await prefs.setString("userPhone", data["user"]["phone"]);
         }
 
         if (!mounted) return;
@@ -81,11 +88,10 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushNamedAndRemoveUntil(context, "/main", (route) => false);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? "Login failed")),
+          SnackBar(content: Text(data["message"] ?? "Login failed")),
         );
       }
     } catch (e) {
-      debugPrint("Login error: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: $e")),
       );
@@ -131,7 +137,6 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       body: Column(
         children: [
-          // 🔹 Top Curved Header
           Container(
             width: double.infinity,
             height: screenHeight * 0.225,
@@ -175,15 +180,12 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-
-          // 🔸 Login Fields Section
           Expanded(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.08),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // 📱 Email or Phone Field
                   TextField(
                     style: const TextStyle(color: AppColors.rusticSunset),
                     cursorColor: AppColors.rusticSunset,
@@ -214,10 +216,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-
                   SizedBox(height: screenHeight * 0.025),
-
-                  // 🔒 Password Field
                   TextField(
                     style: const TextStyle(color: AppColors.rusticSunset),
                     cursorColor: AppColors.rusticSunset,
@@ -265,10 +264,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-
                   SizedBox(height: screenHeight * 0.035),
-
-                  // 🔘 Login Button
                   SizedBox(
                     width: screenWidth * 0.65,
                     height: 45,

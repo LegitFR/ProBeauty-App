@@ -1,10 +1,109 @@
+import 'dart:convert';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:probeauty_app/models/product.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
-class ShopScreen extends StatelessWidget {
+class ShopScreen extends StatefulWidget {
   const ShopScreen({super.key});
 
+  @override
+  State<ShopScreen> createState() => _ShopScreenState();
+}
+
+class _ShopScreenState extends State<ShopScreen> {
+  static const String _baseUrl = 'https://probeauty-backend.onrender.com';
+  static const String _productsEndpoint = '$_baseUrl/api/v1/products';
+
+  bool _loading = false;
+  String? _error;
+  List<Product> _products = [];
+
+  // salon ID -> salon name cache
+  Map<String, String> salonNames = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchProducts();
+  }
+
+  // ---------------- Fetch Products ----------------
+  Future<void> _fetchProducts() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
+    try {
+      final res = await http.get(
+        Uri.parse(_productsEndpoint),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (res.statusCode == 200) {
+        final Map<String, dynamic> body = json.decode(res.body);
+        final data = body['data'];
+
+        if (data is List) {
+          _products = data.map((e) => Product.fromJson(e)).toList();
+          setState(() {});
+
+          // fetch salon names
+          _fetchAllSalonNames();
+        } else {
+          setState(() => _error = 'Unexpected response shape');
+        }
+      } else {
+        setState(() => _error = 'Server responded with ${res.statusCode}');
+      }
+    } catch (e) {
+      setState(() => _error = 'Failed to fetch products: $e');
+    } finally {
+      setState(() => _loading = false);
+    }
+  }
+
+  // ---------------- Fetch All Unique Salon Names ----------------
+  Future<void> _fetchAllSalonNames() async {
+    final uniqueSalonIds = _products
+        .map((p) => p.salonId)
+        .where((id) => id != null && id.isNotEmpty)
+        .toSet();
+
+    for (String? salonId in uniqueSalonIds) {
+      if (salonId != null && !salonNames.containsKey(salonId)) {
+        await _fetchSalonName(salonId);
+      }
+    }
+
+    setState(() {}); // refresh UI with salon names
+  }
+
+  // ---------------- Fetch Single Salon Name ----------------
+  Future<void> _fetchSalonName(String salonId) async {
+    try {
+      print(salonId);
+      final res = await http.get(
+        Uri.parse('$_baseUrl/api/v1/salons/$salonId'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (res.statusCode == 200) {
+        final body = json.decode(res.body);
+        final name = body['data']?['name'] ?? 'Salon';
+        salonNames[salonId] = name;
+      } else {
+        salonNames[salonId] = "Salon";
+      }
+    } catch (e) {
+      salonNames[salonId] = "Salon";
+    }
+  }
+
+  // ---------------------- UI ----------------------
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -20,7 +119,7 @@ class ShopScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ==== Search Bar ====
+                // Search bar
                 Container(
                   padding: EdgeInsets.symmetric(
                       horizontal: width * 0.035, vertical: height * 0.01),
@@ -43,10 +142,6 @@ class ShopScreen extends StatelessWidget {
                         child: TextField(
                           decoration: InputDecoration(
                             hintText: "Search",
-                            hintStyle: TextStyle(
-                              color: Colors.black,
-                              fontFamily: "PoppinsRegular",
-                            ),
                             border: InputBorder.none,
                           ),
                         ),
@@ -59,9 +154,10 @@ class ShopScreen extends StatelessWidget {
                     ],
                   ),
                 ),
+
                 SizedBox(height: height * 0.025),
 
-                // ==== Category Scroll ====
+                // Categories
                 SizedBox(
                   height: height * 0.11,
                   child: ListView(
@@ -75,97 +171,60 @@ class ShopScreen extends StatelessWidget {
                           'Conditioner', width),
                       categoryItem(
                           'assets/images/shop/hairoil.png', 'Hair Oil', width),
-                      categoryItem(
-                          'assets/images/shop/hairoil.png', 'Hair Oil', width),
                     ],
                   ),
                 ),
 
                 SizedBox(height: height * 0.025),
 
-                // ==== Placeholder for Carousel ====
+                // Carousel banner
                 CarouselSlider(
                   options: CarouselOptions(
                     height: height * 0.20,
                     autoPlay: true,
                     enlargeCenterPage: true,
-                    viewportFraction: 0.85,
-                    aspectRatio: 16 / 9,
-                    autoPlayInterval: const Duration(seconds: 3),
                   ),
                   items: [
                     'assets/images/shop/banner1.png',
                     'assets/images/shop/banner2.png',
                     'assets/images/shop/banner3.png',
                   ].map((imagePath) {
-                    return Builder(
-                      builder: (BuildContext context) {
-                        return ClipRRect(
-                          borderRadius: BorderRadius.circular(18),
-                          child: Image.asset(
-                            imagePath,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                          ),
-                        );
-                      },
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(18),
+                      child: Image.asset(
+                        imagePath,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
                     );
                   }).toList(),
                 ),
 
                 SizedBox(height: height * 0.035),
 
-                // ==== Special Offers ====
-                Text(
-                  "Special offers",
-                  style: TextStyle(
-                    fontFamily: "PoppinsSemiBold",
-                    fontSize: width * 0.045,
-                    color: Colors.black,
-                  ),
+                // Title
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Special offers",
+                      style: TextStyle(
+                        fontFamily: "PoppinsSemiBold",
+                        fontSize: width * 0.045,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: _fetchProducts,
+                      icon: Icon(Icons.refresh),
+                    ),
+                  ],
                 ),
+
                 SizedBox(height: height * 0.015),
 
                 SizedBox(
                   height: height * 0.32,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      specialOfferCard(
-                        context,
-                        width,
-                        brand: "De Fabulous",
-                        productName:
-                            "De Fabulous Marula Oil Shampoo with Quinoa ultimate...",
-                        price: "₹1,490",
-                        oldPrice: "₹1,620",
-                        discount: "(8% off)",
-                        image: "assets/images/shop/product1.png",
-                      ),
-                      specialOfferCard(
-                        context,
-                        width,
-                        brand: "GK Hair",
-                        productName:
-                            "GK Hair Moisturizing Color Protection Conditioner (300ml)",
-                        price: "₹1,827",
-                        oldPrice: "₹2,150",
-                        discount: "(15% off)",
-                        image: "assets/images/shop/product1.png",
-                      ),
-                      specialOfferCard(
-                        context,
-                        width,
-                        brand: "GK Hair",
-                        productName:
-                            "GK Hair Moisturizing Color Protection Conditioner (300ml)",
-                        price: "₹1,827",
-                        oldPrice: "₹2,150",
-                        discount: "(15% off)",
-                        image: "assets/images/shop/product1.png",
-                      ),
-                    ],
-                  ),
+                  child: _buildSpecialOffersList(width),
                 ),
               ],
             ),
@@ -175,44 +234,66 @@ class ShopScreen extends StatelessWidget {
     );
   }
 
-  // === Category Item Widget ===
+  // ---------------- Build Product List ----------------
+  Widget _buildSpecialOffersList(double width) {
+    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_error != null)
+      return Text(_error!, style: TextStyle(color: Colors.red));
+    if (_products.isEmpty) return Text("No products available.");
+
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      itemCount: _products.length,
+      itemBuilder: (context, index) {
+        final p = _products[index];
+        final image = p.images.isNotEmpty ? p.images[0] : null;
+        final salonName = salonNames[p.salonId] ?? "Loading...";
+
+        return GestureDetector(
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              '/product_screen',
+              arguments: {
+                "product": p,
+                "salonName": salonName == "Loading..." ? "Salon" : salonName,
+              },
+            );
+          },
+          child: specialOfferCard(
+            context,
+            width,
+            brand: salonName,
+            productName: p.title ?? 'Product',
+            price: '₹${p.price ?? "-"}',
+            oldPrice: '',
+            discount: '',
+            imageUrl: image,
+          ),
+        );
+      },
+    );
+  }
+
+  // ---------------- Category Item ----------------
   Widget categoryItem(String image, String title, double width) {
     return Padding(
       padding: EdgeInsets.only(right: width * 0.04),
       child: Column(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 6,
-                  offset: const Offset(2, 3),
-                ),
-              ],
-            ),
-            child: CircleAvatar(
-              radius: width * 0.085,
-              backgroundColor: Colors.white,
-              backgroundImage: AssetImage(image),
-            ),
+          CircleAvatar(
+            radius: width * 0.085,
+            backgroundColor: Colors.white,
+            backgroundImage: AssetImage(image),
           ),
-          SizedBox(height: width * 0.015),
-          Text(
-            title,
-            style: TextStyle(
-              fontFamily: "PoppinsRegular",
-              fontSize: width * 0.032,
-              color: Colors.black,
-            ),
-          ),
+          SizedBox(height: 6),
+          Text(title),
         ],
       ),
     );
   }
 
-  // === Special Offer Card Widget ===
+  // ---------------- Product Card ----------------
   Widget specialOfferCard(
     BuildContext context,
     double width, {
@@ -221,138 +302,76 @@ class ShopScreen extends StatelessWidget {
     required String price,
     required String oldPrice,
     required String discount,
-    required String image,
+    String? imageUrl,
   }) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(context, '/product_screen');
-      },
-      child: Container(
-        width: width * 0.5,
-        margin: EdgeInsets.only(right: width * 0.035),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 8,
-              offset: const Offset(2, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // === Product Image & Heart Icon ===
-            Stack(
+    return Container(
+      width: width * 0.5,
+      margin: EdgeInsets.only(right: width * 0.035),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(blurRadius: 8, color: Colors.black12),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // image
+          Container(
+            height: width * 0.3,
+            alignment: Alignment.center,
+            child: imageUrl != null
+                ? Image.network(imageUrl,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => Icon(Icons.error))
+                : Icon(Icons.image, size: 50),
+          ),
+
+          // text info
+          Padding(
+            padding: EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  height: width * 0.3,
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(14),
-                    ),
-                  ),
-                  child: Center(
-                    child: Image.asset(image, fit: BoxFit.contain),
-                  ),
-                ),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Icon(Icons.favorite_border, color: Colors.grey[600]),
-                ),
+                Text(brand,
+                    style: TextStyle(
+                        color: AppColors.rusticSunset,
+                        fontWeight: FontWeight.w600)),
+                SizedBox(height: 5),
+                Text(productName, maxLines: 2, overflow: TextOverflow.ellipsis),
+                SizedBox(height: 5),
+                Text(price,
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ],
             ),
+          ),
 
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: width * 0.025),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: width * 0.015),
-                  Text(
-                    brand,
-                    style: TextStyle(
-                      color: AppColors.rusticSunset,
-                      fontSize: width * 0.03,
-                      fontFamily: "PoppinsRegular",
-                    ),
-                  ),
-                  SizedBox(height: width * 0.008),
-                  Text(
-                    productName,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: width * 0.03,
-                      fontFamily: "PoppinsRegular",
-                    ),
-                  ),
-                  SizedBox(height: width * 0.01),
-                  Row(
-                    children: [
-                      Text(
-                        price,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: width * 0.037,
-                          fontFamily: "PoppinsSemiBold",
-                        ),
-                      ),
-                      SizedBox(width: width * 0.01),
-                      Text(
-                        oldPrice,
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: width * 0.03,
-                          fontFamily: "PoppinsRegular",
-                          decoration: TextDecoration.lineThrough,
-                        ),
-                      ),
-                      SizedBox(width: width * 0.005),
-                      Text(
-                        discount,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: width * 0.028,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+          Spacer(),
+
+          // Button
+          Container(
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(14),
+                bottomRight: Radius.circular(14),
               ),
             ),
-
-            const Spacer(),
-
-            // === Select Size Button ===
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: width * 0.022),
-              decoration: const BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(14),
-                ),
-              ),
-              alignment: Alignment.center,
+            child: Center(
               child: Text(
                 "Select Size",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: width * 0.033,
-                  fontFamily: "PoppinsMedium",
-                ),
+                style: TextStyle(color: Colors.white),
               ),
             ),
-          ],
-        ),
+          )
+        ],
       ),
     );
   }
 }
+
+// ---------------- Product Model ----------------
+

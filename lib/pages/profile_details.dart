@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:probeauty_app/resources/AppColors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileDetails extends StatefulWidget {
   const ProfileDetails({Key? key}) : super(key: key);
@@ -9,20 +12,114 @@ class ProfileDetails extends StatefulWidget {
 }
 
 class _ProfileDetailsState extends State<ProfileDetails> {
-  final TextEditingController _firstNameController =
-      TextEditingController(text: 'John');
-  final TextEditingController _lastNameController =
-      TextEditingController(text: 'Son');
-  final TextEditingController _phoneController =
-      TextEditingController(text: '9940510872');
-  final TextEditingController _emailController =
-      TextEditingController(text: 'johnsonkannan@gmail.com');
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _dayController = TextEditingController();
   final TextEditingController _monthController = TextEditingController();
   final TextEditingController _yearController = TextEditingController();
 
   String _selectedCountryCode = '+91';
   String? _selectedEmailOption;
+
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserData(); // 🔥 Load values from SharedPreferences
+  }
+
+  // ⭐ Load actual saved details
+  Future<void> loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final fullName = prefs.getString("userName") ?? "";
+    final phone = prefs.getString("userPhone") ?? "";
+    final email = prefs.getString("userEmail") ?? "";
+
+    // Split full name → first + last
+    final nameParts = fullName.split(" ");
+    String first = nameParts.isNotEmpty ? nameParts.first : "";
+    String last = nameParts.length > 1 ? nameParts.sublist(1).join(" ") : "";
+
+    setState(() {
+      _firstNameController.text = first;
+      _lastNameController.text = last;
+      _phoneController.text = phone;
+      _emailController.text = email;
+    });
+  }
+
+  // 🔴 SHOW MESSAGE
+  void _showMessage(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg)),
+    );
+  }
+
+  // 🔵 API CALL → UPDATE PROFILE
+  Future<void> _updateProfile() async {
+    if (_saving) return;
+
+    final first = _firstNameController.text.trim();
+    final last = _lastNameController.text.trim();
+    final phone = _phoneController.text.trim();
+    final fullName = "$first $last".trim();
+
+    if (first.isEmpty) {
+      _showMessage("First name required");
+      return;
+    }
+
+    if (phone.isNotEmpty && !RegExp(r'^[6-9]\d{9}$').hasMatch(phone)) {
+      _showMessage("Invalid phone number");
+      return;
+    }
+
+    setState(() => _saving = true);
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("accessToken");
+
+    if (token == null) {
+      _showMessage("User not logged in");
+      return;
+    }
+
+    final url =
+        Uri.parse("https://probeauty-backend.onrender.com/api/v1/user/me");
+
+    final body = {"name": fullName, if (phone.isNotEmpty) "phone": phone};
+
+    try {
+      final response = await http.patch(
+        url,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(body),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        await prefs.setString("userName", fullName);
+        await prefs.setString("userPhone", phone);
+
+        _showMessage("Profile updated successfully!");
+        Navigator.pop(context);
+      } else {
+        _showMessage(data["message"] ?? "Update failed");
+      }
+    } catch (e) {
+      _showMessage("Error: $e");
+    }
+
+    setState(() => _saving = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,9 +129,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         backgroundColor: AppColors.softIvory,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Edit profile details',
@@ -98,12 +193,10 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         border: Border.all(color: Colors.black, width: 1.5),
       ),
       child: TextField(
+        controller: controller,
         style: const TextStyle(
             fontFamily: "PoppinsRegular", fontSize: 14, color: Colors.black),
-        controller: controller,
         decoration: const InputDecoration(
-          hintStyle: TextStyle(
-              fontFamily: "PoppinsRegular", fontSize: 14, color: Colors.black),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         ),
@@ -132,18 +225,14 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                         child: Text(code),
                       ))
                   .toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedCountryCode = value!;
-                });
-              },
+              onChanged: (value) => setState(() {
+                _selectedCountryCode = value!;
+              }),
             ),
           ),
         ),
         const SizedBox(width: 12),
-        Expanded(
-          child: _buildTextField(_phoneController),
-        ),
+        Expanded(child: _buildTextField(_phoneController)),
       ],
     );
   }
@@ -151,20 +240,11 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   Widget _buildDateFields() {
     return Row(
       children: [
-        Expanded(
-          flex: 2,
-          child: _buildDateTextField(_dayController, 'Day'),
-        ),
+        Expanded(flex: 2, child: _buildDateTextField(_dayController, 'Day')),
         const SizedBox(width: 12),
-        Expanded(
-          flex: 2,
-          child: _buildDateDropdown('Month'),
-        ),
+        Expanded(flex: 2, child: _buildDateDropdown('Month')),
         const SizedBox(width: 12),
-        Expanded(
-          flex: 2,
-          child: _buildDateTextField(_yearController, 'Year'),
-        ),
+        Expanded(flex: 2, child: _buildDateTextField(_yearController, 'Year')),
       ],
     );
   }
@@ -180,8 +260,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         controller: controller,
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle:
-              const TextStyle(color: Colors.grey, fontFamily: "PoppinsRegular"),
+          hintStyle: const TextStyle(color: Colors.grey),
           border: InputBorder.none,
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -203,15 +282,9 @@ class _ProfileDetailsState extends State<ProfileDetails> {
             padding: const EdgeInsets.only(left: 14),
             child: Text(
               hint,
-              style: const TextStyle(
-                  color: Colors.grey,
-                  fontFamily: "PoppinsRegular",
-                  fontSize: 14.5),
+              style: const TextStyle(color: Colors.grey, fontSize: 14),
             ),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          icon: const Icon(Icons.keyboard_arrow_down, size: 20),
-          isExpanded: true,
           items: const [],
           onChanged: null,
         ),
@@ -233,24 +306,20 @@ class _ProfileDetailsState extends State<ProfileDetails> {
             padding: EdgeInsets.only(left: 15),
             child: Text(
               'Select Option',
-              style:
-                  TextStyle(color: Colors.grey, fontFamily: "PoppinsRegular"),
+              style: TextStyle(color: Colors.grey),
             ),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           icon: const Icon(Icons.keyboard_arrow_down, size: 20),
           isExpanded: true,
           items: ['Option 1', 'Option 2', 'Option 3']
-              .map((option) => DropdownMenuItem(
-                    value: option,
-                    child: Text(option),
+              .map((opt) => DropdownMenuItem(
+                    value: opt,
+                    child: Text(opt),
                   ))
               .toList(),
-          onChanged: (value) {
-            setState(() {
-              _selectedEmailOption = value;
-            });
-          },
+          onChanged: (value) => setState(() {
+            _selectedEmailOption = value;
+          }),
         ),
       ),
     );
@@ -260,22 +329,23 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () {
-          // Handle save action
-        },
+        onPressed: _saving ? null : _updateProfile,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.rusticSunset,
           padding: const EdgeInsets.symmetric(vertical: 18),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
-          elevation: 0,
         ),
-        child: const Text(
-          'Save',
-          style: TextStyle(
-              fontSize: 16, color: Colors.white, fontFamily: "PoppinsRegular"),
-        ),
+        child: _saving
+            ? const CircularProgressIndicator(color: Colors.white)
+            : const Text(
+                'Save',
+                style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontFamily: "PoppinsRegular"),
+              ),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:probeauty_app/resources/AppColors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -11,6 +12,35 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final ScrollController _scrollController = ScrollController();
+
+  String userName = "";
+  String userEmail = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      userName = prefs.getString("userName") ?? "User";
+      userEmail = prefs.getString("userEmail") ?? "";
+    });
+  }
+
+  // Get initials (AB, AJ, A)
+  String _getInitials(String name) {
+    if (name.trim().isEmpty) return "";
+
+    final parts = name.trim().split(" ");
+    if (parts.length == 1) {
+      return parts[0][0].toUpperCase();
+    }
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               SizedBox(height: screenHeight * 0.04),
 
-              // Profile title
+              // Title
               Text(
                 'Profile',
                 style: TextStyle(
@@ -39,7 +69,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               SizedBox(height: screenHeight * 0.03),
 
-              // Profile card with border
+              // Profile card
               GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(
@@ -64,6 +94,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   child: Row(
                     children: [
+                      // Profile Initials Circle
                       Container(
                         width: 65,
                         height: 65,
@@ -71,31 +102,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           shape: BoxShape.circle,
                           color: AppColors.rusticSunset,
                         ),
-                        child: const Center(
+                        child: Center(
                           child: Text(
-                            'JS',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 30,
-                                fontFamily: "PoppinsMedium"),
+                            _getInitials(userName),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 30,
+                              fontFamily: "PoppinsMedium",
+                            ),
                           ),
                         ),
                       ),
+
                       const SizedBox(width: 18),
-                      const Expanded(
+
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // Username
                             Text(
-                              'John son',
-                              style: TextStyle(
+                              userName,
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontFamily: 'PoppinsSemiBold',
                                 color: Colors.black,
                               ),
                             ),
-                            SizedBox(height: 6),
-                            Text(
+                            const SizedBox(height: 6),
+
+                            // Subtitle
+                            const Text(
                               'Edit profile',
                               style: TextStyle(
                                 fontSize: 14,
@@ -113,7 +150,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               const SizedBox(height: 25),
 
-              // Menu Items
+              // Menu items
               _buildMenuItem(Icons.favorite_border, 'Favourites', () {}),
               _buildMenuItem(
                   Icons.location_on_outlined, 'Saved addresses', () {}),
@@ -127,7 +164,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               const SizedBox(height: 8),
 
-              // Bottom Actions
+              // Language & Support Row
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -149,7 +186,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 15), // space between buttons
+                  const SizedBox(width: 15),
                   TextButton.icon(
                     onPressed: () {},
                     icon: SvgPicture.asset(
@@ -171,13 +208,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
 
-              // Logout Button
               const SizedBox(height: 8),
+
+              // Logout Button
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    // TODO: add logout functionality
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.rusticSunset,
                     shape: RoundedRectangleBorder(
@@ -194,6 +234,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
               ),
+
               const SizedBox(height: 25),
             ],
           ),
@@ -214,7 +255,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: Colors.black12,
             offset: Offset(0, 1),
             blurRadius: 2,
-            spreadRadius: 0,
           ),
         ],
       ),
