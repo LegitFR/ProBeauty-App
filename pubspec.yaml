@@ -42,6 +42,9 @@ dependencies:
   carousel_slider: ^5.1.1
   http: ^1.5.0
   shared_preferences: ^2.5.3
+  intl: ^0.20.2
+  geolocator: ^14.0.1
+  geocoding: ^2.1.0
 
 dev_dependencies:
   flutter_test:
@@ -75,6 +78,7 @@ flutter:
     - assets/images/saloons/
     - assets/images/shop/
     - assets/images/offers/
+    - assets/images/services/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -142,3 +146,6 @@ flutter:
 
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+dependency_overrides:
+  geolocator_android: ^4.10.1

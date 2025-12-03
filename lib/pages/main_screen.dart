@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:probeauty_app/pages/appointments_screen.dart';
+import 'package:probeauty_app/pages/explore_screen.dart';
 import 'package:probeauty_app/pages/home_screen.dart';
 import 'package:probeauty_app/pages/profile_screen.dart';
 import 'package:probeauty_app/pages/shop_screen.dart';
@@ -19,10 +20,7 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _screens = const [
     HomeScreen(),
-    Center(
-      child: Text('Explore',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-    ),
+    ExploreScreen(),
     ShopScreen(),
     AppointmentsScreen(),
     ProfileScreen(),
