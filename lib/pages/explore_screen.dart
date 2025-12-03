@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:probeauty_app/pages/explore_results_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:intl/intl.dart';
 
@@ -15,6 +16,7 @@ class ExploreScreen extends StatefulWidget {
 }
 
 class _ExploreScreenState extends State<ExploreScreen> {
+  TextEditingController searchController = TextEditingController();
   DateTime? selectedDate;
   String? selectedTimeSlot;
 
@@ -71,6 +73,13 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   Future<void> _fetchServices() async {
+    final images = [
+      "assets/images/services/hair_styling.png",
+      "assets/images/services/ayurvedic.png",
+      "assets/images/services/eyebrow.png",
+      "assets/images/services/makeup.png",
+    ];
+
     try {
       final url =
           Uri.parse("https://probeauty-backend.onrender.com/api/v1/services");
@@ -82,12 +91,15 @@ class _ExploreScreenState extends State<ExploreScreen> {
         final List data = jsonResponse["data"];
 
         setState(() {
-          _services = data.map<Map<String, String>>((service) {
+          _services = data.asMap().entries.map<Map<String, String>>((entry) {
+            final index = entry.key;
+            final service = entry.value;
+
             return {
               "id": service["id"],
               "title": service["title"] ?? "Service",
-              "img":
-                  "assets/images/services/hair_styling.png", // fallback (no image from backend)
+              // CYCLE BETWEEN 4 IMAGES
+              "img": images[index % images.length],
             };
           }).toList();
 
@@ -206,6 +218,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 child: Column(
                   children: [
                     _buildSearchField(
+                      controller: searchController,
                       hint: "Any treatment or venue",
                       svgIcon: "assets/images/icons/search_icon.svg",
                     ),
@@ -244,7 +257,22 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           width: double.infinity,
                           height: height * 0.06,
                           child: ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ExploreResultsScreen(
+                                    serviceText: searchController
+                                        .text, // your search field text
+                                    dateText: selectedDate != null
+                                        ? _formatDate(selectedDate!)
+                                        : "",
+                                    timeText: selectedTimeSlot ?? "",
+                                    locationText: "Mumbai" ?? "",
+                                  ),
+                                ),
+                              );
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.rusticSunset,
                               shape: RoundedRectangleBorder(
@@ -318,7 +346,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: _loadingServices ? 4 : _services.length,
+                // itemCount: _loadingServices ? 4 : _services.length,
+                itemCount: 4,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   crossAxisSpacing: 14,
@@ -410,6 +439,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   Widget _buildSearchField({
     required String hint,
     required String svgIcon,
+    required TextEditingController controller,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -418,6 +448,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
         border: Border.all(color: Colors.black, width: 1.4),
       ),
       child: TextField(
+        controller: searchController,
         decoration: InputDecoration(
           prefixIcon: Padding(
             padding: const EdgeInsets.all(12),

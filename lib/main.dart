@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const MainScreen(),
+      home: const SplashScreen(),
 
       // ------------- FIXED: onGenerateRoute for passing arguments -------------
       onGenerateRoute: (settings) {
