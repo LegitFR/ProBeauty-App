@@ -1,3 +1,4 @@
+// pages/explore_results_screen.dart
 import 'dart:async';
 import 'dart:convert';
 
@@ -5,10 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:probeauty_app/resources/AppColors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 /// ExploreResultsScreen
 /// - Services now come directly from /salons/search
-/// - No second API call for services
+/// - Booking integration added: POST /api/v1/bookings
 class ExploreResultsScreen extends StatefulWidget {
   final String? serviceText;
   final String? dateText;
@@ -174,7 +177,6 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
       backgroundColor: AppColors.softIvory,
@@ -220,7 +222,6 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Main service title
                             Text(
                               widget.serviceText ?? "Haircut & styling",
                               style: const TextStyle(
@@ -229,10 +230,7 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
                                 color: Colors.black,
                               ),
                             ),
-
                             const SizedBox(height: 2),
-
-                            // Sub text (date | time | location)
                             Text(
                               "${widget.dateText ?? ''} | ${widget.timeText ?? ''} | ${widget.locationText ?? ''}",
                               maxLines: 1,
@@ -257,7 +255,6 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
               ),
             ),
 
-            // Filters
             Padding(
               padding: EdgeInsets.symmetric(horizontal: width * 0.045),
               child: SingleChildScrollView(
@@ -278,7 +275,6 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
 
             const SizedBox(height: 12),
 
-            // Content
             Expanded(
               child: _initialLoading
                   ? _buildSkeletonList()
@@ -295,7 +291,11 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
                               if (index < salons.length) {
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 18),
-                                  child: SalonCard(salon: salons[index]),
+                                  child: SalonCard(
+                                    salon: salons[index],
+                                    dateText: widget.dateText,
+                                    timeText: widget.timeText,
+                                  ),
                                 );
                               } else {
                                 return const Center(
@@ -337,7 +337,9 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
     return Container(
       height: 200,
       decoration: BoxDecoration(
-          color: Colors.grey.shade300, borderRadius: BorderRadius.circular(12)),
+        color: Colors.grey.shade300,
+        borderRadius: BorderRadius.circular(12),
+      ),
     );
   }
 
@@ -345,7 +347,9 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-          border: Border.all(), borderRadius: BorderRadius.circular(8)),
+        border: Border.all(),
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: SvgPicture.asset(
         "assets/images/icons/filter_icon.svg",
         height: 20,
@@ -357,7 +361,9 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-          border: Border.all(), borderRadius: BorderRadius.circular(8)),
+        border: Border.all(),
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: Row(
         children: [
           Text(label),
@@ -415,40 +421,204 @@ class ServiceModel {
   final String title;
   final int? durationMinutes;
   final double? price;
+  final List<StaffModel> staff;
 
   ServiceModel({
     required this.id,
     required this.title,
     this.durationMinutes,
     this.price,
+    required this.staff,
   });
 
   factory ServiceModel.fromJson(Map<String, dynamic> json) {
+    final List staffJson = json['staff'] ?? [];
     return ServiceModel(
       id: json['id'] ?? "",
       title: json['title'] ?? "",
       durationMinutes: json['durationMinutes'] != null
-          ? json['durationMinutes'] as int
+          ? (json['durationMinutes'] as num).toInt()
           : null,
       price: json['price'] != null
           ? double.tryParse(json['price'].toString())
           : null,
+      staff: staffJson.map<StaffModel>((s) => StaffModel.fromJson(s)).toList(),
+    );
+  }
+}
+
+class StaffModel {
+  final String id;
+  final String? userId;
+
+  StaffModel({required this.id, this.userId});
+
+  factory StaffModel.fromJson(Map<String, dynamic> json) {
+    return StaffModel(
+      id: json['id'] ?? "",
+      userId: json['userId']?.toString(),
     );
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// SALON CARD (NO UI CHANGES)
+/// SALON CARD — NOW WITH CORRECT DATE PARSER + BOOKING API
 ////////////////////////////////////////////////////////////////////////////////
 
-class SalonCard extends StatelessWidget {
+class SalonCard extends StatefulWidget {
   final SalonModel salon;
+  final String? dateText;
+  final String? timeText;
 
-  const SalonCard({super.key, required this.salon});
+  const SalonCard({
+    super.key,
+    required this.salon,
+    this.dateText,
+    this.timeText,
+  });
+
+  @override
+  State<SalonCard> createState() => _SalonCardState();
+}
+
+class _SalonCardState extends State<SalonCard> {
+  bool _bookingLoading = false;
+
+  /// ✔️ Parse "10 Dec 25" → DateTime(year: 2025, month: 12, day: 10)
+  DateTime? _parseDate(String? dateStr) {
+    if (dateStr == null || dateStr.trim().isEmpty) return null;
+
+    try {
+      final fmt = DateFormat("d MMM yy");
+      final d = fmt.parse(dateStr);
+      return DateTime(d.year, d.month, d.day);
+    } catch (e) {
+      print("❌ DATE PARSE ERROR: $e");
+      return null;
+    }
+  }
+
+  /// ✔️ Map time slots to starting hour
+  int _slotToHour(String? slot) {
+    final s = (slot ?? "").toLowerCase();
+    switch (s) {
+      case "morning":
+        return 5;
+      case "afternoon":
+        return 12;
+      case "evening":
+        return 17;
+      case "night":
+        return 21;
+      default:
+        return 12;
+    }
+  }
+
+  Future<void> _createBooking(ServiceModel service) async {
+    final salonId = widget.salon.id;
+    final serviceId = service.id;
+    final staffId = service.staff.isNotEmpty ? service.staff.first.id : null;
+
+    if (staffId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("No staff available for this service"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final parsedDate = _parseDate(widget.dateText);
+    if (parsedDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Invalid date format (expected: d MMM yy)"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final hour = _slotToHour(widget.timeText);
+    final localStart =
+        DateTime(parsedDate.year, parsedDate.month, parsedDate.day, hour, 0);
+
+    final isoUtc = localStart.toUtc().toIso8601String();
+
+    setState(() => _bookingLoading = true);
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("accessToken");
+
+      if (token == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("⚠ No token found"),
+            backgroundColor: Colors.red,
+          ),
+        );
+        setState(() => _bookingLoading = false);
+        return;
+      }
+
+      final url =
+          Uri.parse("https://probeauty-backend.onrender.com/api/v1/bookings");
+
+      final body = {
+        "salonId": salonId,
+        "serviceId": serviceId,
+        "staffId": staffId,
+        "startTime": isoUtc,
+      };
+
+      print("📤 BOOKING BODY: $body");
+
+      final resp = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode(body),
+      );
+
+      print("📥 STATUS: ${resp.statusCode}");
+      print("📥 BODY: ${resp.body}");
+
+      if (resp.statusCode == 201) {
+        final json = jsonDecode(resp.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Booking successful!"),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        final msg = jsonDecode(resp.body)['message'] ?? 'Booking failed';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg), backgroundColor: Colors.red),
+        );
+      }
+    } catch (e) {
+      print("❌ BOOKING ERROR: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+
+    if (mounted) setState(() => _bookingLoading = false);
+  }
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+    final salon = widget.salon;
 
     return Container(
       decoration: BoxDecoration(
@@ -478,9 +648,7 @@ class SalonCard extends StatelessWidget {
                   style: const TextStyle(
                       fontFamily: "PoppinsSemiBold", fontSize: 17),
                 ),
-
                 const SizedBox(height: 6),
-
                 Row(
                   children: [
                     Text(
@@ -491,25 +659,23 @@ class SalonCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     _buildStars(salon.averageRating ?? 0),
                     const SizedBox(width: 8),
-                    const Text("(450)",
-                        style: TextStyle(
-                            fontFamily: "PoppinsRegular", fontSize: 14)),
+                    const Text(
+                      "(450)",
+                      style:
+                          TextStyle(fontFamily: "PoppinsRegular", fontSize: 14),
+                    ),
                   ],
                 ),
-
                 const SizedBox(height: 6),
-
                 Text(
                   salon.address ?? "",
                   style: const TextStyle(
-                      fontFamily: "PoppinsRegular",
-                      fontSize: 14,
-                      color: Colors.black54),
+                    fontFamily: "PoppinsRegular",
+                    fontSize: 14,
+                    color: Colors.black54,
+                  ),
                 ),
-
                 const SizedBox(height: 14),
-
-                /// SERVICES — direct from the search response now
                 Column(
                   children: [
                     for (final s in salon.services) _serviceTile(s),
@@ -559,9 +725,10 @@ class SalonCard extends StatelessWidget {
                           ? "${s.durationMinutes} mins"
                           : "",
                       style: const TextStyle(
-                          fontFamily: "PoppinsRegular",
-                          fontSize: 13,
-                          color: Colors.black54),
+                        fontFamily: "PoppinsRegular",
+                        fontSize: 13,
+                        color: Colors.black54,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -572,17 +739,30 @@ class SalonCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-                decoration: BoxDecoration(
-                  color: AppColors.softIvory,
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: Colors.black, width: 1.5),
+              GestureDetector(
+                onTap: _bookingLoading ? null : () => _createBooking(s),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.softIvory,
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: Colors.black, width: 1.5),
+                  ),
+                  child: _bookingLoading
+                      ? const SizedBox(
+                          height: 16,
+                          width: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text(
+                          "BOOK",
+                          style: TextStyle(
+                            fontFamily: "PoppinsSemiBold",
+                            fontSize: 14,
+                          ),
+                        ),
                 ),
-                child: const Text("BOOK",
-                    style:
-                        TextStyle(fontFamily: "PoppinsSemiBold", fontSize: 14)),
               ),
             ],
           ),

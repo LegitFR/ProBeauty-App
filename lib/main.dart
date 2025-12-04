@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const ProfileScreen(),
+      home: const LoginScreen(),
 
       // ------------- FIXED: onGenerateRoute for passing arguments -------------
       onGenerateRoute: (settings) {
