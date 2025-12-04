@@ -7,6 +7,8 @@ import 'package:probeauty_app/pages/onboarding_screen.dart';
 import 'package:probeauty_app/pages/otp_screen.dart';
 import 'package:probeauty_app/pages/product_screen.dart';
 import 'package:probeauty_app/pages/profile_details.dart';
+import 'package:probeauty_app/pages/profile_screen.dart';
+import 'package:probeauty_app/pages/saved_address_screen.dart';
 import 'package:probeauty_app/pages/signup_screen.dart';
 import 'package:probeauty_app/pages/splash_screen.dart';
 import 'pages/appointments_screen.dart';
@@ -25,7 +27,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const SplashScreen(),
+      home: const ProfileScreen(),
 
       // ------------- FIXED: onGenerateRoute for passing arguments -------------
       onGenerateRoute: (settings) {
@@ -70,6 +72,9 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(builder: (_) => const AppointmentInfo());
           case '/profile_details':
             return MaterialPageRoute(builder: (_) => const ProfileDetails());
+          case '/saved_address':
+            return MaterialPageRoute(
+                builder: (_) => const SavedAddressScreen());
         }
 
         // Fallback: main screen

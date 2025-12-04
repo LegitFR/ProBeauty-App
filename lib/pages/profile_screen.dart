@@ -152,8 +152,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               // Menu items
               _buildMenuItem(Icons.favorite_border, 'Favourites', () {}),
-              _buildMenuItem(
-                  Icons.location_on_outlined, 'Saved addresses', () {}),
+              _buildMenuItem(Icons.location_on_outlined, 'Saved addresses', () {
+                Navigator.pushNamed(context, "/saved_address");
+              }),
               _buildMenuItem(Icons.shopping_bag_outlined, 'Orders', () {}),
               _buildMenuItem(
                   Icons.credit_card_outlined, 'Payment methods', () {}),
