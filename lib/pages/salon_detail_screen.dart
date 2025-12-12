@@ -1,0 +1,389 @@
+import 'package:flutter/material.dart';
+import 'package:probeauty_app/pages/select_services_screen.dart';
+import 'package:probeauty_app/resources/AppColors.dart';
+
+class SalonDetailScreen extends StatefulWidget {
+  final String name;
+  final String address;
+  final double rating;
+  final int reviews;
+  final String image;
+
+  final List<dynamic> services;
+  final List<dynamic> salonStaffList;
+
+  const SalonDetailScreen({
+    super.key,
+    required this.name,
+    required this.address,
+    required this.rating,
+    required this.reviews,
+    required this.image,
+    required this.services,
+    required this.salonStaffList,
+  });
+
+  @override
+  State<SalonDetailScreen> createState() => _SalonDetailScreenState();
+}
+
+class _SalonDetailScreenState extends State<SalonDetailScreen> {
+  int selectedTab = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final height = size.height;
+
+    return Scaffold(
+      backgroundColor: AppColors.softIvory,
+      appBar: AppBar(
+        backgroundColor: AppColors.softIvory,
+        elevation: 0,
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: const Icon(Icons.arrow_back_ios, color: Colors.black),
+        ),
+        centerTitle: true,
+        title: Text(
+          widget.name,
+          style: const TextStyle(
+            fontFamily: "PoppinsSemiBold",
+            color: Colors.black,
+            fontSize: 18,
+          ),
+        ),
+      ),
+
+      body: Column(
+        children: [
+          // -------------------------------
+          // TOP IMAGE
+          // -------------------------------
+          SizedBox(
+            height: height * 0.25,
+            width: double.infinity,
+            child: Stack(
+              children: [
+                Image.asset(
+                  widget.image,
+                  width: double.infinity,
+                  height: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+                Positioned(
+                  right: 16,
+                  top: 16,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.black.withOpacity(0.4),
+                    ),
+                    child: const Icon(Icons.share, color: Colors.white),
+                  ),
+                )
+              ],
+            ),
+          ),
+
+          // -------------------------------
+          // DETAILS
+          // -------------------------------
+          Expanded(
+            child: SingleChildScrollView(
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // TITLE + HEART
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            widget.name,
+                            style: const TextStyle(
+                              fontFamily: "PoppinsSemiBold",
+                              fontSize: 18,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.black26),
+                            color: AppColors.softIvory,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(Icons.favorite_border),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    // RATINGS
+                    Row(
+                      children: [
+                        Text(
+                          widget.rating.toString(),
+                          style: const TextStyle(
+                            fontFamily: "PoppinsSemiBold",
+                            fontSize: 15,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        ...List.generate(
+                          5,
+                          (i) => Icon(
+                            Icons.star,
+                            size: 18,
+                            color: i < widget.rating.floor()
+                                ? AppColors.rusticSunset
+                                : AppColors.greyTone,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          "(${widget.reviews})",
+                          style: const TextStyle(
+                            fontFamily: "PoppinsRegular",
+                            fontSize: 13,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    Text(
+                      widget.address,
+                      style: const TextStyle(
+                        fontFamily: "PoppinsRegular",
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
+                    ),
+
+                    const SizedBox(height: 4),
+                    const Text(
+                      "Open until 10:00 pm",
+                      style: TextStyle(
+                        fontFamily: "PoppinsRegular",
+                        fontSize: 14,
+                        color: Colors.black54,
+                      ),
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    // ---------------------------
+                    // TAB BAR
+                    // ---------------------------
+                    const SizedBox(
+                      height: 45,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _TabButton(title: "SERVICES", index: 0),
+                            _TabButton(title: "REVIEWS", index: 1),
+                            _TabButton(title: "TEAM", index: 2),
+                            _TabButton(title: "GIFT CARDS", index: 3),
+                            _TabButton(title: "DETAILS", index: 4),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const Divider(thickness: 1),
+                    const SizedBox(height: 14),
+
+                    // ---------------------------
+                    // SERVICES LIST
+                    // ---------------------------
+                    for (var s in widget.services) ...[
+                      _serviceTile(
+                        title: s["title"] ?? "",
+                        subtitle: "${s["durationMinutes"]} mins",
+                        price: "₹${s["price"]}",
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+
+                    const SizedBox(height: 80),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+
+      // ---------------------------
+      // FIXED BOTTOM BAR
+      // ---------------------------
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        color: AppColors.softIvory,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "${widget.services.length} services available",
+              style: const TextStyle(
+                fontFamily: "PoppinsRegular",
+                fontSize: 13,
+                color: Colors.black87,
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => SelectServicesScreen(
+                      salonName: widget.name,
+                      services: widget.services,
+                      salonStaffList: widget.salonStaffList,
+                    ),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.rusticSunset,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: const Text(
+                "Book now",
+                style: TextStyle(
+                  fontFamily: "PoppinsSemiBold",
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------
+  // SERVICE TILE
+  // ---------------------------------------
+  Widget _serviceTile({
+    required String title,
+    required String subtitle,
+    required String price,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: const TextStyle(
+                        fontFamily: "PoppinsSemiBold", fontSize: 15)),
+                const SizedBox(height: 4),
+                Text(subtitle,
+                    style: const TextStyle(
+                        fontFamily: "PoppinsRegular",
+                        fontSize: 13,
+                        color: Colors.black54)),
+                const SizedBox(height: 6),
+                Text(price,
+                    style: const TextStyle(
+                        fontFamily: "PoppinsSemiBold", fontSize: 15)),
+              ],
+            ),
+          ),
+
+          // BOOK BUTTON
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => SelectServicesScreen(
+                    salonName: widget.name,
+                    services: widget.services,
+                    salonStaffList: widget.salonStaffList,
+                  ),
+                ),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Text(
+                "BOOK",
+                style: TextStyle(
+                  fontFamily: "PoppinsSemiBold",
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------
+// TAB BUTTON WIDGET
+// ---------------------------------------
+class _TabButton extends StatelessWidget {
+  final String title;
+  final int index;
+
+  const _TabButton({required this.title, required this.index});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.findAncestorStateOfType<_SalonDetailScreenState>();
+    final bool isActive = state?.selectedTab == index;
+
+    return GestureDetector(
+      onTap: () {
+        state?.setState(() {
+          state.selectedTab = index;
+        });
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18),
+        child: Text(
+          title,
+          style: TextStyle(
+            fontFamily: "PoppinsSemiBold",
+            fontSize: 13,
+            color: isActive ? AppColors.rusticSunset : Colors.black54,
+          ),
+        ),
+      ),
+    );
+  }
+}

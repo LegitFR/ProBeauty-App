@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
+import 'package:probeauty_app/pages/ordersScreen.dart';
 import 'package:probeauty_app/pages/appointment_info.dart';
+import 'package:probeauty_app/pages/cart_screen.dart';
 import 'package:probeauty_app/pages/main_screen.dart';
 import 'package:probeauty_app/pages/login_screen.dart';
 import 'package:probeauty_app/pages/notification_settings.dart';
@@ -11,13 +13,22 @@ import 'package:probeauty_app/pages/profile_screen.dart';
 import 'package:probeauty_app/pages/saved_address_screen.dart';
 import 'package:probeauty_app/pages/signup_screen.dart';
 import 'package:probeauty_app/pages/splash_screen.dart';
+import 'package:probeauty_app/providers/cart_provider.dart';
+import 'package:probeauty_app/providers/order_provider.dart';
+import 'package:provider/provider.dart';
 import 'pages/appointments_screen.dart';
 import 'pages/decision_screen.dart';
 import 'pages/notification_screen.dart';
 import 'models/product.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => CartProvider()),
+      ChangeNotifierProvider(create: (_) => OrderProvider()),
+    ],
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -27,7 +38,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const LoginScreen(),
+      home: const MainScreen(),
 
       // ------------- FIXED: onGenerateRoute for passing arguments -------------
       onGenerateRoute: (settings) {
@@ -75,6 +86,10 @@ class MyApp extends StatelessWidget {
           case '/saved_address':
             return MaterialPageRoute(
                 builder: (_) => const SavedAddressScreen());
+          case '/cart':
+            return MaterialPageRoute(builder: (_) => const CartScreen());
+          case '/orders':
+            return MaterialPageRoute(builder: (_) => const OrdersScreen());
         }
 
         // Fallback: main screen

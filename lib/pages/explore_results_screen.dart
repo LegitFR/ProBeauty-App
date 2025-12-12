@@ -189,7 +189,6 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Search summary
             Padding(
               padding:
                   EdgeInsets.symmetric(horizontal: width * 0.045, vertical: 12),
@@ -254,7 +253,6 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
                 ),
               ),
             ),
-
             Padding(
               padding: EdgeInsets.symmetric(horizontal: width * 0.045),
               child: SingleChildScrollView(
@@ -272,9 +270,7 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
                 ),
               ),
             ),
-
             const SizedBox(height: 12),
-
             Expanded(
               child: _initialLoading
                   ? _buildSkeletonList()
@@ -375,7 +371,9 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 /// MODELS
+////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
 class SalonModel {
@@ -462,7 +460,15 @@ class StaffModel {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// SALON CARD — NOW WITH CORRECT DATE PARSER + BOOKING API
+////////////////////////////////////////////////////////////////////////////////
+/// SALON CARD — NOW FIXED: ONLY ONE CARD/SERVICE BOOKS AT A TIME
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+/// SALON CARD — NOW WITH GREEN TICK AFTER BOOKING
+////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
 class SalonCard extends StatefulWidget {
@@ -482,9 +488,13 @@ class SalonCard extends StatefulWidget {
 }
 
 class _SalonCardState extends State<SalonCard> {
-  bool _bookingLoading = false;
+  /// loading PER service
+  Map<String, bool> _serviceLoading = {};
 
-  /// ✔️ Parse "10 Dec 25" → DateTime(year: 2025, month: 12, day: 10)
+  /// ✔ booked PER service
+  Map<String, bool> _serviceBooked = {};
+
+  /// Parse "10 Dec 25"
   DateTime? _parseDate(String? dateStr) {
     if (dateStr == null || dateStr.trim().isEmpty) return null;
 
@@ -498,8 +508,9 @@ class _SalonCardState extends State<SalonCard> {
     }
   }
 
-  /// ✔️ Map time slots to starting hour
+  /// Time slot → hour
   int _slotToHour(String? slot) {
+    slot = "Evening";
     final s = (slot ?? "").toLowerCase();
     switch (s) {
       case "morning":
@@ -547,7 +558,10 @@ class _SalonCardState extends State<SalonCard> {
 
     final isoUtc = localStart.toUtc().toIso8601String();
 
-    setState(() => _bookingLoading = true);
+    /// mark loading only for this service
+    setState(() {
+      _serviceLoading[serviceId] = true;
+    });
 
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -560,7 +574,9 @@ class _SalonCardState extends State<SalonCard> {
             backgroundColor: Colors.red,
           ),
         );
-        setState(() => _bookingLoading = false);
+        setState(() {
+          _serviceLoading[serviceId] = false;
+        });
         return;
       }
 
@@ -588,10 +604,13 @@ class _SalonCardState extends State<SalonCard> {
       print("📥 STATUS: ${resp.statusCode}");
       print("📥 BODY: ${resp.body}");
 
-      if (resp.statusCode == 201) {
-        final json = jsonDecode(resp.body);
+      if (resp.statusCode == 201 || resp.statusCode == 200) {
+        setState(() {
+          _serviceBooked[serviceId] = true; // ✔ mark as booked
+        });
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text("Booking successful!"),
             backgroundColor: Colors.green,
           ),
@@ -612,7 +631,12 @@ class _SalonCardState extends State<SalonCard> {
       );
     }
 
-    if (mounted) setState(() => _bookingLoading = false);
+    /// stop loading for this service
+    if (mounted) {
+      setState(() {
+        _serviceLoading[serviceId] = false;
+      });
+    }
   }
 
   @override
@@ -646,7 +670,9 @@ class _SalonCardState extends State<SalonCard> {
                 Text(
                   salon.name,
                   style: const TextStyle(
-                      fontFamily: "PoppinsSemiBold", fontSize: 17),
+                    fontFamily: "PoppinsSemiBold",
+                    fontSize: 17,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Row(
@@ -654,15 +680,19 @@ class _SalonCardState extends State<SalonCard> {
                     Text(
                       salon.averageRating?.toStringAsFixed(1) ?? "0.0",
                       style: const TextStyle(
-                          fontFamily: "PoppinsSemiBold", fontSize: 14),
+                        fontFamily: "PoppinsSemiBold",
+                        fontSize: 14,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     _buildStars(salon.averageRating ?? 0),
                     const SizedBox(width: 8),
                     const Text(
                       "(450)",
-                      style:
-                          TextStyle(fontFamily: "PoppinsRegular", fontSize: 14),
+                      style: TextStyle(
+                        fontFamily: "PoppinsRegular",
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
@@ -690,6 +720,9 @@ class _SalonCardState extends State<SalonCard> {
   }
 
   Widget _serviceTile(ServiceModel s) {
+    final isLoading = _serviceLoading[s.id] == true;
+    final isBooked = _serviceBooked[s.id] == true;
+
     return Column(
       children: [
         Container(
@@ -710,6 +743,7 @@ class _SalonCardState extends State<SalonCard> {
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Row(
             children: [
+              /// SERVICE DETAILS
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -717,7 +751,9 @@ class _SalonCardState extends State<SalonCard> {
                     Text(
                       s.title,
                       style: const TextStyle(
-                          fontFamily: "PoppinsSemiBold", fontSize: 15),
+                        fontFamily: "PoppinsSemiBold",
+                        fontSize: 15,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -734,34 +770,49 @@ class _SalonCardState extends State<SalonCard> {
                     Text(
                       s.price != null ? "₹${s.price!.toInt()}" : "",
                       style: const TextStyle(
-                          fontFamily: "PoppinsSemiBold", fontSize: 15),
+                        fontFamily: "PoppinsSemiBold",
+                        fontSize: 15,
+                      ),
                     ),
                   ],
                 ),
               ),
+
+              /// BOOK / LOADING / ✔ TICK
               GestureDetector(
-                onTap: _bookingLoading ? null : () => _createBooking(s),
+                onTap: (isLoading || isBooked) ? null : () => _createBooking(s),
                 child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
                   decoration: BoxDecoration(
                     color: AppColors.softIvory,
                     borderRadius: BorderRadius.circular(15),
-                    border: Border.all(color: Colors.black, width: 1.5),
+                    border: Border.all(
+                      color: Colors.black,
+                      width: 1.5,
+                    ),
                   ),
-                  child: _bookingLoading
+
+                  /// -------- THE BUTTON CONTENT --------
+                  child: isLoading
                       ? const SizedBox(
                           height: 16,
                           width: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text(
-                          "BOOK",
-                          style: TextStyle(
-                            fontFamily: "PoppinsSemiBold",
-                            fontSize: 14,
-                          ),
-                        ),
+                      : isBooked
+                          ? const Icon(
+                              Icons.check_circle,
+                              color: Colors.green,
+                              size: 20,
+                            )
+                          : const Text(
+                              "BOOK",
+                              style: TextStyle(
+                                fontFamily: "PoppinsSemiBold",
+                                fontSize: 14,
+                              ),
+                            ),
                 ),
               ),
             ],

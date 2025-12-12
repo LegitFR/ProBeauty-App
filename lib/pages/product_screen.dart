@@ -1,7 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/product.dart';
 
 class ProductScreen extends StatefulWidget {
@@ -21,10 +26,301 @@ class ProductScreen extends StatefulWidget {
 class _ProductScreenState extends State<ProductScreen> {
   int selectedSize = 0;
   int selectedRating = 0;
-  int quantity = 1;
+
+  // 🔥 Cart quantity synced with backend
+  int quantity = 0;
 
   final sizes = ["180ml", "250ml", "450ml", "1000ml"];
   int currentImageIndex = 0;
+
+  final String baseUrl = "https://probeauty-backend.onrender.com";
+  bool _cartUpdating = false; // to prevent spamming requests
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInitialCartQuantity();
+  }
+
+  Future<void> _loadInitialCartQuantity() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("accessToken");
+      if (token == null) {
+        print("⚠ No token found; cart remains local only (quantity = 0)");
+        return;
+      }
+
+      final url = Uri.parse("$baseUrl/api/v1/cart");
+      final resp = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+
+      print("📥 GET CART status: ${resp.statusCode}");
+      print("📥 GET CART body: ${resp.body}");
+
+      if (resp.statusCode == 200) {
+        final jsonBody = jsonDecode(resp.body);
+        final data = jsonBody["data"];
+        if (data == null || data["cart"] == null) return;
+
+        final cart = data["cart"];
+        final List items = cart["cartItems"] ?? [];
+
+        final productId = widget.product.id;
+        if (productId == null) return;
+
+        int backendQty = 0;
+        for (final item in items) {
+          if (item["productId"] == productId) {
+            backendQty = (item["quantity"] ?? 0) as int;
+            break;
+          }
+        }
+
+        if (mounted) {
+          setState(() {
+            quantity = backendQty;
+          });
+        }
+      } else {
+        print("❌ Failed to load cart: ${resp.statusCode}");
+      }
+    } catch (e) {
+      print("❌ Error loading cart: $e");
+    }
+  }
+
+  Future<void> _incrementQuantity() async {
+    if (_cartUpdating) return;
+    final productId = widget.product.id;
+    if (productId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Product ID missing"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final newQty = quantity + 1;
+
+    setState(() {
+      _cartUpdating = true;
+    });
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("accessToken");
+      if (token == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("⚠ Please login to use cart"),
+            backgroundColor: Colors.red,
+          ),
+        );
+        setState(() {
+          _cartUpdating = false;
+        });
+        return;
+      }
+
+      http.Response resp;
+
+      if (quantity == 0) {
+        // First time adding → POST /cart/items
+        final url = Uri.parse("$baseUrl/api/v1/cart/items");
+        final body = {
+          "productId": productId,
+          "quantity": newQty,
+        };
+
+        print("📤 POST CART ITEM body: $body");
+
+        resp = await http.post(
+          url,
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode(body),
+        );
+      } else {
+        // Already in cart → PATCH /cart/items/:productId
+        final url = Uri.parse("$baseUrl/api/v1/cart/items/$productId");
+        final body = {
+          "quantity": newQty,
+        };
+
+        print("📤 PATCH CART ITEM body: $body");
+
+        resp = await http.patch(
+          url,
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode(body),
+        );
+      }
+
+      print("📥 CART + STATUS: ${resp.statusCode}");
+      print("📥 CART + BODY: ${resp.body}");
+
+      if (resp.statusCode == 201 || resp.statusCode == 200) {
+        if (mounted) {
+          setState(() {
+            quantity = newQty;
+          });
+        }
+      } else {
+        String msg = "Failed to update cart";
+        try {
+          final j = jsonDecode(resp.body);
+          if (j is Map && j["message"] != null) {
+            msg = j["message"].toString();
+          }
+        } catch (_) {}
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(msg),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      print("❌ CART + ERROR: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error updating cart: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+
+    if (mounted) {
+      setState(() {
+        _cartUpdating = false;
+      });
+    }
+  }
+
+  Future<void> _decrementQuantity() async {
+    if (_cartUpdating) return;
+    if (quantity == 0) return;
+
+    final productId = widget.product.id;
+    if (productId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Product ID missing"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final newQty = quantity - 1;
+
+    setState(() {
+      _cartUpdating = true;
+    });
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("accessToken");
+      if (token == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("⚠ Please login to use cart"),
+            backgroundColor: Colors.red,
+          ),
+        );
+        setState(() {
+          _cartUpdating = false;
+        });
+        return;
+      }
+
+      http.Response resp;
+
+      if (newQty > 0) {
+        // Update quantity → PATCH
+        final url = Uri.parse("$baseUrl/api/v1/cart/items/$productId");
+        final body = {
+          "quantity": newQty,
+        };
+
+        print("📤 PATCH CART ITEM (decrement) body: $body");
+
+        resp = await http.patch(
+          url,
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode(body),
+        );
+      } else {
+        // Quantity becomes 0 → DELETE
+        final url = Uri.parse("$baseUrl/api/v1/cart/items/$productId");
+
+        print("📤 DELETE CART ITEM productId: $productId");
+
+        resp = await http.delete(
+          url,
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+        );
+      }
+
+      print("📥 CART - STATUS: ${resp.statusCode}");
+      print("📥 CART - BODY: ${resp.body}");
+
+      if (resp.statusCode == 200) {
+        if (mounted) {
+          setState(() {
+            quantity = newQty;
+          });
+        }
+      } else {
+        String msg = "Failed to update cart";
+        try {
+          final j = jsonDecode(resp.body);
+          if (j is Map && j["message"] != null) {
+            msg = j["message"].toString();
+          }
+        } catch (_) {}
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(msg),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      print("❌ CART - ERROR: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error updating cart: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+
+    if (mounted) {
+      setState(() {
+        _cartUpdating = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +339,7 @@ class _ProductScreenState extends State<ProductScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            // Left: Price + "View price details"
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -67,7 +364,7 @@ class _ProductScreenState extends State<ProductScreen> {
               ],
             ),
 
-            // Quantity selector
+            // Right: Quantity selector + Cart icon
             Row(
               children: [
                 Container(
@@ -78,11 +375,12 @@ class _ProductScreenState extends State<ProductScreen> {
                   child: Row(
                     children: [
                       IconButton(
-                        onPressed: () {
-                          if (quantity > 1) setState(() => quantity--);
-                        },
-                        icon: const Icon(Icons.remove,
-                            color: Colors.white, size: 15),
+                        onPressed: _cartUpdating ? null : _decrementQuantity,
+                        icon: const Icon(
+                          Icons.remove,
+                          color: Colors.white,
+                          size: 15,
+                        ),
                       ),
                       Text(
                         "$quantity",
@@ -93,23 +391,31 @@ class _ProductScreenState extends State<ProductScreen> {
                         ),
                       ),
                       IconButton(
-                        onPressed: () => setState(() => quantity++),
-                        icon: const Icon(Icons.add,
-                            color: Colors.white, size: 15),
+                        onPressed: _cartUpdating ? null : _incrementQuantity,
+                        icon: const Icon(
+                          Icons.add,
+                          color: Colors.white,
+                          size: 15,
+                        ),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 10),
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppColors.rusticSunset,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: SvgPicture.asset(
-                    "assets/images/icons/cart_icon.svg",
-                    color: Colors.white,
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(context, "/cart");
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.rusticSunset,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: SvgPicture.asset(
+                      "assets/images/icons/cart_icon.svg",
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ],
@@ -175,7 +481,7 @@ class _ProductScreenState extends State<ProductScreen> {
                 ).toList(),
               ),
 
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
 
               // Dot indicators
               Row(
@@ -234,11 +540,17 @@ class _ProductScreenState extends State<ProductScreen> {
                   ),
                   ...List.generate(
                     4,
-                    (index) => const Icon(Icons.star,
-                        color: AppColors.rusticSunset, size: 18),
+                    (index) => const Icon(
+                      Icons.star,
+                      color: AppColors.rusticSunset,
+                      size: 18,
+                    ),
                   ),
-                  const Icon(Icons.star_half,
-                      color: AppColors.rusticSunset, size: 18),
+                  const Icon(
+                    Icons.star_half,
+                    color: AppColors.rusticSunset,
+                    size: 18,
+                  ),
                   SizedBox(width: width * 0.015),
                   Text(
                     "(90) Rate this product",
@@ -353,16 +665,18 @@ class _ProductScreenState extends State<ProductScreen> {
                   Text(
                     "Sold by : ",
                     style: TextStyle(
-                        fontSize: width * 0.032,
-                        fontFamily: "PoppinsRegular",
-                        color: Colors.black),
+                      fontSize: width * 0.032,
+                      fontFamily: "PoppinsRegular",
+                      color: Colors.black,
+                    ),
                   ),
                   Text(
                     "RELIANCE RETAIL LIMITED",
                     style: TextStyle(
-                        fontSize: width * 0.032,
-                        fontFamily: "PoppinsMedium",
-                        color: AppColors.rusticSunset),
+                      fontSize: width * 0.032,
+                      fontFamily: "PoppinsMedium",
+                      color: AppColors.rusticSunset,
+                    ),
                   ),
                 ],
               ),
@@ -405,7 +719,9 @@ class _ProductScreenState extends State<ProductScreen> {
     return Container(
       margin: EdgeInsets.only(top: height * 0.02),
       padding: EdgeInsets.symmetric(
-          horizontal: width * 0.04, vertical: width * 0.035),
+        horizontal: width * 0.04,
+        vertical: width * 0.035,
+      ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
         gradient: LinearGradient(
@@ -429,13 +745,19 @@ class _ProductScreenState extends State<ProductScreen> {
           ),
           Row(
             children: [
-              Text("View all",
-                  style: TextStyle(
-                      fontFamily: "PoppinsMedium",
-                      fontSize: width * 0.03,
-                      color: Colors.black)),
-              const Icon(Icons.arrow_forward_ios,
-                  size: 14, color: Colors.black),
+              Text(
+                "View all",
+                style: TextStyle(
+                  fontFamily: "PoppinsMedium",
+                  fontSize: width * 0.03,
+                  color: Colors.black,
+                ),
+              ),
+              const Icon(
+                Icons.arrow_forward_ios,
+                size: 14,
+                color: Colors.black,
+              ),
             ],
           ),
         ],
@@ -446,7 +768,9 @@ class _ProductScreenState extends State<ProductScreen> {
   Widget _offerChip(double width, IconData icon, String text) {
     return Container(
       padding: EdgeInsets.symmetric(
-          horizontal: width * 0.025, vertical: width * 0.015),
+        horizontal: width * 0.025,
+        vertical: width * 0.015,
+      ),
       decoration: BoxDecoration(
         color: AppColors.softIvory,
         borderRadius: BorderRadius.circular(30),
@@ -458,9 +782,10 @@ class _ProductScreenState extends State<ProductScreen> {
           Text(
             text,
             style: TextStyle(
-                fontFamily: "PoppinsRegular",
-                fontSize: width * 0.028,
-                color: AppColors.rusticSunset),
+              fontFamily: "PoppinsRegular",
+              fontSize: width * 0.028,
+              color: AppColors.rusticSunset,
+            ),
           ),
         ],
       ),
@@ -499,9 +824,10 @@ class _ProductScreenState extends State<ProductScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 3,
-              offset: const Offset(0, 2))
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 3,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Column(
@@ -511,9 +837,10 @@ class _ProductScreenState extends State<ProductScreen> {
           Text(
             text,
             style: TextStyle(
-                fontFamily: "PoppinsRegular",
-                fontSize: width * 0.03,
-                color: Colors.black),
+              fontFamily: "PoppinsRegular",
+              fontSize: width * 0.03,
+              color: Colors.black,
+            ),
           ),
         ],
       ),
@@ -537,14 +864,20 @@ class _ProductScreenState extends State<ProductScreen> {
             children: [
               Row(
                 children: [
-                  Text("Delivery Options",
-                      style: TextStyle(
-                          fontFamily: "PoppinsMedium",
-                          fontSize: width * 0.035,
-                          color: Colors.black)),
+                  Text(
+                    "Delivery Options",
+                    style: TextStyle(
+                      fontFamily: "PoppinsMedium",
+                      fontSize: width * 0.035,
+                      color: Colors.black,
+                    ),
+                  ),
                   const SizedBox(width: 5),
-                  const Icon(Icons.location_on_outlined,
-                      size: 18, color: Colors.black),
+                  const Icon(
+                    Icons.location_on_outlined,
+                    size: 18,
+                    color: Colors.black,
+                  ),
                   const Text(
                     "4000023",
                     style: TextStyle(color: Colors.black),
@@ -553,8 +886,15 @@ class _ProductScreenState extends State<ProductScreen> {
               ),
               Row(
                 children: const [
-                  Text("Change", style: TextStyle(color: Colors.black)),
-                  Icon(Icons.arrow_forward_ios, size: 12, color: Colors.black),
+                  Text(
+                    "Change",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 12,
+                    color: Colors.black,
+                  ),
                 ],
               ),
             ],
@@ -562,11 +902,16 @@ class _ProductScreenState extends State<ProductScreen> {
           SizedBox(height: height * 0.02),
           Row(
             children: const [
-              Icon(Icons.local_shipping_outlined,
-                  size: 22, color: Colors.black),
+              Icon(
+                Icons.local_shipping_outlined,
+                size: 22,
+                color: Colors.black,
+              ),
               SizedBox(width: 8),
-              Text("Free delivery - Get it by Sat, 25 Jan",
-                  style: TextStyle(color: Colors.black)),
+              Text(
+                "Free delivery - Get it by Sat, 25 Jan",
+                style: TextStyle(color: Colors.black),
+              ),
             ],
           ),
         ],
@@ -582,23 +927,32 @@ class _ProductScreenState extends State<ProductScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 2,
-              offset: const Offset(0, 2))
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 2,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Theme(
         data: ThemeData(dividerColor: Colors.transparent),
         child: ExpansionTile(
-          title: Text(title,
-              style: const TextStyle(
-                  fontFamily: "PoppinsRegular", color: Colors.black)),
+          title: Text(
+            title,
+            style: const TextStyle(
+              fontFamily: "PoppinsRegular",
+              color: Colors.black,
+            ),
+          ),
           children: [
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Text(content,
-                  style: const TextStyle(
-                      fontFamily: "PoppinsRegular", color: Colors.black)),
+              child: Text(
+                content,
+                style: const TextStyle(
+                  fontFamily: "PoppinsRegular",
+                  color: Colors.black,
+                ),
+              ),
             ),
           ],
         ),

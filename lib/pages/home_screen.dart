@@ -1,15 +1,66 @@
+import 'dart:convert';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:probeauty_app/pages/salon_detail_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  List<dynamic> salons = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchSalons();
+  }
+
+  Future<void> fetchSalons() async {
+    try {
+      final url = Uri.parse(
+          "https://probeauty-backend.onrender.com/api/v1/salons?page=1&limit=10");
+
+      final response = await http.get(url);
+
+      print("SALON STATUS: ${response.statusCode}");
+      print("SALON BODY: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          salons = data["data"] ?? [];
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print("Salon Fetch Error: $e");
+      setState(() => isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final width = size.width;
     final height = size.height;
+
+    // fallback images
+    final fallbackImages = [
+      'assets/images/saloons/saloon1.png',
+      'assets/images/saloons/saloon2.png',
+      'assets/images/saloons/saloon2.png',
+    ];
 
     return Scaffold(
       backgroundColor: AppColors.softIvory,
@@ -82,26 +133,15 @@ class HomeScreen extends StatelessWidget {
                   'assets/images/offers/offer2.png',
                   'assets/images/offers/offer3.png',
                 ].map((imagePath) {
-                  return Builder(
-                    builder: (BuildContext context) {
-                      return Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 6),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 10,
-                              offset: const Offset(0, 5),
-                            ),
-                          ],
-                          image: DecorationImage(
-                            image: AssetImage(imagePath),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      );
-                    },
+                  return Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 6),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      image: DecorationImage(
+                        image: AssetImage(imagePath),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   );
                 }).toList(),
               ),
@@ -118,156 +158,10 @@ class HomeScreen extends StatelessWidget {
               ),
               SizedBox(height: height * 0.02),
 
-              SizedBox(
-                height: height * 0.3,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: 3,
-                  itemBuilder: (context, index) {
-                    final offerImages = [
-                      'assets/images/saloons/saloon1.png',
-                      'assets/images/saloons/saloon2.png',
-                      'assets/images/saloons/saloon2.png',
-                    ];
+              isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : buildSalonList(width, height, fallbackImages),
 
-                    return Padding(
-                      padding: EdgeInsets.only(right: width * 0.04),
-                      child: Container(
-                        width: width * 0.65, // ~242px equivalent
-                        height: height * 0.28, // ~216px equivalent
-                        decoration: BoxDecoration(
-                          color: AppColors.softIvory,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.black, width: 4),
-                        ),
-                        child: Column(
-                          children: [
-                            // Top image
-                            ClipRRect(
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(16),
-                                topRight: Radius.circular(16),
-                              ),
-                              child: Image.asset(
-                                offerImages[index],
-                                width: double.infinity,
-                                height: height * 0.135, // half height
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-
-                            // Bottom content
-                            Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: width * 0.03,
-                                  vertical: height * 0.01,
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Zazzle Bridal Studio",
-                                      style: TextStyle(
-                                        fontFamily: "PoppinsSemiBold",
-                                        fontSize: width * 0.04,
-                                      ),
-                                    ),
-                                    SizedBox(height: height * 0.005),
-                                    Row(
-                                      children: [
-                                        ...List.generate(
-                                          5,
-                                          (starIndex) => Icon(
-                                            Icons.star,
-                                            size: width * 0.035,
-                                            color: starIndex < 4
-                                                ? AppColors.rusticSunset
-                                                : AppColors.greyTone,
-                                          ),
-                                        ),
-                                        SizedBox(width: width * 0.01),
-                                        Text(
-                                          " (1650)",
-                                          style: TextStyle(
-                                              fontSize: width * 0.03,
-                                              color: Colors.black,
-                                              fontFamily: "PoppinsRegular"),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: height * 0.005),
-                                    Text(
-                                      "Anna Nagar, Chennai",
-                                      style: TextStyle(
-                                        fontFamily: "PoppinsRegular",
-                                        fontSize: width * 0.032,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                    SizedBox(height: height * 0.008),
-                                    Row(
-                                      children: [
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: width * 0.02,
-                                            vertical: height * 0.004,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.lighterGreyTone,
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                          ),
-                                          child: const Text(
-                                            "Bridal Studio",
-                                            style: TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.black,
-                                                fontFamily: "PoppinsRegular"),
-                                          ),
-                                        ),
-                                        SizedBox(width: width * 0.02),
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: width * 0.02,
-                                            vertical: height * 0.004,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.rusticSunset,
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Image.asset(
-                                                'assets/images/icons/discount_tag.png',
-                                                width: width * 0.035,
-                                              ),
-                                              SizedBox(width: width * 0.01),
-                                              const Text(
-                                                "Save up to 10%",
-                                                style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 12,
-                                                    fontFamily:
-                                                        "PoppinsRegular"),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
               SizedBox(height: height * 0.04),
 
               Text(
@@ -279,131 +173,183 @@ class HomeScreen extends StatelessWidget {
               ),
               SizedBox(height: height * 0.02),
 
-              SizedBox(
-                height: height * 0.3,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: 3,
-                  itemBuilder: (context, index) {
-                    final offerImages = [
-                      'assets/images/saloons/saloon1.png',
-                      'assets/images/saloons/saloon2.png',
-                      'assets/images/saloons/saloon2.png',
-                    ];
-
-                    return Padding(
-                      padding: EdgeInsets.only(right: width * 0.04),
-                      child: Container(
-                        width: width * 0.65, // ~242px equivalent
-                        height: height * 0.28, // ~216px equivalent
-                        decoration: BoxDecoration(
-                          color: AppColors.softIvory,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.black, width: 4),
-                        ),
-                        child: Column(
-                          children: [
-                            // Top image
-                            ClipRRect(
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(16),
-                                topRight: Radius.circular(16),
-                              ),
-                              child: Image.asset(
-                                offerImages[index],
-                                width: double.infinity,
-                                height: height * 0.135, // half height
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-
-                            // Bottom content
-                            Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: width * 0.03,
-                                  vertical: height * 0.01,
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Zazzle Bridal Studio",
-                                      style: TextStyle(
-                                        fontFamily: "PoppinsSemiBold",
-                                        fontSize: width * 0.04,
-                                      ),
-                                    ),
-                                    SizedBox(height: height * 0.005),
-                                    Row(
-                                      children: [
-                                        ...List.generate(
-                                          5,
-                                          (starIndex) => Icon(
-                                            Icons.star,
-                                            size: width * 0.035,
-                                            color: starIndex < 4
-                                                ? AppColors.rusticSunset
-                                                : AppColors.greyTone,
-                                          ),
-                                        ),
-                                        SizedBox(width: width * 0.01),
-                                        Text(
-                                          " (1650)",
-                                          style: TextStyle(
-                                              fontSize: width * 0.03,
-                                              color: Colors.black,
-                                              fontFamily: "PoppinsRegular"),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: height * 0.005),
-                                    Text(
-                                      "Anna Nagar, Chennai",
-                                      style: TextStyle(
-                                        fontFamily: "PoppinsRegular",
-                                        fontSize: width * 0.032,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                    SizedBox(height: height * 0.008),
-                                    Row(
-                                      children: [
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: width * 0.02,
-                                            vertical: height * 0.004,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.lighterGreyTone,
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                          ),
-                                          child: const Text(
-                                            "Bridal Studio",
-                                            style: TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.black,
-                                                fontFamily: "PoppinsRegular"),
-                                          ),
-                                        ),
-                                        SizedBox(width: width * 0.02),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
+              isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : buildSalonList(width, height, fallbackImages),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  // === Salon Card List (Horizontal)
+  Widget buildSalonList(double width, double height, List images) {
+    return SizedBox(
+      height: height * 0.3,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: salons.length,
+        itemBuilder: (context, index) {
+          final salon = salons[index];
+
+          final String name = salon["name"] ?? "Salon";
+          final String address = salon["address"] ?? "Unknown location";
+          final List services =
+              salon["services"] is List ? salon["services"] : [];
+          final List salonStaffList =
+              salon["staff"] is List ? salon["staff"] : [];
+          final img = images[index % images.length];
+
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => SalonDetailScreen(
+                    name: name,
+                    address: address,
+                    rating: 4.5,
+                    reviews: 1200,
+                    image: img,
+                    services: services,
+                    salonStaffList: salonStaffList,
+                  ),
+                ),
+              );
+            },
+            child: Padding(
+              padding: EdgeInsets.only(right: width * 0.04),
+              child: Container(
+                width: width * 0.65,
+                decoration: BoxDecoration(
+                  color: AppColors.softIvory,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.black, width: 4),
+                ),
+                child: Column(
+                  children: [
+                    ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
+                      ),
+                      child: Image.asset(
+                        img,
+                        width: double.infinity,
+                        height: height * 0.135,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: width * 0.03,
+                          vertical: height * 0.01,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              name,
+                              style: TextStyle(
+                                fontFamily: "PoppinsSemiBold",
+                                fontSize: width * 0.04,
+                              ),
+                            ),
+                            SizedBox(height: height * 0.005),
+
+                            // Fake stars
+                            Row(
+                              children: [
+                                ...List.generate(
+                                  5,
+                                  (starIndex) => Icon(
+                                    Icons.star,
+                                    size: width * 0.035,
+                                    color: starIndex < 4
+                                        ? AppColors.rusticSunset
+                                        : AppColors.greyTone,
+                                  ),
+                                ),
+                                SizedBox(width: width * 0.01),
+                                Text(
+                                  "(1200)",
+                                  style: TextStyle(
+                                    fontSize: width * 0.03,
+                                    fontFamily: "PoppinsRegular",
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: height * 0.005),
+
+                            Text(
+                              address,
+                              style: TextStyle(
+                                fontFamily: "PoppinsRegular",
+                                fontSize: width * 0.032,
+                              ),
+                            ),
+
+                            SizedBox(height: height * 0.008),
+
+                            Row(
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: width * 0.02,
+                                    vertical: height * 0.004,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.lighterGreyTone,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Text(
+                                    "Salon",
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        fontFamily: "PoppinsRegular"),
+                                  ),
+                                ),
+                                SizedBox(width: width * 0.02),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: width * 0.02,
+                                    vertical: height * 0.004,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.rusticSunset,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Image.asset(
+                                        'assets/images/icons/discount_tag.png',
+                                        width: width * 0.035,
+                                      ),
+                                      SizedBox(width: width * 0.01),
+                                      const Text(
+                                        "Save up to 10%",
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            fontFamily: "PoppinsRegular"),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -414,22 +360,9 @@ class HomeScreen extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: width * 0.03),
       child: Column(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
-                  blurRadius: 8,
-                  offset: const Offset(2, 4),
-                ),
-              ],
-            ),
-            child: CircleAvatar(
-              radius: width * 0.09,
-              backgroundColor: Colors.white,
-              backgroundImage: AssetImage(image),
-            ),
+          CircleAvatar(
+            radius: width * 0.09,
+            backgroundImage: AssetImage(image),
           ),
           SizedBox(height: height * 0.012),
           Text(
