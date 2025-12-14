@@ -3,13 +3,19 @@ import 'package:probeauty_app/resources/AppColors.dart';
 import 'book_appointment_screen.dart';
 
 class SelectProfessionalScreen extends StatelessWidget {
+  final String salonId;
+  final String salonName;
+  final double rating;
   final List<dynamic> staffList;
   final List<Map<String, dynamic>> selectedServices;
 
   const SelectProfessionalScreen({
     super.key,
+    required this.salonName,
+    required this.rating,
     required this.staffList,
     required this.selectedServices,
+    required this.salonId,
   });
 
   @override
@@ -64,6 +70,9 @@ class SelectProfessionalScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (_) => BookAppointmentScreen(
+                        salonId: salonId,
+                        salonName: salonName,
+                        rating: rating,
                         staff: anyStaff,
                         selectedServices: selectedServices,
                       ),
@@ -85,6 +94,9 @@ class SelectProfessionalScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (_) => BookAppointmentScreen(
+                      salonId: salonId,
+                      salonName: salonName,
+                      rating: rating,
                       staff: staff, // ONE STAFF OBJECT
                       selectedServices: selectedServices, // FULL SERVICE LIST
                     ),

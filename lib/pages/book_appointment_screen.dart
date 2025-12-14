@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:probeauty_app/pages/first_visit_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
 class BookAppointmentScreen extends StatefulWidget {
+  final String salonId;
+  final String salonName;
+  final double rating;
   final Map<String, dynamic> staff; // ONE staff object
   final List<Map<String, dynamic>> selectedServices; // LIST of service objects
 
   const BookAppointmentScreen({
     super.key,
+    required this.salonId,
+    required this.salonName,
+    required this.rating,
     required this.staff,
     required this.selectedServices,
   });
@@ -231,7 +238,23 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                   final selected = t == selectedTime;
 
                   return GestureDetector(
-                    onTap: () => setState(() => selectedTime = t),
+                    onTap: () {
+                      setState(() => selectedTime = t);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => FirstVisitScreen(
+                            salonId: widget.salonId,
+                            salonName: widget.salonName,
+                            staff: widget.staff,
+                            rating: widget.rating,
+                            date: selectedDate,
+                            time: t,
+                            selectedServices: widget.selectedServices,
+                          ),
+                        ),
+                      );
+                    },
                     child: Container(
                       margin: const EdgeInsets.symmetric(vertical: 12),
                       padding: const EdgeInsets.symmetric(

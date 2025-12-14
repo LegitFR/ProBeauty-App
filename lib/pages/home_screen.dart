@@ -193,6 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
         itemBuilder: (context, index) {
           final salon = salons[index];
 
+          final String id = salon["id"] ?? "id";
           final String name = salon["name"] ?? "Salon";
           final String address = salon["address"] ?? "Unknown location";
           final List services =
@@ -207,6 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (_) => SalonDetailScreen(
+                    id: id,
                     name: name,
                     address: address,
                     rating: 4.5,

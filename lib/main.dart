@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import 'package:probeauty_app/pages/first_visit_screen.dart';
 import 'package:probeauty_app/pages/ordersScreen.dart';
 import 'package:probeauty_app/pages/appointment_info.dart';
 import 'package:probeauty_app/pages/cart_screen.dart';
@@ -38,7 +39,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const MainScreen(),
+      home: const SplashScreen(),
 
       // ------------- FIXED: onGenerateRoute for passing arguments -------------
       onGenerateRoute: (settings) {

@@ -3,6 +3,7 @@ import 'package:probeauty_app/pages/select_services_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
 class SalonDetailScreen extends StatefulWidget {
+  final String id;
   final String name;
   final String address;
   final double rating;
@@ -14,6 +15,7 @@ class SalonDetailScreen extends StatefulWidget {
 
   const SalonDetailScreen({
     super.key,
+    required this.id,
     required this.name,
     required this.address,
     required this.rating,
@@ -255,7 +257,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (_) => SelectServicesScreen(
+                      salonId: widget.id,
                       salonName: widget.name,
+                      rating: widget.rating,
                       services: widget.services,
                       salonStaffList: widget.salonStaffList,
                     ),
@@ -325,7 +329,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (_) => SelectServicesScreen(
+                    salonId: widget.id,
                     salonName: widget.name,
+                    rating: widget.rating,
                     services: widget.services,
                     salonStaffList: widget.salonStaffList,
                   ),
