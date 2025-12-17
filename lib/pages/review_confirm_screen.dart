@@ -176,10 +176,15 @@ class ReviewConfirmScreen extends StatelessWidget {
           "Review and Confirm",
           style: TextStyle(fontFamily: "PoppinsSemiBold", color: Colors.black),
         ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: Icon(Icons.close, color: Colors.black),
+        actions: [
+          GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Padding(
+              padding: EdgeInsets.only(right: 16),
+              child: Icon(Icons.close, color: Colors.black),
+            ),
           )
         ],
       ),

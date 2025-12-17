@@ -40,10 +40,15 @@ class SelectProfessionalScreen extends StatelessWidget {
             fontSize: 18,
           ),
         ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: Icon(Icons.close, color: Colors.black),
+        actions: [
+          GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Padding(
+              padding: EdgeInsets.only(right: 16.0),
+              child: Icon(Icons.close, color: Colors.black),
+            ),
           )
         ],
       ),
@@ -179,7 +184,7 @@ class SelectProfessionalScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           const Text(
-            "Staff ID",
+            "Staff Name",
             style: TextStyle(
               fontFamily: "PoppinsSemiBold",
               fontSize: 15,
@@ -187,7 +192,7 @@ class SelectProfessionalScreen extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            staff["id"] ?? "N/A",
+            staff["name"] ?? "N/A",
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontFamily: "PoppinsRegular",

@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../resources/AppColors.dart';
+import 'decision_screen.dart';
+import 'main_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -11,45 +14,83 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   final List<String> _images = [
-    'assets/images/splash/Frame 4-6.png',
-    'assets/images/splash/Frame 4-5.png',
-    'assets/images/splash/Frame 4-4.png',
-    'assets/images/splash/Frame 4-3.png',
-    'assets/images/splash/Frame 4-2.png',
-    'assets/images/splash/Frame 4-1.png',
-    'assets/images/splash/Frame 4.png',
+    'assets/images/splash/0.png',
+    'assets/images/splash/0.png',
+    'assets/images/splash/0.png',
+    'assets/images/splash/1.png',
+    'assets/images/splash/1.png',
+    'assets/images/splash/1.png',
+    'assets/images/splash/2.png',
+    'assets/images/splash/2.png',
+    'assets/images/splash/2.png',
+    'assets/images/splash/3.png',
+    'assets/images/splash/3.png',
+    'assets/images/splash/3.png',
+    'assets/images/splash/4.png',
+    'assets/images/splash/4.png',
+    'assets/images/splash/4.png',
+    'assets/images/splash/5.png',
+    'assets/images/splash/5.png',
+    'assets/images/splash/5.png',
+    'assets/images/splash/6.png',
+    'assets/images/splash/6.png',
+    'assets/images/splash/6.png',
   ];
 
   int _currentIndex = 0;
+  bool _moveUp = false;
   Timer? _imageTimer;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    for (final img in _images) {
+      precacheImage(AssetImage(img), context);
+    }
+  }
 
   @override
   void initState() {
     super.initState();
 
-    // Total duration for smooth transition
-    const totalDuration = Duration(milliseconds: 3500);
+    const frameInterval = Duration(milliseconds: 80);
 
-    // Smoothly calculated frame duration
-    final frameInterval = Duration(
-      milliseconds: (totalDuration.inMilliseconds / _images.length).round(),
-    );
-
-    // Change frames smoothly
     _imageTimer = Timer.periodic(frameInterval, (timer) {
       if (_currentIndex < _images.length - 1) {
-        setState(() {
-          _currentIndex++;
-        });
+        setState(() => _currentIndex++);
       } else {
-        _imageTimer?.cancel();
+        timer.cancel();
+
+        /// ⬆️ Move logo up
+        Future.delayed(const Duration(milliseconds: 200), () {
+          if (mounted) setState(() => _moveUp = true);
+        });
+
+        /// 🔐 Decide next screen
+        Future.delayed(const Duration(milliseconds: 900), _decideNextScreen);
       }
     });
+  }
 
-    // Go to next screen after all frames are shown
-    Future.delayed(totalDuration + const Duration(milliseconds: 400), () {
-      Navigator.pushReplacementNamed(context, '/decision');
-    });
+  /// 🔐 SESSION CHECK
+  Future<void> _decideNextScreen() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final accessToken = prefs.getString("accessToken");
+
+    if (!mounted) return;
+
+    if (accessToken != null && accessToken.isNotEmpty) {
+      // ✅ User already logged in
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const MainScreen()),
+      );
+    } else {
+      // ❌ Not logged in
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const DecisionScreen()),
+      );
+    }
   }
 
   @override
@@ -60,21 +101,19 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: AppColors.rusticSunset,
-      body: Center(
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 250),
-          switchInCurve: Curves.easeInOut,
-          switchOutCurve: Curves.easeInOut,
-          transitionBuilder: (child, animation) =>
-              FadeTransition(opacity: animation, child: child),
-          child: Image.asset(
-            _images[_currentIndex],
-            key: ValueKey<String>(_images[_currentIndex]),
-            width: 220,
-            height: 220,
-          ),
+      body: AnimatedAlign(
+        duration: const Duration(milliseconds: 700),
+        curve: Curves.easeInOutCubic,
+        alignment: _moveUp ? const Alignment(0, -0.70) : Alignment.center,
+        child: Image.asset(
+          _images[_currentIndex],
+          width: size.width * 0.35,
+          height: size.width * 0.35,
+          fit: BoxFit.contain,
         ),
       ),
     );
