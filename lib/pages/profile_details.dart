@@ -123,52 +123,57 @@ class _ProfileDetailsState extends State<ProfileDetails> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.softIvory,
-      appBar: AppBar(
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
         backgroundColor: AppColors.softIvory,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+        appBar: AppBar(
+          backgroundColor: AppColors.softIvory,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: const Text(
+            'Edit profile details',
+            style: TextStyle(
+                color: Colors.black,
+                fontSize: 18,
+                fontFamily: "PoppinsSemiBold"),
+          ),
+          centerTitle: true,
         ),
-        title: const Text(
-          'Edit profile details',
-          style: TextStyle(
-              color: Colors.black, fontSize: 18, fontFamily: "PoppinsSemiBold"),
-        ),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildLabel('First Name'),
-            const SizedBox(height: 8),
-            _buildTextField(_firstNameController),
-            const SizedBox(height: 20),
-            _buildLabel('Last Name'),
-            const SizedBox(height: 8),
-            _buildTextField(_lastNameController),
-            const SizedBox(height: 20),
-            _buildLabel('Mobile number'),
-            const SizedBox(height: 8),
-            _buildPhoneField(),
-            const SizedBox(height: 20),
-            _buildLabel('Email Address'),
-            const SizedBox(height: 8),
-            _buildTextField(_emailController),
-            const SizedBox(height: 20),
-            _buildLabel('Date of birth'),
-            const SizedBox(height: 8),
-            _buildDateFields(),
-            const SizedBox(height: 20),
-            _buildLabel('Email Address'),
-            const SizedBox(height: 8),
-            _buildDropdownField(),
-            const SizedBox(height: 40),
-            _buildSaveButton(),
-          ],
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildLabel('First Name'),
+              const SizedBox(height: 8),
+              _buildTextField(_firstNameController),
+              const SizedBox(height: 20),
+              _buildLabel('Last Name'),
+              const SizedBox(height: 8),
+              _buildTextField(_lastNameController),
+              const SizedBox(height: 20),
+              _buildLabel('Mobile number'),
+              const SizedBox(height: 8),
+              _buildPhoneField(),
+              const SizedBox(height: 20),
+              _buildLabel('Email Address'),
+              const SizedBox(height: 8),
+              _buildTextField(_emailController),
+              const SizedBox(height: 20),
+              _buildLabel('Date of birth'),
+              const SizedBox(height: 8),
+              _buildDateFields(),
+              const SizedBox(height: 20),
+              _buildLabel('Email Address'),
+              const SizedBox(height: 8),
+              _buildDropdownField(),
+              const SizedBox(height: 40),
+              _buildSaveButton(),
+            ],
+          ),
         ),
       ),
     );

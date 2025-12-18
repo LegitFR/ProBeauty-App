@@ -22,55 +22,81 @@ class SelectProfessionalScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     print(selectedServices);
 
-    return Scaffold(
-      backgroundColor: AppColors.softIvory,
-      appBar: AppBar(
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
         backgroundColor: AppColors.softIvory,
-        elevation: 0,
-        leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-        ),
-        centerTitle: true,
-        title: const Text(
-          "Select professional",
-          style: TextStyle(
-            fontFamily: "PoppinsSemiBold",
-            color: Colors.black,
-            fontSize: 18,
+        appBar: AppBar(
+          backgroundColor: AppColors.softIvory,
+          elevation: 0,
+          leading: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
           ),
-        ),
-        actions: [
-          GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: const Padding(
-              padding: EdgeInsets.only(right: 16.0),
-              child: Icon(Icons.close, color: Colors.black),
+          centerTitle: true,
+          title: const Text(
+            "Select professional",
+            style: TextStyle(
+              fontFamily: "PoppinsSemiBold",
+              color: Colors.black,
+              fontSize: 18,
             ),
-          )
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: GridView.builder(
-          itemCount: staffList.length + 1,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 18,
-            crossAxisSpacing: 18,
-            childAspectRatio: 0.85,
           ),
-          itemBuilder: (context, index) {
-            // -----------------------------------------------
-            // 1️⃣ ANY PROFESSIONAL CARD
-            // -----------------------------------------------
-            if (index == 0) {
+          actions: [
+            GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: const Padding(
+                padding: EdgeInsets.only(right: 16.0),
+                child: Icon(Icons.close, color: Colors.black),
+              ),
+            )
+          ],
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: GridView.builder(
+            itemCount: staffList.length + 1,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 18,
+              crossAxisSpacing: 18,
+              childAspectRatio: 0.85,
+            ),
+            itemBuilder: (context, index) {
+              // -----------------------------------------------
+              // 1️⃣ ANY PROFESSIONAL CARD
+              // -----------------------------------------------
+              if (index == 0) {
+                return GestureDetector(
+                  onTap: () {
+                    Map<String, dynamic> anyStaff = staffList.first;
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BookAppointmentScreen(
+                          salonId: salonId,
+                          salonName: salonName,
+                          rating: rating,
+                          staff: anyStaff,
+                          selectedServices: selectedServices,
+                        ),
+                      ),
+                    );
+                  },
+                  child: _anyProfessionalCard(),
+                );
+              }
+
+              // -----------------------------------------------
+              // 2️⃣ INDIVIDUAL STAFF CARD
+              // -----------------------------------------------
+              final Map<String, dynamic> staff = staffList[index - 1];
+
               return GestureDetector(
                 onTap: () {
-                  Map<String, dynamic> anyStaff = staffList.first;
-
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -78,39 +104,16 @@ class SelectProfessionalScreen extends StatelessWidget {
                         salonId: salonId,
                         salonName: salonName,
                         rating: rating,
-                        staff: anyStaff,
-                        selectedServices: selectedServices,
+                        staff: staff, // ONE STAFF OBJECT
+                        selectedServices: selectedServices, // FULL SERVICE LIST
                       ),
                     ),
                   );
                 },
-                child: _anyProfessionalCard(),
+                child: _professionalCard(staff),
               );
-            }
-
-            // -----------------------------------------------
-            // 2️⃣ INDIVIDUAL STAFF CARD
-            // -----------------------------------------------
-            final Map<String, dynamic> staff = staffList[index - 1];
-
-            return GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BookAppointmentScreen(
-                      salonId: salonId,
-                      salonName: salonName,
-                      rating: rating,
-                      staff: staff, // ONE STAFF OBJECT
-                      selectedServices: selectedServices, // FULL SERVICE LIST
-                    ),
-                  ),
-                );
-              },
-              child: _professionalCard(staff),
-            );
-          },
+            },
+          ),
         ),
       ),
     );

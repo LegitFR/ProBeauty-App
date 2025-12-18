@@ -183,226 +183,231 @@ class _ExploreScreenState extends State<ExploreScreen> {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      backgroundColor: AppColors.softIvory,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: width * 0.045),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: height * 0.03),
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
+        backgroundColor: AppColors.softIvory,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: width * 0.045),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: height * 0.03),
 
-              Text(
-                "Explore",
-                style: TextStyle(
-                  fontFamily: "PlayfairDisplayBold",
-                  fontSize: width * 0.08,
-                  color: Colors.black,
-                ),
-              ),
-
-              SizedBox(height: height * 0.03),
-
-              // ----------------------- SEARCH BOX -----------------------
-              Container(
-                padding: EdgeInsets.all(width * 0.05),
-                decoration: BoxDecoration(
-                  color: AppColors.softIvory,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: Colors.black,
-                    width: 2.87,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    _buildSearchField(
-                      controller: searchController,
-                      hint: "Any treatment or venue",
-                      svgIcon: "assets/images/icons/search_icon.svg",
-                    ),
-                    SizedBox(height: height * 0.02),
-                    _buildLocationField(),
-                    SizedBox(height: height * 0.02),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: _selectDate,
-                            child: _buildChip(
-                              svgIcon: "assets/images/icons/calendar_icon.svg",
-                              label: selectedDate == null
-                                  ? "Any date"
-                                  : _formatDate(selectedDate!),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: width * 0.04),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: _selectTimeSlot,
-                            child: _buildChip(
-                              svgIcon: "assets/images/icons/time_icon.svg",
-                              label: selectedTimeSlot ?? "Any time",
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: height * 0.03),
-                    Column(
-                      children: [
-                        SizedBox(
-                          width: double.infinity,
-                          height: height * 0.06,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ExploreResultsScreen(
-                                    serviceText: searchController
-                                        .text, // your search field text
-                                    dateText: selectedDate != null
-                                        ? _formatDate(selectedDate!)
-                                        : "",
-                                    timeText: selectedTimeSlot ?? "",
-                                    locationText: "Mumbai" ?? "",
-                                  ),
-                                ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.rusticSunset,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                "Search Probeauty",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontFamily: "PoppinsMedium",
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: height * 0.035),
-
-              // ----------------------- FILTERS ROW -----------------------
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _buildFilterIcon(onTap: _openCombinedFilterSheet),
-                    SizedBox(width: width * 0.03),
-                    _buildFilterChip("Sort", onTap: _openSortSheet),
-                    SizedBox(width: width * 0.03),
-                    _buildFilterChip("Max price", onTap: _openMaxPriceSheet),
-                    SizedBox(width: width * 0.03),
-                    _buildFilterChip("Venue type", onTap: _openVenueTypeSheet),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: height * 0.03),
-
-              Center(
-                child: Text(
-                  "446,305 appointments booked today",
+                Text(
+                  "Explore",
                   style: TextStyle(
-                    fontFamily: "PoppinsRegular",
-                    fontSize: width * 0.035,
-                    color: Colors.black87,
+                    fontFamily: "PlayfairDisplayBold",
+                    fontSize: width * 0.08,
+                    color: Colors.black,
                   ),
                 ),
-              ),
 
-              SizedBox(height: height * 0.02),
+                SizedBox(height: height * 0.03),
 
-              // ----------------------- SERVICES SECTION -----------------------
-              Text(
-                "Services",
-                style: TextStyle(
-                  fontFamily: "PoppinsSemiBold",
-                  fontSize: width * 0.055,
-                  color: Colors.black,
-                ),
-              ),
-
-              SizedBox(height: height * 0.02),
-
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                // itemCount: _loadingServices ? 4 : _services.length,
-                itemCount: 4,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 14,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 1.25,
-                ),
-                itemBuilder: (context, index) {
-                  if (_loadingServices) {
-                    return _buildServiceShimmer(width);
-                  }
-
-                  final item = _services[index];
-
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.softIvory,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.black, width: 2.87),
+                // ----------------------- SEARCH BOX -----------------------
+                Container(
+                  padding: EdgeInsets.all(width * 0.05),
+                  decoration: BoxDecoration(
+                    color: AppColors.softIvory,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Colors.black,
+                      width: 2.87,
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  ),
+                  child: Column(
+                    children: [
+                      _buildSearchField(
+                        controller: searchController,
+                        hint: "Any treatment or venue",
+                        svgIcon: "assets/images/icons/search_icon.svg",
+                      ),
+                      SizedBox(height: height * 0.02),
+                      _buildLocationField(),
+                      SizedBox(height: height * 0.02),
+                      Row(
                         children: [
-                          ClipRRect(
-                            child: Image.asset(
-                              item['img']!,
-                              height: width * 0.22,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: _selectDate,
+                              child: _buildChip(
+                                svgIcon:
+                                    "assets/images/icons/calendar_icon.svg",
+                                label: selectedDate == null
+                                    ? "Any date"
+                                    : _formatDate(selectedDate!),
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 5),
-                          Flexible(
-                            child: Text(
-                              item['title']!,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontFamily: "PoppinsMedium",
-                                fontSize: 13,
-                                color: Colors.black,
+                          SizedBox(width: width * 0.04),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: _selectTimeSlot,
+                              child: _buildChip(
+                                svgIcon: "assets/images/icons/time_icon.svg",
+                                label: selectedTimeSlot ?? "Any time",
                               ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  );
-                },
-              ),
+                      SizedBox(height: height * 0.03),
+                      Column(
+                        children: [
+                          SizedBox(
+                            width: double.infinity,
+                            height: height * 0.06,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ExploreResultsScreen(
+                                      serviceText: searchController
+                                          .text, // your search field text
+                                      dateText: selectedDate != null
+                                          ? _formatDate(selectedDate!)
+                                          : "",
+                                      timeText: selectedTimeSlot ?? "",
+                                      locationText: "Mumbai" ?? "",
+                                    ),
+                                  ),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.rusticSunset,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              child: const Center(
+                                child: Text(
+                                  "Search Probeauty",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontFamily: "PoppinsMedium",
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
 
-              SizedBox(height: height * 0.04),
-            ],
+                SizedBox(height: height * 0.035),
+
+                // ----------------------- FILTERS ROW -----------------------
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildFilterIcon(onTap: _openCombinedFilterSheet),
+                      SizedBox(width: width * 0.03),
+                      _buildFilterChip("Sort", onTap: _openSortSheet),
+                      SizedBox(width: width * 0.03),
+                      _buildFilterChip("Max price", onTap: _openMaxPriceSheet),
+                      SizedBox(width: width * 0.03),
+                      _buildFilterChip("Venue type",
+                          onTap: _openVenueTypeSheet),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: height * 0.03),
+
+                Center(
+                  child: Text(
+                    "446,305 appointments booked today",
+                    style: TextStyle(
+                      fontFamily: "PoppinsRegular",
+                      fontSize: width * 0.035,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: height * 0.02),
+
+                // ----------------------- SERVICES SECTION -----------------------
+                Text(
+                  "Services",
+                  style: TextStyle(
+                    fontFamily: "PoppinsSemiBold",
+                    fontSize: width * 0.055,
+                    color: Colors.black,
+                  ),
+                ),
+
+                SizedBox(height: height * 0.02),
+
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  // itemCount: _loadingServices ? 4 : _services.length,
+                  itemCount: 4,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 14,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 1.25,
+                  ),
+                  itemBuilder: (context, index) {
+                    if (_loadingServices) {
+                      return _buildServiceShimmer(width);
+                    }
+
+                    final item = _services[index];
+
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.softIvory,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.black, width: 2.87),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ClipRRect(
+                              child: Image.asset(
+                                item['img']!,
+                                height: width * 0.22,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Flexible(
+                              child: Text(
+                                item['title']!,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontFamily: "PoppinsMedium",
+                                  fontSize: 13,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+
+                SizedBox(height: height * 0.04),
+              ],
+            ),
           ),
         ),
       ),

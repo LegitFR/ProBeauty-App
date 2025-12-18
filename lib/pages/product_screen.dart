@@ -331,384 +331,388 @@ class _ProductScreenState extends State<ProductScreen> {
     final width = size.width;
     final height = size.height;
 
-    return Scaffold(
-      backgroundColor: AppColors.softIvory,
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-        decoration: const BoxDecoration(color: AppColors.softIvory),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Left: Price + "View price details"
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "₹${product.price ?? ""}",
-                  style: const TextStyle(
-                    fontFamily: "PoppinsSemiBold",
-                    fontSize: 20,
-                    color: Colors.black,
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
+        backgroundColor: AppColors.softIvory,
+        bottomNavigationBar: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          decoration: const BoxDecoration(color: AppColors.softIvory),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Left: Price + "View price details"
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "₹${product.price ?? ""}",
+                    style: const TextStyle(
+                      fontFamily: "PoppinsSemiBold",
+                      fontSize: 20,
+                      color: Colors.black,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 3),
-                const Text(
-                  "View price details",
-                  style: TextStyle(
-                    fontFamily: "PoppinsRegular",
-                    fontSize: 12,
-                    color: Colors.black54,
+                  const SizedBox(height: 3),
+                  const Text(
+                    "View price details",
+                    style: TextStyle(
+                      fontFamily: "PoppinsRegular",
+                      fontSize: 12,
+                      color: Colors.black54,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
 
-            // Right: Quantity selector + Cart icon
-            Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.rusticSunset,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        onPressed: _cartUpdating ? null : _decrementQuantity,
-                        icon: const Icon(
-                          Icons.remove,
-                          color: Colors.white,
-                          size: 15,
-                        ),
-                      ),
-                      Text(
-                        "$quantity",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontFamily: "PoppinsMedium",
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: _cartUpdating ? null : _incrementQuantity,
-                        icon: const Icon(
-                          Icons.add,
-                          color: Colors.white,
-                          size: 15,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 10),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamed(context, "/cart");
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
+              // Right: Quantity selector + Cart icon
+              Row(
+                children: [
+                  Container(
                     decoration: BoxDecoration(
                       color: AppColors.rusticSunset,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: SvgPicture.asset(
-                      "assets/images/icons/cart_icon.svg",
-                      color: Colors.white,
+                    child: Row(
+                      children: [
+                        IconButton(
+                          onPressed: _cartUpdating ? null : _decrementQuantity,
+                          icon: const Icon(
+                            Icons.remove,
+                            color: Colors.white,
+                            size: 15,
+                          ),
+                        ),
+                        Text(
+                          "$quantity",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontFamily: "PoppinsMedium",
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: _cartUpdating ? null : _incrementQuantity,
+                          icon: const Icon(
+                            Icons.add,
+                            color: Colors.white,
+                            size: 15,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 10),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, "/cart");
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.rusticSunset,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: SvgPicture.asset(
+                        "assets/images/icons/cart_icon.svg",
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        appBar: AppBar(
+          backgroundColor: AppColors.softIvory,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+            onPressed: () => Navigator.pop(context),
+          ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 25),
+              child: SvgPicture.asset(
+                'assets/images/icons/cart_icon.svg',
+                width: 24,
+                height: 24,
+                colorFilter:
+                    const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+              ),
             ),
           ],
         ),
-      ),
-      appBar: AppBar(
-        backgroundColor: AppColors.softIvory,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 25),
-            child: SvgPicture.asset(
-              'assets/images/icons/cart_icon.svg',
-              width: 24,
-              height: 24,
-              colorFilter:
-                  const ColorFilter.mode(Colors.black, BlendMode.srcIn),
-            ),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: width * 0.04),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ==========================
-              //    IMAGE CAROUSEL
-              // ==========================
-              CarouselSlider(
-                options: CarouselOptions(
-                  height: height * 0.40,
-                  viewportFraction: 1,
-                  enlargeCenterPage: false,
-                  autoPlay: false,
-                  enableInfiniteScroll: false,
-                  onPageChanged: (index, reason) {
-                    setState(() => currentImageIndex = index);
-                  },
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: width * 0.04),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ==========================
+                //    IMAGE CAROUSEL
+                // ==========================
+                CarouselSlider(
+                  options: CarouselOptions(
+                    height: height * 0.40,
+                    viewportFraction: 1,
+                    enlargeCenterPage: false,
+                    autoPlay: false,
+                    enableInfiniteScroll: false,
+                    onPageChanged: (index, reason) {
+                      setState(() => currentImageIndex = index);
+                    },
+                  ),
+                  items:
+                      (product.images.isNotEmpty ? product.images : [""]).map(
+                    (imgUrl) {
+                      return Container(
+                        width: double.infinity,
+                        color: Colors.white,
+                        child: imgUrl.isNotEmpty
+                            ? Image.network(
+                                imgUrl,
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, __, ___) =>
+                                    const Icon(Icons.broken_image, size: 100),
+                              )
+                            : const Icon(Icons.image, size: 120),
+                      );
+                    },
+                  ).toList(),
                 ),
-                items: (product.images.isNotEmpty ? product.images : [""]).map(
-                  (imgUrl) {
-                    return Container(
-                      width: double.infinity,
-                      color: Colors.white,
-                      child: imgUrl.isNotEmpty
-                          ? Image.network(
-                              imgUrl,
-                              fit: BoxFit.contain,
-                              errorBuilder: (_, __, ___) =>
-                                  const Icon(Icons.broken_image, size: 100),
-                            )
-                          : const Icon(Icons.image, size: 120),
-                    );
-                  },
-                ).toList(),
-              ),
 
-              const SizedBox(height: 10),
+                const SizedBox(height: 10),
 
-              // Dot indicators
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  product.images.length,
-                  (index) => Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    width: currentImageIndex == index ? 10 : 7,
-                    height: currentImageIndex == index ? 10 : 7,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: currentImageIndex == index
-                          ? AppColors.rusticSunset
-                          : Colors.black26,
+                // Dot indicators
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    product.images.length,
+                    (index) => Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      width: currentImageIndex == index ? 10 : 7,
+                      height: currentImageIndex == index ? 10 : 7,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: currentImageIndex == index
+                            ? AppColors.rusticSunset
+                            : Colors.black26,
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              SizedBox(height: height * 0.02),
+                SizedBox(height: height * 0.02),
 
-              // === Brand Name ===
-              Text(
-                salonName,
-                style: TextStyle(
-                  fontFamily: "PoppinsMedium",
-                  fontSize: width * 0.035,
-                  color: AppColors.rusticSunset,
-                ),
-              ),
-              SizedBox(height: height * 0.005),
-
-              // === Product Title ===
-              Text(
-                product.title ?? "Product Name",
-                style: TextStyle(
-                  fontFamily: "PoppinsMedium",
-                  fontSize: width * 0.038,
-                  color: Colors.black,
-                ),
-              ),
-
-              SizedBox(height: height * 0.008),
-
-              // Rating Row
-              Row(
-                children: [
-                  Text(
-                    "4.5  ",
-                    style: TextStyle(
-                      fontFamily: "PoppinsMedium",
-                      fontSize: width * 0.03,
-                      color: Colors.black,
-                    ),
+                // === Brand Name ===
+                Text(
+                  salonName,
+                  style: TextStyle(
+                    fontFamily: "PoppinsMedium",
+                    fontSize: width * 0.035,
+                    color: AppColors.rusticSunset,
                   ),
-                  ...List.generate(
-                    4,
-                    (index) => const Icon(
-                      Icons.star,
+                ),
+                SizedBox(height: height * 0.005),
+
+                // === Product Title ===
+                Text(
+                  product.title ?? "Product Name",
+                  style: TextStyle(
+                    fontFamily: "PoppinsMedium",
+                    fontSize: width * 0.038,
+                    color: Colors.black,
+                  ),
+                ),
+
+                SizedBox(height: height * 0.008),
+
+                // Rating Row
+                Row(
+                  children: [
+                    Text(
+                      "4.5  ",
+                      style: TextStyle(
+                        fontFamily: "PoppinsMedium",
+                        fontSize: width * 0.03,
+                        color: Colors.black,
+                      ),
+                    ),
+                    ...List.generate(
+                      4,
+                      (index) => const Icon(
+                        Icons.star,
+                        color: AppColors.rusticSunset,
+                        size: 18,
+                      ),
+                    ),
+                    const Icon(
+                      Icons.star_half,
                       color: AppColors.rusticSunset,
                       size: 18,
                     ),
-                  ),
-                  const Icon(
-                    Icons.star_half,
-                    color: AppColors.rusticSunset,
-                    size: 18,
-                  ),
-                  SizedBox(width: width * 0.015),
-                  Text(
-                    "(90) Rate this product",
-                    style: TextStyle(
-                      fontFamily: "PoppinsMedium",
-                      fontSize: width * 0.03,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-
-              SizedBox(height: height * 0.015),
-
-              // Price Row
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    "₹${product.price ?? ""}",
-                    style: TextStyle(
-                      fontFamily: "PoppinsSemiBold",
-                      fontSize: width * 0.045,
-                      color: Colors.black,
-                    ),
-                  ),
-                  SizedBox(width: width * 0.015),
-                  const Text(
-                    "₹1,620",
-                    style: TextStyle(
-                      color: Colors.grey,
-                      decoration: TextDecoration.lineThrough,
-                      fontSize: 16,
-                    ),
-                  ),
-                  SizedBox(width: width * 0.015),
-                  const Text(
-                    "(8% off)",
-                    style: TextStyle(
-                      fontFamily: "PoppinsMedium",
-                      fontSize: 14,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 3),
-
-              Text(
-                "Inclusive Of All Taxes",
-                style: TextStyle(
-                  fontFamily: "PoppinsRegular",
-                  fontSize: width * 0.023,
-                  color: Colors.black,
-                ),
-              ),
-
-              SizedBox(height: height * 0.025),
-
-              // Size selector
-              Text(
-                "Select Size",
-                style: TextStyle(
-                  fontFamily: "PoppinsRegular",
-                  fontSize: width * 0.035,
-                  color: Colors.black,
-                ),
-              ),
-              SizedBox(height: height * 0.012),
-
-              Row(
-                children: List.generate(sizes.length, (index) {
-                  final isSelected = selectedSize == index;
-                  return GestureDetector(
-                    onTap: () => setState(() => selectedSize = index),
-                    child: Container(
-                      margin: EdgeInsets.only(right: width * 0.025),
-                      padding: EdgeInsets.symmetric(
-                          horizontal: width * 0.035, vertical: width * 0.02),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.rusticSunset
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(15),
-                        border: Border.all(
-                          color: isSelected ? Colors.transparent : Colors.black,
-                        ),
-                      ),
-                      child: Text(
-                        sizes[index],
-                        style: TextStyle(
-                          fontFamily: "PoppinsRegular",
-                          fontSize: width * 0.032,
-                          color: isSelected ? Colors.white : Colors.black,
-                        ),
+                    SizedBox(width: width * 0.015),
+                    Text(
+                      "(90) Rate this product",
+                      style: TextStyle(
+                        fontFamily: "PoppinsMedium",
+                        fontSize: width * 0.03,
+                        color: Colors.black,
                       ),
                     ),
-                  );
-                }),
-              ),
-              SizedBox(height: height * 0.02),
+                  ],
+                ),
 
-              // Offers (static)
-              _offersSection(width, height),
+                SizedBox(height: height * 0.015),
 
-              SizedBox(height: height * 0.02),
-
-              // Sold by
-              Row(
-                children: [
-                  Text(
-                    "Sold by : ",
-                    style: TextStyle(
-                      fontSize: width * 0.032,
-                      fontFamily: "PoppinsRegular",
-                      color: Colors.black,
+                // Price Row
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      "₹${product.price ?? ""}",
+                      style: TextStyle(
+                        fontFamily: "PoppinsSemiBold",
+                        fontSize: width * 0.045,
+                        color: Colors.black,
+                      ),
                     ),
-                  ),
-                  Text(
-                    "RELIANCE RETAIL LIMITED",
-                    style: TextStyle(
-                      fontSize: width * 0.032,
-                      fontFamily: "PoppinsMedium",
-                      color: AppColors.rusticSunset,
+                    SizedBox(width: width * 0.015),
+                    const Text(
+                      "₹1,620",
+                      style: TextStyle(
+                        color: Colors.grey,
+                        decoration: TextDecoration.lineThrough,
+                        fontSize: 16,
+                      ),
                     ),
+                    SizedBox(width: width * 0.015),
+                    const Text(
+                      "(8% off)",
+                      style: TextStyle(
+                        fontFamily: "PoppinsMedium",
+                        fontSize: 14,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 3),
+
+                Text(
+                  "Inclusive Of All Taxes",
+                  style: TextStyle(
+                    fontFamily: "PoppinsRegular",
+                    fontSize: width * 0.023,
+                    color: Colors.black,
                   ),
-                ],
-              ),
-              SizedBox(height: height * 0.03),
+                ),
 
-              // Feature cards
-              _featureRow(width, height),
+                // SizedBox(height: height * 0.025),
 
-              SizedBox(height: height * 0.03),
+                // Size selector
+                // Text(
+                //   "Select Size",
+                //   style: TextStyle(
+                //     fontFamily: "PoppinsRegular",
+                //     fontSize: width * 0.035,
+                //     color: Colors.black,
+                //   ),
+                // ),
+                // SizedBox(height: height * 0.012),
 
-              // Delivery options
-              _deliverySection(width, height),
+                // Row(
+                //   children: List.generate(sizes.length, (index) {
+                //     final isSelected = selectedSize == index;
+                //     return GestureDetector(
+                //       onTap: () => setState(() => selectedSize = index),
+                //       child: Container(
+                //         margin: EdgeInsets.only(right: width * 0.025),
+                //         padding: EdgeInsets.symmetric(
+                //             horizontal: width * 0.035, vertical: width * 0.02),
+                //         decoration: BoxDecoration(
+                //           color: isSelected
+                //               ? AppColors.rusticSunset
+                //               : Colors.transparent,
+                //           borderRadius: BorderRadius.circular(15),
+                //           border: Border.all(
+                //             color: isSelected ? Colors.transparent : Colors.black,
+                //           ),
+                //         ),
+                //         child: Text(
+                //           sizes[index],
+                //           style: TextStyle(
+                //             fontFamily: "PoppinsRegular",
+                //             fontSize: width * 0.032,
+                //             color: isSelected ? Colors.white : Colors.black,
+                //           ),
+                //         ),
+                //       ),
+                //     );
+                //   }),
+                // ),
+                // SizedBox(height: height * 0.02),
 
-              SizedBox(height: height * 0.03),
+                // Offers (static)
+                _offersSection(width, height),
 
-              // Description
-              sectionTile(
-                "Product description",
-                product.title ??
-                    "This shampoo helps nourish and repair damaged hair with Marula oil and Quinoa protein.",
-              ),
+                SizedBox(height: height * 0.02),
 
-              SizedBox(height: height * 0.01),
+                // Sold by
+                Row(
+                  children: [
+                    Text(
+                      "Sold by : ",
+                      style: TextStyle(
+                        fontSize: width * 0.032,
+                        fontFamily: "PoppinsRegular",
+                        color: Colors.black,
+                      ),
+                    ),
+                    Text(
+                      "RELIANCE RETAIL LIMITED",
+                      style: TextStyle(
+                        fontSize: width * 0.032,
+                        fontFamily: "PoppinsMedium",
+                        color: AppColors.rusticSunset,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: height * 0.03),
 
-              // Key features
-              sectionTile(
-                "Key features and benefits",
-                "• Repairs damaged hair\n• Adds shine\n• Sulfate-free formula",
-              ),
+                // Feature cards
+                _featureRow(width, height),
 
-              SizedBox(height: height * 0.05),
-            ],
+                SizedBox(height: height * 0.03),
+
+                // Delivery options
+                _deliverySection(width, height),
+
+                SizedBox(height: height * 0.03),
+
+                // Description
+                sectionTile(
+                  "Product description",
+                  product.title ??
+                      "This shampoo helps nourish and repair damaged hair with Marula oil and Quinoa protein.",
+                ),
+
+                SizedBox(height: height * 0.01),
+
+                // Key features
+                sectionTile(
+                  "Key features and benefits",
+                  "• Repairs damaged hair\n• Adds shine\n• Sulfate-free formula",
+                ),
+
+                SizedBox(height: height * 0.05),
+              ],
+            ),
           ),
         ),
       ),

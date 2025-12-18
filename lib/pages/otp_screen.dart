@@ -103,129 +103,132 @@ class _OTPScreenState extends State<OTPScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      backgroundColor: AppColors.softIvory,
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: screenHeight * 0.06),
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
+        backgroundColor: AppColors.softIvory,
+        body: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: screenHeight * 0.06),
 
-              // Title
-              Text(
-                "Enter OTP",
-                style: TextStyle(
-                  color: AppColors.rusticSunset,
-                  fontFamily: "PoppinsSemiBold",
-                  fontSize: screenWidth * 0.06,
-                ),
-              ),
-
-              SizedBox(height: screenHeight * 0.01),
-
-              // Subtitle
-              Text(
-                contact.contains("@")
-                    ? "A 6-digit code has been sent to\n$contact"
-                    : "A 6-digit code has been sent to\n+91 $contact",
-                style: TextStyle(
-                  color: Colors.black,
-                  fontFamily: "PoppinsRegular",
-                  fontSize: screenWidth * 0.034,
-                ),
-              ),
-
-              SizedBox(height: screenHeight * 0.04),
-
-              // OTP Inputs
-              Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(6, (index) {
-                    return SizedBox(
-                      width: screenWidth * 0.10,
-                      child: TextField(
-                        controller: _otpControllers[index],
-                        keyboardType: TextInputType.number,
-                        textAlign: TextAlign.center,
-                        maxLength: 1,
-                        style: TextStyle(
-                          fontSize: screenWidth * 0.05,
-                          fontFamily: "PoppinsBold",
-                          color: Colors.black,
-                        ),
-                        decoration: InputDecoration(
-                          counterText: "",
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: AppColors.greyTone,
-                              width: 1,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: AppColors.rusticSunset,
-                              width: 1.5,
-                            ),
-                          ),
-                        ),
-                        onChanged: (value) {
-                          if (value.isNotEmpty && index < 7) {
-                            FocusScope.of(context).nextFocus();
-                          }
-                          if (value.isEmpty && index > 0) {
-                            FocusScope.of(context).previousFocus();
-                          }
-                        },
-                      ),
-                    );
-                  }),
-                ),
-              ),
-
-              SizedBox(height: screenHeight * 0.06),
-
-              // Verify Button
-              Center(
-                child: SizedBox(
-                  width: screenWidth * 0.65,
-                  height: 45,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.rusticSunset,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      elevation: 2,
-                    ),
-                    onPressed: () => _verifyOtp(contact),
-                    child: _isLoading
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              _buildDot(AppColors.greyTone),
-                              SizedBox(width: screenWidth * 0.015),
-                              _buildDot(Colors.white),
-                              SizedBox(width: screenWidth * 0.015),
-                              _buildDot(AppColors.greyTone),
-                            ],
-                          )
-                        : Text(
-                            "Verify OTP",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: screenWidth * 0.04,
-                              fontFamily: "PoppinsRegular",
-                            ),
-                          ),
+                // Title
+                Text(
+                  "Enter OTP",
+                  style: TextStyle(
+                    color: AppColors.rusticSunset,
+                    fontFamily: "PoppinsSemiBold",
+                    fontSize: screenWidth * 0.06,
                   ),
                 ),
-              ),
-            ],
+
+                SizedBox(height: screenHeight * 0.01),
+
+                // Subtitle
+                Text(
+                  contact.contains("@")
+                      ? "A 6-digit code has been sent to\n$contact"
+                      : "A 6-digit code has been sent to\n+91 $contact",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontFamily: "PoppinsRegular",
+                    fontSize: screenWidth * 0.034,
+                  ),
+                ),
+
+                SizedBox(height: screenHeight * 0.04),
+
+                // OTP Inputs
+                Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: List.generate(6, (index) {
+                      return SizedBox(
+                        width: screenWidth * 0.10,
+                        child: TextField(
+                          controller: _otpControllers[index],
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.center,
+                          maxLength: 1,
+                          style: TextStyle(
+                            fontSize: screenWidth * 0.05,
+                            fontFamily: "PoppinsBold",
+                            color: Colors.black,
+                          ),
+                          decoration: InputDecoration(
+                            counterText: "",
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: AppColors.greyTone,
+                                width: 1,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: AppColors.rusticSunset,
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                          onChanged: (value) {
+                            if (value.isNotEmpty && index < 7) {
+                              FocusScope.of(context).nextFocus();
+                            }
+                            if (value.isEmpty && index > 0) {
+                              FocusScope.of(context).previousFocus();
+                            }
+                          },
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+
+                SizedBox(height: screenHeight * 0.06),
+
+                // Verify Button
+                Center(
+                  child: SizedBox(
+                    width: screenWidth * 0.65,
+                    height: 45,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.rusticSunset,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        elevation: 2,
+                      ),
+                      onPressed: () => _verifyOtp(contact),
+                      child: _isLoading
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _buildDot(AppColors.greyTone),
+                                SizedBox(width: screenWidth * 0.015),
+                                _buildDot(Colors.white),
+                                SizedBox(width: screenWidth * 0.015),
+                                _buildDot(AppColors.greyTone),
+                              ],
+                            )
+                          : Text(
+                              "Verify OTP",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: screenWidth * 0.04,
+                                fontFamily: "PoppinsRegular",
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

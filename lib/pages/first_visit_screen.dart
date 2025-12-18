@@ -43,52 +43,55 @@ class FirstVisitScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.softIvory,
-      appBar: AppBar(
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
         backgroundColor: AppColors.softIvory,
-        elevation: 0,
-        leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+        appBar: AppBar(
+          backgroundColor: AppColors.softIvory,
+          elevation: 0,
+          leading: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          ),
         ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 10),
+        body: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 10),
 
-            // ---------- TITLE ----------
-            Text(
-              "is this your first visit to\n$salonName?",
-              style: const TextStyle(
-                fontFamily: "PoppinsSemiBold",
-                fontSize: 22,
-                height: 1.3,
-                color: Colors.black,
+              // ---------- TITLE ----------
+              Text(
+                "is this your first visit to\n$salonName?",
+                style: const TextStyle(
+                  fontFamily: "PoppinsSemiBold",
+                  fontSize: 22,
+                  height: 1.3,
+                  color: Colors.black,
+                ),
               ),
-            ),
 
-            const SizedBox(height: 30),
+              const SizedBox(height: 30),
 
-            // ---------- YES ----------
-            _optionCard(
-              title: "Yes",
-              subtitle: "This is my first visit",
-              onTap: () => _goNext(context, true),
-            ),
+              // ---------- YES ----------
+              _optionCard(
+                title: "Yes",
+                subtitle: "This is my first visit",
+                onTap: () => _goNext(context, true),
+              ),
 
-            const SizedBox(height: 14),
+              const SizedBox(height: 14),
 
-            // ---------- NO ----------
-            _optionCard(
-              title: "No",
-              subtitle: "I've visited before",
-              onTap: () => _goNext(context, false),
-            ),
-          ],
+              // ---------- NO ----------
+              _optionCard(
+                title: "No",
+                subtitle: "I've visited before",
+                onTap: () => _goNext(context, false),
+              ),
+            ],
+          ),
         ),
       ),
     );

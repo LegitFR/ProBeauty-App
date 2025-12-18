@@ -162,8 +162,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _buildMenuItem(
                   Icons.credit_card_outlined, 'Payment methods', () {}),
               _buildMenuItem(Icons.card_giftcard_outlined, 'Gift card', () {}),
-              _buildMenuItem(
-                  Icons.notifications_outlined, 'Notifications', () {}),
+              _buildMenuItem(Icons.notifications_outlined, 'Notifications', () {
+                Navigator.pushNamed(context, "/notification");
+              }),
               _buildMenuItem(Icons.settings_outlined, 'Settings', () {}),
 
               const SizedBox(height: 8),

@@ -38,252 +38,255 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
     final width = size.width;
     final height = size.height;
 
-    return Scaffold(
-      backgroundColor: AppColors.softIvory,
-      appBar: AppBar(
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
         backgroundColor: AppColors.softIvory,
-        elevation: 0,
-        leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: const Icon(Icons.arrow_back_ios, color: Colors.black),
-        ),
-        centerTitle: true,
-        title: Text(
-          widget.name,
-          style: const TextStyle(
-            fontFamily: "PoppinsSemiBold",
-            color: Colors.black,
-            fontSize: 18,
+        appBar: AppBar(
+          backgroundColor: AppColors.softIvory,
+          elevation: 0,
+          leading: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: const Icon(Icons.arrow_back_ios, color: Colors.black),
           ),
-        ),
-      ),
-
-      body: Column(
-        children: [
-          // -------------------------------
-          // TOP IMAGE
-          // -------------------------------
-          SizedBox(
-            height: height * 0.25,
-            width: double.infinity,
-            child: Stack(
-              children: [
-                Image.asset(
-                  widget.image,
-                  width: double.infinity,
-                  height: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-                Positioned(
-                  right: 16,
-                  top: 16,
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.black.withOpacity(0.4),
-                    ),
-                    child: const Icon(Icons.share, color: Colors.white),
-                  ),
-                )
-              ],
+          centerTitle: true,
+          title: Text(
+            widget.name,
+            style: const TextStyle(
+              fontFamily: "PoppinsSemiBold",
+              color: Colors.black,
+              fontSize: 18,
             ),
           ),
+        ),
 
-          // -------------------------------
-          // DETAILS
-          // -------------------------------
-          Expanded(
-            child: SingleChildScrollView(
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // TITLE + HEART
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            widget.name,
-                            style: const TextStyle(
-                              fontFamily: "PoppinsSemiBold",
-                              fontSize: 18,
-                              color: Colors.black,
+        body: Column(
+          children: [
+            // -------------------------------
+            // TOP IMAGE
+            // -------------------------------
+            SizedBox(
+              height: height * 0.25,
+              width: double.infinity,
+              child: Stack(
+                children: [
+                  Image.asset(
+                    widget.image,
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                  Positioned(
+                    right: 16,
+                    top: 16,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.black.withOpacity(0.4),
+                      ),
+                      child: const Icon(Icons.share, color: Colors.white),
+                    ),
+                  )
+                ],
+              ),
+            ),
+
+            // -------------------------------
+            // DETAILS
+            // -------------------------------
+            Expanded(
+              child: SingleChildScrollView(
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // TITLE + HEART
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              widget.name,
+                              style: const TextStyle(
+                                fontFamily: "PoppinsSemiBold",
+                                fontSize: 18,
+                                color: Colors.black,
+                              ),
                             ),
                           ),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.black26),
+                              color: AppColors.softIvory,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.15),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(Icons.favorite_border),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 6),
+
+                      // RATINGS
+                      Row(
+                        children: [
+                          Text(
+                            widget.rating.toString(),
+                            style: const TextStyle(
+                              fontFamily: "PoppinsSemiBold",
+                              fontSize: 15,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          ...List.generate(
+                            5,
+                            (i) => Icon(
+                              Icons.star,
+                              size: 18,
+                              color: i < widget.rating.floor()
+                                  ? AppColors.rusticSunset
+                                  : AppColors.greyTone,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            "(${widget.reviews})",
+                            style: const TextStyle(
+                              fontFamily: "PoppinsRegular",
+                              fontSize: 13,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      Text(
+                        widget.address,
+                        style: const TextStyle(
+                          fontFamily: "PoppinsRegular",
+                          fontSize: 14,
+                          color: Colors.black87,
                         ),
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.black26),
-                            color: AppColors.softIvory,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.15),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
+                      ),
+
+                      const SizedBox(height: 4),
+                      const Text(
+                        "Open until 10:00 pm",
+                        style: TextStyle(
+                          fontFamily: "PoppinsRegular",
+                          fontSize: 14,
+                          color: Colors.black54,
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      // ---------------------------
+                      // TAB BAR
+                      // ---------------------------
+                      const SizedBox(
+                        height: 45,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              _TabButton(title: "SERVICES", index: 0),
+                              _TabButton(title: "REVIEWS", index: 1),
+                              _TabButton(title: "TEAM", index: 2),
+                              _TabButton(title: "GIFT CARDS", index: 3),
+                              _TabButton(title: "DETAILS", index: 4),
                             ],
                           ),
-                          child: const Icon(Icons.favorite_border),
                         ),
+                      ),
+
+                      const Divider(thickness: 1),
+                      const SizedBox(height: 14),
+
+                      // ---------------------------
+                      // SERVICES LIST
+                      // ---------------------------
+                      for (var s in widget.services) ...[
+                        _serviceTile(
+                          title: s["title"] ?? "",
+                          subtitle: "${s["durationMinutes"]} mins",
+                          price: "₹${s["price"]}",
+                        ),
+                        const SizedBox(height: 12),
                       ],
-                    ),
 
-                    const SizedBox(height: 6),
-
-                    // RATINGS
-                    Row(
-                      children: [
-                        Text(
-                          widget.rating.toString(),
-                          style: const TextStyle(
-                            fontFamily: "PoppinsSemiBold",
-                            fontSize: 15,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        ...List.generate(
-                          5,
-                          (i) => Icon(
-                            Icons.star,
-                            size: 18,
-                            color: i < widget.rating.floor()
-                                ? AppColors.rusticSunset
-                                : AppColors.greyTone,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          "(${widget.reviews})",
-                          style: const TextStyle(
-                            fontFamily: "PoppinsRegular",
-                            fontSize: 13,
-                            color: Colors.black54,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    Text(
-                      widget.address,
-                      style: const TextStyle(
-                        fontFamily: "PoppinsRegular",
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
-                    ),
-
-                    const SizedBox(height: 4),
-                    const Text(
-                      "Open until 10:00 pm",
-                      style: TextStyle(
-                        fontFamily: "PoppinsRegular",
-                        fontSize: 14,
-                        color: Colors.black54,
-                      ),
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    // ---------------------------
-                    // TAB BAR
-                    // ---------------------------
-                    const SizedBox(
-                      height: 45,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            _TabButton(title: "SERVICES", index: 0),
-                            _TabButton(title: "REVIEWS", index: 1),
-                            _TabButton(title: "TEAM", index: 2),
-                            _TabButton(title: "GIFT CARDS", index: 3),
-                            _TabButton(title: "DETAILS", index: 4),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const Divider(thickness: 1),
-                    const SizedBox(height: 14),
-
-                    // ---------------------------
-                    // SERVICES LIST
-                    // ---------------------------
-                    for (var s in widget.services) ...[
-                      _serviceTile(
-                        title: s["title"] ?? "",
-                        subtitle: "${s["durationMinutes"]} mins",
-                        price: "₹${s["price"]}",
-                      ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 80),
                     ],
-
-                    const SizedBox(height: 80),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-
-      // ---------------------------
-      // FIXED BOTTOM BAR
-      // ---------------------------
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        color: AppColors.softIvory,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "${widget.services.length} services available",
-              style: const TextStyle(
-                fontFamily: "PoppinsRegular",
-                fontSize: 13,
-                color: Colors.black87,
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => SelectServicesScreen(
-                      salonId: widget.id,
-                      salonName: widget.name,
-                      rating: widget.rating,
-                      services: widget.services,
-                      salonStaffList: widget.salonStaffList,
-                    ),
                   ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.rusticSunset,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Text(
-                "Book now",
-                style: TextStyle(
-                  fontFamily: "PoppinsSemiBold",
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
-              ),
-            )
+            ),
           ],
+        ),
+
+        // ---------------------------
+        // FIXED BOTTOM BAR
+        // ---------------------------
+        bottomNavigationBar: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          color: AppColors.softIvory,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "${widget.services.length} services available",
+                style: const TextStyle(
+                  fontFamily: "PoppinsRegular",
+                  fontSize: 13,
+                  color: Colors.black87,
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => SelectServicesScreen(
+                        salonId: widget.id,
+                        salonName: widget.name,
+                        rating: widget.rating,
+                        services: widget.services,
+                        salonStaffList: widget.salonStaffList,
+                      ),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.rusticSunset,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  "Book now",
+                  style: TextStyle(
+                    fontFamily: "PoppinsSemiBold",
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

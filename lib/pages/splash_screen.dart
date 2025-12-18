@@ -103,17 +103,20 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return Scaffold(
-      backgroundColor: AppColors.rusticSunset,
-      body: AnimatedAlign(
-        duration: const Duration(milliseconds: 700),
-        curve: Curves.easeInOutCubic,
-        alignment: _moveUp ? const Alignment(0, -0.70) : Alignment.center,
-        child: Image.asset(
-          _images[_currentIndex],
-          width: size.width * 0.35,
-          height: size.width * 0.35,
-          fit: BoxFit.contain,
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
+        backgroundColor: AppColors.rusticSunset,
+        body: AnimatedAlign(
+          duration: const Duration(milliseconds: 700),
+          curve: Curves.easeInOutCubic,
+          alignment: _moveUp ? const Alignment(0, -0.70) : Alignment.center,
+          child: Image.asset(
+            _images[_currentIndex],
+            width: size.width * 0.35,
+            height: size.width * 0.35,
+            fit: BoxFit.contain,
+          ),
         ),
       ),
     );

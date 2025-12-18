@@ -8,92 +8,95 @@ class NotificationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return Scaffold(
-      backgroundColor: AppColors.softIvory,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(120),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: AppColors.softIvory,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black26,
-                offset: Offset(0, 1),
-                blurRadius: 4,
-              ),
-            ],
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                        color: Colors.black87),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  Text(
-                    "Notifications",
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.05,
-                      fontFamily: "PoppinsSemiBold",
-                      color: Colors.black87,
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
+        backgroundColor: AppColors.softIvory,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(120),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: AppColors.softIvory,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  offset: Offset(0, 1),
+                  blurRadius: 4,
+                ),
+              ],
+            ),
+            child: SafeArea(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                          color: Colors.black87),
+                      onPressed: () => Navigator.pop(context),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.settings_outlined,
-                        color: Colors.black87),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/notification_settings');
-                      // Handle notification settings
-                    },
-                  ),
-                ],
+                    Text(
+                      "Notifications",
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.05,
+                        fontFamily: "PoppinsSemiBold",
+                        color: Colors.black87,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.settings_outlined,
+                          color: Colors.black87),
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/notification_settings');
+                        // Handle notification settings
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 17),
-            Text(
-              "Unread (2)",
-              style: TextStyle(
-                fontSize: screenWidth * 0.05,
-                fontFamily: "PoppinsSemiBold",
-                color: Colors.black,
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 17),
+              Text(
+                "Unread (2)",
+                style: TextStyle(
+                  fontSize: screenWidth * 0.05,
+                  fontFamily: "PoppinsSemiBold",
+                  color: Colors.black,
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            // Notification Tile 1
-            _buildNotificationTile(
-              imagePath: "assets/images/icons/appointment.png",
-              title: "Appointment Success",
-              message:
-                  "Your appointment has been successfully scheduled with Dr. Meera at 4:30 PM...",
-              time: "Just now",
-              onTap: () {},
-            ),
-            const SizedBox(height: 12),
+              // Notification Tile 1
+              _buildNotificationTile(
+                imagePath: "assets/images/icons/appointment.png",
+                title: "Appointment Success",
+                message:
+                    "Your appointment has been successfully scheduled with Dr. Meera at 4:30 PM...",
+                time: "Just now",
+                onTap: () {},
+              ),
+              const SizedBox(height: 12),
 
-            // Notification Tile 2
-            _buildNotificationTile(
-              imagePath: "assets/images/icons/discount.png",
-              title: "Appointment Success",
-              message:
-                  "Your appointment has been successfully confirmed for tomorrow...",
-              time: "Just now",
-              onTap: () {},
-            ),
-          ],
+              // Notification Tile 2
+              _buildNotificationTile(
+                imagePath: "assets/images/icons/discount.png",
+                title: "Appointment Success",
+                message:
+                    "Your appointment has been successfully confirmed for tomorrow...",
+                time: "Just now",
+                onTap: () {},
+              ),
+            ],
+          ),
         ),
       ),
     );

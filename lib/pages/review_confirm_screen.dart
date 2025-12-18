@@ -165,158 +165,163 @@ class ReviewConfirmScreen extends StatelessWidget {
     const taxes = 50;
     final grandTotal = total + taxes;
 
-    return Scaffold(
-      backgroundColor: AppColors.softIvory,
-      appBar: AppBar(
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
         backgroundColor: AppColors.softIvory,
-        elevation: 0,
-        leading: const BackButton(color: Colors.black),
-        centerTitle: true,
-        title: const Text(
-          "Review and Confirm",
-          style: TextStyle(fontFamily: "PoppinsSemiBold", color: Colors.black),
-        ),
-        actions: [
-          GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: const Padding(
-              padding: EdgeInsets.only(right: 16),
-              child: Icon(Icons.close, color: Colors.black),
-            ),
-          )
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // SALON HEADER
-            Row(
-              children: [
-                Container(
-                  width: 80,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Center(
-                    child: Text("LOGO",
-                        style: TextStyle(color: Colors.white, fontSize: 10)),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        salonName,
-                        style: const TextStyle(
-                            fontFamily: "PoppinsSemiBold", fontSize: 15),
-                      ),
-                      Row(
-                        children: [
-                          _buildStars(rating),
-                          const SizedBox(width: 6),
-                          Text("($reviewCount)",
-                              style: const TextStyle(fontSize: 12)),
-                        ],
-                      ),
-                      const Text("Anna Nagar, Chennai",
-                          style: TextStyle(color: Colors.black54)),
-                    ],
-                  ),
-                )
-              ],
-            ),
-
-            const SizedBox(height: 18),
-
-            Row(
-              children: [
-                const Icon(Icons.schedule, size: 16),
-                const SizedBox(width: 6),
-                Text("$timeText - 12:45 pm"),
-              ],
-            ),
-            Row(
-              children: [
-                const Icon(Icons.calendar_today, size: 16),
-                const SizedBox(width: 6),
-                Text(dateText),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            ...selectedServices.map((s) {
-              final price = _parsePrice(s["price"]);
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(s["title"],
-                            style:
-                                const TextStyle(fontFamily: "PoppinsSemiBold")),
-                        Text("${s["durationMinutes"]} mins"),
-                      ],
-                    ),
-                    Text("₹$price",
-                        style: const TextStyle(fontFamily: "PoppinsSemiBold")),
-                  ],
-                ),
-              );
-            }),
-
-            const Divider(),
-            _priceRow("Taxes", taxes),
-            const Divider(),
-            _priceRow("Total", grandTotal, bold: true),
-            _priceRow("Pay now", 0, green: true),
-            _priceRow("Pay at venue", grandTotal),
-
-            const SizedBox(height: 90),
-          ],
-        ),
-      ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.black12)),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                "₹$grandTotal\n${selectedServices.length} service",
-                style: const TextStyle(
-                    fontFamily: "PoppinsSemiBold", fontSize: 13),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () => _confirmBookings(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.rusticSunset,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-              ),
-              child: const Text(
-                "Confirm",
-                style: TextStyle(
-                    fontFamily: "PoppinsSemiBold", color: Colors.white),
+        appBar: AppBar(
+          backgroundColor: AppColors.softIvory,
+          elevation: 0,
+          leading: const BackButton(color: Colors.black),
+          centerTitle: true,
+          title: const Text(
+            "Review and Confirm",
+            style:
+                TextStyle(fontFamily: "PoppinsSemiBold", color: Colors.black),
+          ),
+          actions: [
+            GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: const Padding(
+                padding: EdgeInsets.only(right: 16),
+                child: Icon(Icons.close, color: Colors.black),
               ),
             )
           ],
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // SALON HEADER
+              Row(
+                children: [
+                  Container(
+                    width: 80,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Center(
+                      child: Text("LOGO",
+                          style: TextStyle(color: Colors.white, fontSize: 10)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          salonName,
+                          style: const TextStyle(
+                              fontFamily: "PoppinsSemiBold", fontSize: 15),
+                        ),
+                        Row(
+                          children: [
+                            _buildStars(rating),
+                            const SizedBox(width: 6),
+                            Text("($reviewCount)",
+                                style: const TextStyle(fontSize: 12)),
+                          ],
+                        ),
+                        const Text("Anna Nagar, Chennai",
+                            style: TextStyle(color: Colors.black54)),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+
+              const SizedBox(height: 18),
+
+              Row(
+                children: [
+                  const Icon(Icons.schedule, size: 16),
+                  const SizedBox(width: 6),
+                  Text("$timeText - 12:45 pm"),
+                ],
+              ),
+              Row(
+                children: [
+                  const Icon(Icons.calendar_today, size: 16),
+                  const SizedBox(width: 6),
+                  Text(dateText),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              ...selectedServices.map((s) {
+                final price = _parsePrice(s["price"]);
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(s["title"],
+                              style: const TextStyle(
+                                  fontFamily: "PoppinsSemiBold")),
+                          Text("${s["durationMinutes"]} mins"),
+                        ],
+                      ),
+                      Text("₹$price",
+                          style:
+                              const TextStyle(fontFamily: "PoppinsSemiBold")),
+                    ],
+                  ),
+                );
+              }),
+
+              const Divider(),
+              _priceRow("Taxes", taxes),
+              const Divider(),
+              _priceRow("Total", grandTotal, bold: true),
+              _priceRow("Pay now", 0, green: true),
+              _priceRow("Pay at venue", grandTotal),
+
+              const SizedBox(height: 90),
+            ],
+          ),
+        ),
+        bottomNavigationBar: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: const BoxDecoration(
+            border: Border(top: BorderSide(color: Colors.black12)),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  "₹$grandTotal\n${selectedServices.length} service",
+                  style: const TextStyle(
+                      fontFamily: "PoppinsSemiBold", fontSize: 13),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => _confirmBookings(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.rusticSunset,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                ),
+                child: const Text(
+                  "Confirm",
+                  style: TextStyle(
+                      fontFamily: "PoppinsSemiBold", color: Colors.white),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

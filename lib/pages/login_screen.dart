@@ -125,184 +125,187 @@ class _LoginScreenState extends State<LoginScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      backgroundColor: AppColors.softIvory,
-      appBar: AppBar(
-        backgroundColor: AppColors.rusticSunset,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
+        backgroundColor: AppColors.softIvory,
+        appBar: AppBar(
+          backgroundColor: AppColors.rusticSunset,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
         ),
-      ),
-      body: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            height: screenHeight * 0.225,
-            decoration: const BoxDecoration(
-              color: AppColors.rusticSunset,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(40),
-                bottomRight: Radius.circular(40),
+        body: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              height: screenHeight * 0.225,
+              decoration: const BoxDecoration(
+                color: AppColors.rusticSunset,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(40),
+                  bottomRight: Radius.circular(40),
+                ),
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: screenWidth * 0.08,
+                  vertical: screenHeight * 0.05,
+                ),
+                child: Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Welcome back,",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenWidth * 0.08,
+                          fontFamily: "PlayfairDisplayBold",
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.005),
+                      Text(
+                        "Log in!",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenWidth * 0.05,
+                          fontFamily: "PoppinsRegular",
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: screenWidth * 0.08,
-                vertical: screenHeight * 0.05,
-              ),
-              child: Align(
-                alignment: Alignment.bottomLeft,
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.08),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      "Welcome back,",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: screenWidth * 0.08,
-                        fontFamily: "PlayfairDisplayBold",
+                    TextField(
+                      style: const TextStyle(color: AppColors.rusticSunset),
+                      cursorColor: AppColors.rusticSunset,
+                      controller: _emailController,
+                      focusNode: _emailFocus,
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(
+                          Icons.call,
+                          color: _emailFocus.hasFocus ||
+                                  _emailController.text.isNotEmpty
+                              ? AppColors.rusticSunset
+                              : AppColors.greyTone,
+                        ),
+                        hintText: "Email or Phone number",
+                        hintStyle: const TextStyle(
+                          color: AppColors.greyTone,
+                          fontFamily: "PoppinsRegular",
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: const BorderSide(
+                              color: AppColors.greyTone, width: 1),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: const BorderSide(
+                              color: AppColors.rusticSunset, width: 1.2),
+                        ),
                       ),
                     ),
-                    SizedBox(height: screenHeight * 0.005),
-                    Text(
-                      "Log in!",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: screenWidth * 0.05,
-                        fontFamily: "PoppinsRegular",
+                    SizedBox(height: screenHeight * 0.025),
+                    TextField(
+                      style: const TextStyle(color: AppColors.rusticSunset),
+                      cursorColor: AppColors.rusticSunset,
+                      controller: _passwordController,
+                      focusNode: _passwordFocus,
+                      obscureText: _obscurePassword,
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(
+                          Icons.lock_outline,
+                          color: _passwordFocus.hasFocus ||
+                                  _passwordController.text.isNotEmpty
+                              ? AppColors.rusticSunset
+                              : AppColors.greyTone,
+                        ),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: _passwordFocus.hasFocus ||
+                                    _passwordController.text.isNotEmpty
+                                ? AppColors.rusticSunset
+                                : AppColors.greyTone,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                        hintText: "Password",
+                        hintStyle: const TextStyle(
+                          color: AppColors.greyTone,
+                          fontFamily: "PoppinsRegular",
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: const BorderSide(
+                              color: AppColors.greyTone, width: 1),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: const BorderSide(
+                              color: AppColors.rusticSunset, width: 1.2),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: screenHeight * 0.035),
+                    SizedBox(
+                      width: screenWidth * 0.65,
+                      height: 45,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.rusticSunset,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          elevation: 2,
+                        ),
+                        onPressed: _login,
+                        child: _isLoading
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _buildDot(AppColors.greyTone),
+                                  SizedBox(width: screenWidth * 0.015),
+                                  _buildDot(Colors.white),
+                                  SizedBox(width: screenWidth * 0.015),
+                                  _buildDot(AppColors.greyTone),
+                                ],
+                              )
+                            : Text(
+                                "Log in",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: screenWidth * 0.04,
+                                  fontFamily: "PoppinsRegular",
+                                ),
+                              ),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.08),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextField(
-                    style: const TextStyle(color: AppColors.rusticSunset),
-                    cursorColor: AppColors.rusticSunset,
-                    controller: _emailController,
-                    focusNode: _emailFocus,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(
-                        Icons.call,
-                        color: _emailFocus.hasFocus ||
-                                _emailController.text.isNotEmpty
-                            ? AppColors.rusticSunset
-                            : AppColors.greyTone,
-                      ),
-                      hintText: "Email or Phone number",
-                      hintStyle: const TextStyle(
-                        color: AppColors.greyTone,
-                        fontFamily: "PoppinsRegular",
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(
-                            color: AppColors.greyTone, width: 1),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(
-                            color: AppColors.rusticSunset, width: 1.2),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: screenHeight * 0.025),
-                  TextField(
-                    style: const TextStyle(color: AppColors.rusticSunset),
-                    cursorColor: AppColors.rusticSunset,
-                    controller: _passwordController,
-                    focusNode: _passwordFocus,
-                    obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(
-                        Icons.lock_outline,
-                        color: _passwordFocus.hasFocus ||
-                                _passwordController.text.isNotEmpty
-                            ? AppColors.rusticSunset
-                            : AppColors.greyTone,
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                          color: _passwordFocus.hasFocus ||
-                                  _passwordController.text.isNotEmpty
-                              ? AppColors.rusticSunset
-                              : AppColors.greyTone,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
-                      hintText: "Password",
-                      hintStyle: const TextStyle(
-                        color: AppColors.greyTone,
-                        fontFamily: "PoppinsRegular",
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(
-                            color: AppColors.greyTone, width: 1),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(
-                            color: AppColors.rusticSunset, width: 1.2),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: screenHeight * 0.035),
-                  SizedBox(
-                    width: screenWidth * 0.65,
-                    height: 45,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.rusticSunset,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        elevation: 2,
-                      ),
-                      onPressed: _login,
-                      child: _isLoading
-                          ? Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                _buildDot(AppColors.greyTone),
-                                SizedBox(width: screenWidth * 0.015),
-                                _buildDot(Colors.white),
-                                SizedBox(width: screenWidth * 0.015),
-                                _buildDot(AppColors.greyTone),
-                              ],
-                            )
-                          : Text(
-                              "Log in",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: screenWidth * 0.04,
-                                fontFamily: "PoppinsRegular",
-                              ),
-                            ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

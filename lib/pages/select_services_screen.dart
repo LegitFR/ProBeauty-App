@@ -49,111 +49,115 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
             (s) => (s["category"] ?? "Featured").toString() == selectedCategory)
         .toList();
 
-    return Scaffold(
-      backgroundColor: AppColors.softIvory,
-      appBar: AppBar(
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
         backgroundColor: AppColors.softIvory,
-        elevation: 0,
-        leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-        ),
-        centerTitle: true,
-        title: const Text(
-          "Select Services",
-          style: TextStyle(
-            fontFamily: "PoppinsSemiBold",
-            color: Colors.black,
+        appBar: AppBar(
+          backgroundColor: AppColors.softIvory,
+          elevation: 0,
+          leading: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          ),
+          centerTitle: true,
+          title: const Text(
+            "Select Services",
+            style: TextStyle(
+              fontFamily: "PoppinsSemiBold",
+              color: Colors.black,
+            ),
           ),
         ),
-      ),
 
-      // BODY
-      body: Column(
-        children: [
-          // ----------- CATEGORY TABS -----------
-          Container(
-            height: 50,
-            padding: const EdgeInsets.only(left: 16, top: 6),
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: categories.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 16),
-              itemBuilder: (_, index) {
-                final cat = categories[index];
-                final isActive = selectedCategory == cat;
+        // BODY
+        body: Column(
+          children: [
+            // ----------- CATEGORY TABS -----------
+            Container(
+              height: 50,
+              padding: const EdgeInsets.only(left: 16, top: 6),
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: categories.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 16),
+                itemBuilder: (_, index) {
+                  final cat = categories[index];
+                  final isActive = selectedCategory == cat;
 
-                return GestureDetector(
-                  onTap: () => setState(() => selectedCategory = cat),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isActive ? Colors.black : Colors.transparent,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      cat,
-                      style: TextStyle(
-                        fontFamily: "PoppinsSemiBold",
-                        fontSize: 14,
-                        color: isActive ? AppColors.softIvory : Colors.black87,
+                  return GestureDetector(
+                    onTap: () => setState(() => selectedCategory = cat),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isActive ? Colors.black : Colors.transparent,
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-
-          const Divider(thickness: 1),
-
-          // ----------- SERVICE LIST -----------
-          Expanded(
-            child: ListView.separated(
-              itemCount: filtered.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (_, index) {
-                return _serviceTile(filtered[index]);
-              },
-            ),
-          ),
-        ],
-      ),
-
-      // ----------- CONTINUE BUTTON -----------
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        child: ElevatedButton(
-          onPressed: selectedServices.isEmpty
-              ? null
-              : () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => SelectProfessionalScreen(
-                        salonId: widget.salonId,
-                        salonName: widget.salonName,
-                        rating: widget.rating,
-                        staffList: widget.salonStaffList,
-                        selectedServices: selectedServices,
+                      child: Text(
+                        cat,
+                        style: TextStyle(
+                          fontFamily: "PoppinsSemiBold",
+                          fontSize: 14,
+                          color:
+                              isActive ? AppColors.softIvory : Colors.black87,
+                        ),
                       ),
                     ),
                   );
                 },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.rusticSunset,
-            disabledBackgroundColor: Colors.grey,
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-          child: const Text(
-            "Continue",
-            style: TextStyle(
-                fontFamily: "PoppinsSemiBold",
-                fontSize: 14,
-                color: Colors.white),
+              ),
+            ),
+
+            const Divider(thickness: 1),
+
+            // ----------- SERVICE LIST -----------
+            Expanded(
+              child: ListView.separated(
+                itemCount: filtered.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (_, index) {
+                  return _serviceTile(filtered[index]);
+                },
+              ),
+            ),
+          ],
+        ),
+
+        // ----------- CONTINUE BUTTON -----------
+        bottomNavigationBar: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          child: ElevatedButton(
+            onPressed: selectedServices.isEmpty
+                ? null
+                : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => SelectProfessionalScreen(
+                          salonId: widget.salonId,
+                          salonName: widget.salonName,
+                          rating: widget.rating,
+                          staffList: widget.salonStaffList,
+                          selectedServices: selectedServices,
+                        ),
+                      ),
+                    );
+                  },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.rusticSunset,
+              disabledBackgroundColor: Colors.grey,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text(
+              "Continue",
+              style: TextStyle(
+                  fontFamily: "PoppinsSemiBold",
+                  fontSize: 14,
+                  color: Colors.white),
+            ),
           ),
         ),
       ),

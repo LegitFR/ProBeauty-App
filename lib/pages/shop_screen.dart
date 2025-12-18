@@ -110,123 +110,126 @@ class _ShopScreenState extends State<ShopScreen> {
     final width = size.width;
     final height = size.height;
 
-    return Scaffold(
-      backgroundColor: AppColors.softIvory,
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(width * 0.035),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Search bar
-                Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: width * 0.035, vertical: height * 0.01),
-                  decoration: BoxDecoration(
-                    color: AppColors.softIvory,
-                    borderRadius: BorderRadius.circular(14),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 6,
-                        offset: const Offset(2, 3),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.search, color: Colors.grey[600], size: 22),
-                      SizedBox(width: width * 0.025),
-                      const Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: "Search",
-                            border: InputBorder.none,
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
+        backgroundColor: AppColors.softIvory,
+        body: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.all(width * 0.035),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Search bar
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: width * 0.035, vertical: height * 0.01),
+                    decoration: BoxDecoration(
+                      color: AppColors.softIvory,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 6,
+                          offset: const Offset(2, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.search, color: Colors.grey[600], size: 22),
+                        SizedBox(width: width * 0.025),
+                        const Expanded(
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: "Search",
+                              border: InputBorder.none,
+                            ),
                           ),
                         ),
-                      ),
-                      Image.asset(
-                        'assets/images/icons/mic.png',
-                        width: 20,
-                        height: 20,
-                      ),
-                    ],
+                        Image.asset(
+                          'assets/images/icons/mic.png',
+                          width: 20,
+                          height: 20,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
 
-                SizedBox(height: height * 0.025),
+                  SizedBox(height: height * 0.025),
 
-                // Categories
-                SizedBox(
-                  height: height * 0.11,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
+                  // Categories
+                  SizedBox(
+                    height: height * 0.11,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        categoryItem(
+                            'assets/images/shop/shampoo.png', 'Shampoo', width),
+                        categoryItem('assets/images/shop/haircolor.png',
+                            'Hair Colour', width),
+                        categoryItem('assets/images/shop/conditioner.png',
+                            'Conditioner', width),
+                        categoryItem('assets/images/shop/hairoil.png',
+                            'Hair Oil', width),
+                      ],
+                    ),
+                  ),
+
+                  SizedBox(height: height * 0.025),
+
+                  // Carousel banner
+                  CarouselSlider(
+                    options: CarouselOptions(
+                      height: height * 0.20,
+                      autoPlay: true,
+                      enlargeCenterPage: true,
+                    ),
+                    items: [
+                      'assets/images/shop/banner1.png',
+                      'assets/images/shop/banner2.png',
+                      'assets/images/shop/banner3.png',
+                    ].map((imagePath) {
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(18),
+                        child: Image.asset(
+                          imagePath,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+
+                  SizedBox(height: height * 0.035),
+
+                  // Title
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      categoryItem(
-                          'assets/images/shop/shampoo.png', 'Shampoo', width),
-                      categoryItem('assets/images/shop/haircolor.png',
-                          'Hair Colour', width),
-                      categoryItem('assets/images/shop/conditioner.png',
-                          'Conditioner', width),
-                      categoryItem(
-                          'assets/images/shop/hairoil.png', 'Hair Oil', width),
+                      Text(
+                        "Special offers",
+                        style: TextStyle(
+                          fontFamily: "PoppinsSemiBold",
+                          fontSize: width * 0.045,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: _fetchProducts,
+                        icon: const Icon(Icons.refresh),
+                      ),
                     ],
                   ),
-                ),
 
-                SizedBox(height: height * 0.025),
+                  SizedBox(height: height * 0.015),
 
-                // Carousel banner
-                CarouselSlider(
-                  options: CarouselOptions(
-                    height: height * 0.20,
-                    autoPlay: true,
-                    enlargeCenterPage: true,
+                  SizedBox(
+                    height: height * 0.32,
+                    child: _buildSpecialOffersList(width),
                   ),
-                  items: [
-                    'assets/images/shop/banner1.png',
-                    'assets/images/shop/banner2.png',
-                    'assets/images/shop/banner3.png',
-                  ].map((imagePath) {
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(18),
-                      child: Image.asset(
-                        imagePath,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
-                    );
-                  }).toList(),
-                ),
-
-                SizedBox(height: height * 0.035),
-
-                // Title
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Special offers",
-                      style: TextStyle(
-                        fontFamily: "PoppinsSemiBold",
-                        fontSize: width * 0.045,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: _fetchProducts,
-                      icon: Icon(Icons.refresh),
-                    ),
-                  ],
-                ),
-
-                SizedBox(height: height * 0.015),
-
-                SizedBox(
-                  height: height * 0.32,
-                  child: _buildSpecialOffersList(width),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -238,8 +241,8 @@ class _ShopScreenState extends State<ShopScreen> {
   Widget _buildSpecialOffersList(double width) {
     if (_loading) return const Center(child: CircularProgressIndicator());
     if (_error != null)
-      return Text(_error!, style: TextStyle(color: Colors.red));
-    if (_products.isEmpty) return Text("No products available.");
+      return Text(_error!, style: const TextStyle(color: Colors.red));
+    if (_products.isEmpty) return const Text("No products available.");
 
     return ListView.builder(
       scrollDirection: Axis.horizontal,
@@ -286,7 +289,7 @@ class _ShopScreenState extends State<ShopScreen> {
             backgroundColor: Colors.white,
             backgroundImage: AssetImage(image),
           ),
-          SizedBox(height: 6),
+          const SizedBox(height: 6),
           Text(title),
         ],
       ),
@@ -311,7 +314,7 @@ class _ShopScreenState extends State<ShopScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
-          BoxShadow(blurRadius: 8, color: Colors.black12),
+          const BoxShadow(blurRadius: 8, color: Colors.black12),
         ],
       ),
       child: Column(
@@ -324,45 +327,45 @@ class _ShopScreenState extends State<ShopScreen> {
             child: imageUrl != null
                 ? Image.network(imageUrl,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => Icon(Icons.error))
-                : Icon(Icons.image, size: 50),
+                    errorBuilder: (_, __, ___) => const Icon(Icons.error))
+                : const Icon(Icons.image, size: 50),
           ),
 
           // text info
           Padding(
-            padding: EdgeInsets.all(10),
+            padding: const EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(brand,
-                    style: TextStyle(
+                    style: const TextStyle(
                         color: AppColors.rusticSunset,
                         fontWeight: FontWeight.w600)),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 Text(productName, maxLines: 2, overflow: TextOverflow.ellipsis),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 Text(price,
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold)),
               ],
             ),
           ),
 
-          Spacer(),
+          const Spacer(),
 
           // Button
           Container(
-            padding: EdgeInsets.all(12),
-            decoration: BoxDecoration(
+            padding: const EdgeInsets.all(12),
+            decoration: const BoxDecoration(
               color: Colors.black,
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(14),
                 bottomRight: Radius.circular(14),
               ),
             ),
-            child: Center(
+            child: const Center(
               child: Text(
-                "Select Size",
+                "Shop",
                 style: TextStyle(color: Colors.white),
               ),
             ),
@@ -374,4 +377,3 @@ class _ShopScreenState extends State<ShopScreen> {
 }
 
 // ---------------- Product Model ----------------
-

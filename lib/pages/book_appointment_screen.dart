@@ -194,116 +194,120 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.softIvory,
-      appBar: AppBar(
-        elevation: 0,
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
         backgroundColor: AppColors.softIvory,
-        leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: AppColors.softIvory,
+          leading: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          ),
+          centerTitle: true,
+          title: const Text(
+            "Book an appointment",
+            style:
+                TextStyle(fontFamily: "PoppinsSemiBold", color: Colors.black),
+          ),
         ),
-        centerTitle: true,
-        title: const Text(
-          "Book an appointment",
-          style: TextStyle(fontFamily: "PoppinsSemiBold", color: Colors.black),
-        ),
-      ),
-      body: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Text(
-                DateFormat("MMMM yyyy").format(DateTime.now()),
-                style: const TextStyle(
-                  fontFamily: "PoppinsSemiBold",
-                  fontSize: 20,
-                ),
-              ),
-            ),
-            _buildCalendar(),
-            const Divider(thickness: 1),
-            SizedBox(
-              height: 70,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                itemCount: availableTimes.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (_, i) {
-                  final t = availableTimes[i];
-                  final selected = t == selectedTime;
-
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() => selectedTime = t);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => FirstVisitScreen(
-                            salonId: widget.salonId,
-                            salonName: widget.salonName,
-                            staff: widget.staff,
-                            rating: widget.rating,
-                            date: selectedDate,
-                            time: t,
-                            selectedServices: widget.selectedServices,
-                          ),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(vertical: 12),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        border: Border.all(color: Colors.black),
-                        color: selected
-                            ? AppColors.rusticSunset
-                            : AppColors.softIvory,
-                      ),
-                      child: Text(
-                        displayTime(t),
-                        style: TextStyle(
-                          fontFamily: "PoppinsSemiBold",
-                          color: selected ? Colors.white : Colors.black,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 18),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: widget.selectedServices
-                    .map((s) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _serviceTile(s),
-                        ))
-                    .toList(),
-              ),
-            ),
-            GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        body: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(20),
                 child: Text(
-                  "+ Add another service",
-                  style: TextStyle(
-                    color: AppColors.rusticSunset,
+                  DateFormat("MMMM yyyy").format(DateTime.now()),
+                  style: const TextStyle(
                     fontFamily: "PoppinsSemiBold",
+                    fontSize: 20,
                   ),
                 ),
               ),
-            ),
-          ],
+              _buildCalendar(),
+              const Divider(thickness: 1),
+              SizedBox(
+                height: 70,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  itemCount: availableTimes.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  itemBuilder: (_, i) {
+                    final t = availableTimes[i];
+                    final selected = t == selectedTime;
+
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() => selectedTime = t);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => FirstVisitScreen(
+                              salonId: widget.salonId,
+                              salonName: widget.salonName,
+                              staff: widget.staff,
+                              rating: widget.rating,
+                              date: selectedDate,
+                              time: t,
+                              selectedServices: widget.selectedServices,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          border: Border.all(color: Colors.black),
+                          color: selected
+                              ? AppColors.rusticSunset
+                              : AppColors.softIvory,
+                        ),
+                        child: Text(
+                          displayTime(t),
+                          style: TextStyle(
+                            fontFamily: "PoppinsSemiBold",
+                            color: selected ? Colors.white : Colors.black,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 18),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  children: widget.selectedServices
+                      .map((s) => Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _serviceTile(s),
+                          ))
+                      .toList(),
+                ),
+              ),
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Text(
+                    "+ Add another service",
+                    style: TextStyle(
+                      color: AppColors.rusticSunset,
+                      fontFamily: "PoppinsSemiBold",
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

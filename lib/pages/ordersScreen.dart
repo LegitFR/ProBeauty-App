@@ -25,113 +25,117 @@ class _OrdersScreenState extends State<OrdersScreen> {
   Widget build(BuildContext context) {
     final ordersProvider = context.watch<OrderProvider>();
 
-    return Scaffold(
-      backgroundColor: AppColors.softIvory,
-      appBar: AppBar(
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
         backgroundColor: AppColors.softIvory,
-        elevation: 0,
-        leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-        ),
-        centerTitle: true,
-        title: const Text(
-          "Orders",
-          style: TextStyle(
-            fontFamily: "PoppinsSemiBold",
-            color: Colors.black,
-            fontSize: 20,
+        appBar: AppBar(
+          backgroundColor: AppColors.softIvory,
+          elevation: 0,
+          leading: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
           ),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: Stack(
-              children: [
-                SvgPicture.asset(
-                  "assets/images/icons/cart_icon.svg",
-                  width: 26,
-                  colorFilter: const ColorFilter.mode(
-                    Colors.black,
-                    BlendMode.srcIn,
-                  ),
-                ),
-                Positioned(
-                  right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(3),
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.rusticSunset,
+          centerTitle: true,
+          title: const Text(
+            "Orders",
+            style: TextStyle(
+              fontFamily: "PoppinsSemiBold",
+              color: Colors.black,
+              fontSize: 20,
+            ),
+          ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 20),
+              child: Stack(
+                children: [
+                  SvgPicture.asset(
+                    "assets/images/icons/cart_icon.svg",
+                    width: 26,
+                    colorFilter: const ColorFilter.mode(
+                      Colors.black,
+                      BlendMode.srcIn,
                     ),
-                    child: const Text(
-                      "5",
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Colors.white,
-                        fontFamily: "PoppinsSemiBold",
+                  ),
+                  Positioned(
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.rusticSunset,
+                      ),
+                      child: const Text(
+                        "5",
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.white,
+                          fontFamily: "PoppinsSemiBold",
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child: Text(
-                "Active Orders",
-                style: TextStyle(
-                  fontFamily: "PoppinsSemiBold",
-                  fontSize: 16,
-                  color: Colors.black,
-                ),
+                ],
               ),
             ),
-            if (ordersProvider.isLoading)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.only(top: 40),
-                  child: CircularProgressIndicator(),
-                ),
-              )
-            else if (ordersProvider.error != null)
-              Padding(
-                padding: const EdgeInsets.only(left: 20, top: 10),
-                child: Text(
-                  ordersProvider.error!,
-                  style: const TextStyle(
-                      color: Colors.red,
-                      fontFamily: "PoppinsRegular",
-                      fontSize: 14),
-                ),
-              )
-            else if (ordersProvider.orders.isEmpty)
+          ],
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               const Padding(
-                padding: EdgeInsets.only(left: 20, top: 10),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 child: Text(
-                  "No active orders",
+                  "Active Orders",
                   style: TextStyle(
-                    fontFamily: "PoppinsRegular",
-                    fontSize: 14,
+                    fontFamily: "PoppinsSemiBold",
+                    fontSize: 16,
                     color: Colors.black,
                   ),
                 ),
-              )
-            else
-              Column(
-                children: [
-                  for (final order in ordersProvider.orders) _orderCard(order),
-                ],
               ),
-            const SizedBox(height: 25),
-          ],
+              if (ordersProvider.isLoading)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 40),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              else if (ordersProvider.error != null)
+                Padding(
+                  padding: const EdgeInsets.only(left: 20, top: 10),
+                  child: Text(
+                    ordersProvider.error!,
+                    style: const TextStyle(
+                        color: Colors.red,
+                        fontFamily: "PoppinsRegular",
+                        fontSize: 14),
+                  ),
+                )
+              else if (ordersProvider.orders.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.only(left: 20, top: 10),
+                  child: Text(
+                    "No active orders",
+                    style: TextStyle(
+                      fontFamily: "PoppinsRegular",
+                      fontSize: 14,
+                      color: Colors.black,
+                    ),
+                  ),
+                )
+              else
+                Column(
+                  children: [
+                    for (final order in ordersProvider.orders)
+                      _orderCard(order),
+                  ],
+                ),
+              const SizedBox(height: 25),
+            ],
+          ),
         ),
       ),
     );

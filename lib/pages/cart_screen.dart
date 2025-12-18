@@ -30,114 +30,115 @@ class _CartScreenState extends State<CartScreen> {
     double totalAmount = cart.subtotal;
     String totalText = "₹${totalAmount.toStringAsFixed(0)}";
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "My Cart",
-          style: TextStyle(fontFamily: "PoppinsSemiBold"),
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            "My Cart",
+            style: TextStyle(fontFamily: "PoppinsSemiBold"),
+          ),
+          leading: GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Icon(
+              Icons.arrow_back_ios,
+            ),
+          ),
+          centerTitle: true,
+          backgroundColor: AppColors.softIvory,
         ),
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: const Icon(
-            Icons.arrow_back_ios,
+        backgroundColor: AppColors.softIvory,
+
+        // ======================
+        // FIXED BOTTOM BAR
+        // ======================
+        bottomNavigationBar: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          decoration: const BoxDecoration(
+            color: AppColors.softIvory,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    totalText,
+                    style: const TextStyle(
+                      fontFamily: "PoppinsSemiBold",
+                      fontSize: 22,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  const Text(
+                    "Inclusive Of All Taxes",
+                    style: TextStyle(
+                      fontFamily: "PoppinsRegular",
+                      fontSize: 12,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ],
+              ),
+              ElevatedButton(
+                onPressed: cart.items.isEmpty
+                    ? null
+                    : () async {
+                        final msg = await cart.checkout();
+
+                        if (msg == null) {
+                          // SUCCESS
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Order placed successfully!"),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          }
+                        } else {
+                          // ERROR
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(msg),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.rusticSunset,
+                  disabledBackgroundColor: Colors.grey.shade400,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  "Checkout",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: "PoppinsSemiBold",
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        centerTitle: true,
-        backgroundColor: AppColors.softIvory,
-      ),
-      backgroundColor: AppColors.softIvory,
 
-      // ======================
-      // FIXED BOTTOM BAR
-      // ======================
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        decoration: const BoxDecoration(
-          color: AppColors.softIvory,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  totalText,
-                  style: const TextStyle(
-                    fontFamily: "PoppinsSemiBold",
-                    fontSize: 22,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                const Text(
-                  "Inclusive Of All Taxes",
-                  style: TextStyle(
-                    fontFamily: "PoppinsRegular",
-                    fontSize: 12,
-                    color: Colors.black54,
-                  ),
-                ),
-              ],
-            ),
-            ElevatedButton(
-              onPressed: cart.items.isEmpty
-                  ? null
-                  : () async {
-                      final msg = await cart.checkout();
-
-                      if (msg == null) {
-                        // SUCCESS
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Order placed successfully!"),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                        }
-                      } else {
-                        // ERROR
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(msg),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
-                      }
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.rusticSunset,
-                disabledBackgroundColor: Colors.grey.shade400,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text(
-                "Checkout",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: "PoppinsSemiBold",
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-
-      // ======================
-      // MAIN CONTENT (Scrollable)
-      // ======================
-      body: SafeArea(
-        child: LayoutBuilder(
+        // ======================
+        // MAIN CONTENT (Scrollable)
+        // ======================
+        body: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),

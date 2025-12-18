@@ -190,197 +190,200 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
   // -------------------------------------------------------
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5ECE3),
-      appBar: AppBar(
-        centerTitle: true,
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
         backgroundColor: const Color(0xFFF5ECE3),
-        elevation: 0,
-        title: const Text(
-          "Saved addresses",
-          style: TextStyle(
-            fontFamily: "PoppinsSemiBold",
-            color: Colors.black,
+        appBar: AppBar(
+          centerTitle: true,
+          backgroundColor: const Color(0xFFF5ECE3),
+          elevation: 0,
+          title: const Text(
+            "Saved addresses",
+            style: TextStyle(
+              fontFamily: "PoppinsSemiBold",
+              color: Colors.black,
+            ),
+          ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () => Navigator.pop(context),
           ),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ---- HOME TITLE ----
-            Row(
-              children: [
-                SvgPicture.asset(
-                  "assets/images/icons/home_icon.svg",
-                  height: 14,
-                  width: 14,
-                  colorFilter: const ColorFilter.mode(
-                    AppColors.rusticSunset,
-                    BlendMode.srcIn,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                const Text(
-                  "Home",
-                  style: TextStyle(
-                    fontFamily: "PoppinsRegular",
-                    fontSize: 14,
-                    color: AppColors.rusticSunset,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 10),
-
-            // -------------------------------------------------
-            // DEFAULT ADDRESS CARD
-            // -------------------------------------------------
-            if (defaultAddress != null)
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFA7D4F), Color(0xFFC64414)],
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SvgPicture.asset(
-                      "assets/images/icons/location_icon.svg",
-                      height: 15,
-                      colorFilter:
-                          const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ---- HOME TITLE ----
+              Row(
+                children: [
+                  SvgPicture.asset(
+                    "assets/images/icons/home_icon.svg",
+                    height: 14,
+                    width: 14,
+                    colorFilter: const ColorFilter.mode(
+                      AppColors.rusticSunset,
+                      BlendMode.srcIn,
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        "${defaultAddress!["addressLine1"]},\n"
-                        "${defaultAddress!["addressLine2"]},\n"
-                        "${defaultAddress!["city"]} - ${defaultAddress!["postalCode"]}",
-                        style: const TextStyle(
-                          fontFamily: "PoppinsRegular",
-                          fontSize: 13,
-                          color: Colors.white,
-                        ),
-                      ),
+                  ),
+                  const SizedBox(width: 6),
+                  const Text(
+                    "Home",
+                    style: TextStyle(
+                      fontFamily: "PoppinsRegular",
+                      fontSize: 14,
+                      color: AppColors.rusticSunset,
                     ),
-
-                    // EDIT BUTTON
-                    GestureDetector(
-                      onTap: _enterEditMode,
-                      child: SvgPicture.asset(
-                        "assets/images/icons/edit_icon.svg",
-                        height: 15,
-                        colorFilter: const ColorFilter.mode(
-                          Colors.white,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    )
-                  ],
-                ),
+                  ),
+                ],
               ),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 10),
 
-            // ---------------- ADD NEW ADDRESS ----------------
-            Row(
-              children: [
-                SvgPicture.asset(
-                  "assets/images/icons/add_new_address_icon.svg",
-                  height: 14,
-                  width: 14,
-                  colorFilter: const ColorFilter.mode(
-                    AppColors.rusticSunset,
-                    BlendMode.srcIn,
+              // -------------------------------------------------
+              // DEFAULT ADDRESS CARD
+              // -------------------------------------------------
+              if (defaultAddress != null)
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFA7D4F), Color(0xFFC64414)],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ),
-                const SizedBox(width: 6),
-                const Text(
-                  "Add new address",
-                  style: TextStyle(
-                    fontFamily: "PoppinsRegular",
-                    fontSize: 14,
-                    color: AppColors.rusticSunset,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-            // FORM FIELDS
-            _labelField("House No & Floor *", houseController),
-            const SizedBox(height: 15),
-            _labelField("Building Name & Block no*", buildingController),
-            const SizedBox(height: 15),
-            _labelField("Area & Landmark *", landmarkController),
-            const SizedBox(height: 15),
-            _labelField("City *", cityController),
-            const SizedBox(height: 15),
-            _labelField("District *", districtController),
-            const SizedBox(height: 15),
-            _labelField("Pincode*", pincodeController),
-
-            const SizedBox(height: 20),
-            const Text(
-              "Save this address as",
-              style: TextStyle(
-                  fontFamily: "PoppinsRegular",
-                  fontSize: 14,
-                  color: Colors.black54),
-            ),
-            const SizedBox(height: 10),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _typeChip("Home"),
-                _typeChip("Work"),
-                _typeChip("Others"),
-              ],
-            ),
-
-            const SizedBox(height: 26),
-
-            // ---------------- SAVE / UPDATE BUTTON ----------------
-            GestureDetector(
-              onTap: isLoading ? null : _saveOrUpdateAddress,
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFA7D4F), Color(0xFFC64414)],
-                  ),
-                ),
-                child: Center(
-                  child: isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : Text(
-                          isEditMode ? "Update Address" : "Save",
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SvgPicture.asset(
+                        "assets/images/icons/location_icon.svg",
+                        height: 15,
+                        colorFilter: const ColorFilter.mode(
+                            Colors.white, BlendMode.srcIn),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          "${defaultAddress!["addressLine1"]},\n"
+                          "${defaultAddress!["addressLine2"]},\n"
+                          "${defaultAddress!["city"]} - ${defaultAddress!["postalCode"]}",
                           style: const TextStyle(
-                            fontFamily: "PoppinsSemiBold",
-                            fontSize: 16,
+                            fontFamily: "PoppinsRegular",
+                            fontSize: 13,
                             color: Colors.white,
                           ),
                         ),
+                      ),
+
+                      // EDIT BUTTON
+                      GestureDetector(
+                        onTap: _enterEditMode,
+                        child: SvgPicture.asset(
+                          "assets/images/icons/edit_icon.svg",
+                          height: 15,
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+
+              const SizedBox(height: 20),
+
+              // ---------------- ADD NEW ADDRESS ----------------
+              Row(
+                children: [
+                  SvgPicture.asset(
+                    "assets/images/icons/add_new_address_icon.svg",
+                    height: 14,
+                    width: 14,
+                    colorFilter: const ColorFilter.mode(
+                      AppColors.rusticSunset,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  const Text(
+                    "Add new address",
+                    style: TextStyle(
+                      fontFamily: "PoppinsRegular",
+                      fontSize: 14,
+                      color: AppColors.rusticSunset,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              // FORM FIELDS
+              _labelField("House No & Floor *", houseController),
+              const SizedBox(height: 15),
+              _labelField("Building Name & Block no*", buildingController),
+              const SizedBox(height: 15),
+              _labelField("Area & Landmark *", landmarkController),
+              const SizedBox(height: 15),
+              _labelField("City *", cityController),
+              const SizedBox(height: 15),
+              _labelField("District *", districtController),
+              const SizedBox(height: 15),
+              _labelField("Pincode*", pincodeController),
+
+              const SizedBox(height: 20),
+              const Text(
+                "Save this address as",
+                style: TextStyle(
+                    fontFamily: "PoppinsRegular",
+                    fontSize: 14,
+                    color: Colors.black54),
+              ),
+              const SizedBox(height: 10),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _typeChip("Home"),
+                  _typeChip("Work"),
+                  _typeChip("Others"),
+                ],
+              ),
+
+              const SizedBox(height: 26),
+
+              // ---------------- SAVE / UPDATE BUTTON ----------------
+              GestureDetector(
+                onTap: isLoading ? null : _saveOrUpdateAddress,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFA7D4F), Color(0xFFC64414)],
+                    ),
+                  ),
+                  child: Center(
+                    child: isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            isEditMode ? "Update Address" : "Save",
+                            style: const TextStyle(
+                              fontFamily: "PoppinsSemiBold",
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                  ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 30),
-          ],
+              const SizedBox(height: 30),
+            ],
+          ),
         ),
       ),
     );

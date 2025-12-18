@@ -178,138 +178,141 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
 
-    return Scaffold(
-      backgroundColor: AppColors.softIvory,
-      appBar: AppBar(
-        leading: Container(),
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
         backgroundColor: AppColors.softIvory,
-        leadingWidth: 0,
-        elevation: 0,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding:
-                  EdgeInsets.symmetric(horizontal: width * 0.045, vertical: 12),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: AppColors.softIvory,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 8,
-                        offset: const Offset(0, 6),
-                      )
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      SvgPicture.asset(
-                        "assets/images/icons/search_icon.svg",
-                        height: 22,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.serviceText ?? "Haircut & styling",
-                              style: const TextStyle(
-                                fontFamily: "PoppinsMedium",
-                                fontSize: 15,
-                                color: Colors.black,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              "${widget.dateText ?? ''} | ${widget.timeText ?? ''} | ${widget.locationText ?? ''}",
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontFamily: "PoppinsRegular",
-                                fontSize: 12.5,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ],
+        appBar: AppBar(
+          leading: Container(),
+          backgroundColor: AppColors.softIvory,
+          leadingWidth: 0,
+          elevation: 0,
+        ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: width * 0.045, vertical: 12),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: AppColors.softIvory,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 8,
+                          offset: const Offset(0, 6),
+                        )
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        SvgPicture.asset(
+                          "assets/images/icons/search_icon.svg",
+                          height: 22,
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      SvgPicture.asset(
-                        "assets/images/icons/audio_icon.svg",
-                        height: 22,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: width * 0.045),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _filterIcon(),
-                    const SizedBox(width: 10),
-                    _filterChip("Sort"),
-                    const SizedBox(width: 10),
-                    _filterChip("Max price"),
-                    const SizedBox(width: 10),
-                    _filterChip("Venue type"),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: _initialLoading
-                  ? _buildSkeletonList()
-                  : _error != null
-                      ? _buildError()
-                      : RefreshIndicator(
-                          onRefresh: _refreshSearch,
-                          child: ListView.builder(
-                            controller: _scrollController,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: width * 0.045, vertical: 8),
-                            itemCount: salons.length + (_hasMore ? 1 : 0),
-                            itemBuilder: (context, index) {
-                              if (index < salons.length) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 18),
-                                  child: SalonCard(
-                                    salon: salons[index],
-                                    dateText: widget.dateText,
-                                    timeText: widget.timeText,
-                                  ),
-                                );
-                              } else {
-                                return const Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(12),
-                                    child: SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.serviceText ?? "Haircut & styling",
+                                style: const TextStyle(
+                                  fontFamily: "PoppinsMedium",
+                                  fontSize: 15,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                "${widget.dateText ?? ''} | ${widget.timeText ?? ''} | ${widget.locationText ?? ''}",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontFamily: "PoppinsRegular",
+                                  fontSize: 12.5,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-            ),
-          ],
+                        const SizedBox(width: 8),
+                        SvgPicture.asset(
+                          "assets/images/icons/audio_icon.svg",
+                          height: 22,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: width * 0.045),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _filterIcon(),
+                      const SizedBox(width: 10),
+                      _filterChip("Sort"),
+                      const SizedBox(width: 10),
+                      _filterChip("Max price"),
+                      const SizedBox(width: 10),
+                      _filterChip("Venue type"),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: _initialLoading
+                    ? _buildSkeletonList()
+                    : _error != null
+                        ? _buildError()
+                        : RefreshIndicator(
+                            onRefresh: _refreshSearch,
+                            child: ListView.builder(
+                              controller: _scrollController,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: width * 0.045, vertical: 8),
+                              itemCount: salons.length + (_hasMore ? 1 : 0),
+                              itemBuilder: (context, index) {
+                                if (index < salons.length) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 18),
+                                    child: SalonCard(
+                                      salon: salons[index],
+                                      dateText: widget.dateText,
+                                      timeText: widget.timeText,
+                                    ),
+                                  );
+                                } else {
+                                  return const Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(12),
+                                      child: SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+              ),
+            ],
+          ),
         ),
       ),
     );
