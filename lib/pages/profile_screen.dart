@@ -152,7 +152,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 25),
 
               // Menu items
-              _buildMenuItem(Icons.favorite_border, 'Favourites', () {}),
+              _buildMenuItem(Icons.favorite_border, 'Favourites', () {
+                Navigator.pushNamed(context, "/favourites");
+              }),
               _buildMenuItem(Icons.location_on_outlined, 'Saved addresses', () {
                 Navigator.pushNamed(context, "/saved_address");
               }),

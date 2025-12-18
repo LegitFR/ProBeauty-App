@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import 'package:probeauty_app/pages/first_visit_screen.dart';
+import 'package:probeauty_app/pages/favourites_screen.dart';
 import 'package:probeauty_app/pages/ordersScreen.dart';
 import 'package:probeauty_app/pages/appointment_info.dart';
 import 'package:probeauty_app/pages/cart_screen.dart';
@@ -92,6 +92,8 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(builder: (_) => const CartScreen());
           case '/orders':
             return MaterialPageRoute(builder: (_) => const OrdersScreen());
+          case "/favourites":
+            return MaterialPageRoute(builder: (_) => const FavouritesScreen());
         }
 
         // Fallback: main screen

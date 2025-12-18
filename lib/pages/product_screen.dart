@@ -35,11 +35,114 @@ class _ProductScreenState extends State<ProductScreen> {
 
   final String baseUrl = "https://probeauty-backend.onrender.com";
   bool _cartUpdating = false; // to prevent spamming requests
+  bool _favUpdating = false;
+  bool _isFavourited = false;
 
   @override
   void initState() {
     super.initState();
     _loadInitialCartQuantity();
+    _checkFavouriteStatus();
+  }
+
+  Future<void> _checkFavouriteStatus() async {
+    final productId = widget.product.id;
+    if (productId == null) return;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("accessToken");
+      if (token == null) return;
+
+      final url = Uri.parse("$baseUrl/api/v1/favourites/check/$productId");
+
+      final resp = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+
+      if (resp.statusCode == 200) {
+        final data = jsonDecode(resp.body);
+        final fav = data["data"]?["isFavourited"] ?? false;
+        if (mounted) setState(() => _isFavourited = fav);
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _toggleFavourite() async {
+    if (_favUpdating) return;
+
+    final productId = widget.product.id;
+    if (productId == null) return;
+
+    setState(() => _favUpdating = true);
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("accessToken");
+
+      if (token == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please login first")),
+        );
+        return;
+      }
+
+      http.Response resp;
+
+      if (_isFavourited) {
+        final url = Uri.parse("$baseUrl/api/v1/favourites/$productId");
+        resp = await http.delete(
+          url,
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+        );
+
+        if (resp.statusCode == 200) {
+          setState(() => _isFavourited = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Removed from favourites"),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        final url = Uri.parse("$baseUrl/api/v1/favourites");
+        resp = await http.post(
+          url,
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode({"productId": productId}),
+        );
+
+        if (resp.statusCode == 201) {
+          setState(() => _isFavourited = true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Added to favourites"),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+
+    setState(() => _favUpdating = false);
   }
 
   Future<void> _loadInitialCartQuantity() async {
@@ -341,7 +444,6 @@ class _ProductScreenState extends State<ProductScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Left: Price + "View price details"
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -508,24 +610,51 @@ class _ProductScreenState extends State<ProductScreen> {
                 SizedBox(height: height * 0.02),
 
                 // === Brand Name ===
-                Text(
-                  salonName,
-                  style: TextStyle(
-                    fontFamily: "PoppinsMedium",
-                    fontSize: width * 0.035,
-                    color: AppColors.rusticSunset,
-                  ),
-                ),
-                SizedBox(height: height * 0.005),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          salonName,
+                          style: TextStyle(
+                            fontFamily: "PoppinsMedium",
+                            fontSize: width * 0.035,
+                            color: AppColors.rusticSunset,
+                          ),
+                        ),
+                        SizedBox(height: height * 0.005),
 
-                // === Product Title ===
-                Text(
-                  product.title ?? "Product Name",
-                  style: TextStyle(
-                    fontFamily: "PoppinsMedium",
-                    fontSize: width * 0.038,
-                    color: Colors.black,
-                  ),
+                        // === Product Title ===
+                        Text(
+                          product.title ?? "Product Name",
+                          style: TextStyle(
+                            fontFamily: "PoppinsMedium",
+                            fontSize: width * 0.038,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                    GestureDetector(
+                      onTap: _toggleFavourite,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.black26),
+                          color: AppColors.softIvory,
+                        ),
+                        child: Icon(
+                          _isFavourited
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: _isFavourited ? Colors.red : Colors.black,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
 
                 SizedBox(height: height * 0.008),
