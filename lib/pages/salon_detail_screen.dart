@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:probeauty_app/pages/reviews_screen.dart';
 import 'package:probeauty_app/pages/select_services_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
@@ -378,9 +379,23 @@ class _TabButton extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        state?.setState(() {
-          state.selectedTab = index;
-        });
+        if (index == 1) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ReviewsScreen(
+                salonId: state!.widget.id,
+                salonName: state.widget.name,
+                rating: state.widget.rating,
+                totalReviews: state.widget.reviews,
+              ),
+            ),
+          );
+        } else {
+          state?.setState(() {
+            state.selectedTab = index;
+          });
+        }
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 18),
