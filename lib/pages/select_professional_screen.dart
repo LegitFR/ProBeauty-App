@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:probeauty_app/pages/book_appointment_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
-import 'book_appointment_screen.dart';
 
 class SelectProfessionalScreen extends StatelessWidget {
   final String salonId;
@@ -11,17 +11,15 @@ class SelectProfessionalScreen extends StatelessWidget {
 
   const SelectProfessionalScreen({
     super.key,
+    required this.salonId,
     required this.salonName,
     required this.rating,
     required this.staffList,
     required this.selectedServices,
-    required this.salonId,
   });
 
   @override
   Widget build(BuildContext context) {
-    print(selectedServices);
-
     return SafeArea(
       bottom: true,
       child: Scaffold(
@@ -42,22 +40,13 @@ class SelectProfessionalScreen extends StatelessWidget {
               fontSize: 18,
             ),
           ),
-          actions: [
-            GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: const Padding(
-                padding: EdgeInsets.only(right: 16.0),
-                child: Icon(Icons.close, color: Colors.black),
-              ),
-            )
-          ],
         ),
+
+        // ---------------- STAFF GRID ONLY ----------------
         body: Padding(
           padding: const EdgeInsets.all(16),
           child: GridView.builder(
-            itemCount: staffList.length + 1,
+            itemCount: staffList.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               mainAxisSpacing: 18,
@@ -65,35 +54,7 @@ class SelectProfessionalScreen extends StatelessWidget {
               childAspectRatio: 0.85,
             ),
             itemBuilder: (context, index) {
-              // -----------------------------------------------
-              // 1️⃣ ANY PROFESSIONAL CARD
-              // -----------------------------------------------
-              if (index == 0) {
-                return GestureDetector(
-                  onTap: () {
-                    Map<String, dynamic> anyStaff = staffList.first;
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => BookAppointmentScreen(
-                          salonId: salonId,
-                          salonName: salonName,
-                          rating: rating,
-                          staff: anyStaff,
-                          selectedServices: selectedServices,
-                        ),
-                      ),
-                    );
-                  },
-                  child: _anyProfessionalCard(),
-                );
-              }
-
-              // -----------------------------------------------
-              // 2️⃣ INDIVIDUAL STAFF CARD
-              // -----------------------------------------------
-              final Map<String, dynamic> staff = staffList[index - 1];
+              final staff = staffList[index];
 
               return GestureDetector(
                 onTap: () {
@@ -104,8 +65,8 @@ class SelectProfessionalScreen extends StatelessWidget {
                         salonId: salonId,
                         salonName: salonName,
                         rating: rating,
-                        staff: staff, // ONE STAFF OBJECT
-                        selectedServices: selectedServices, // FULL SERVICE LIST
+                        staff: staff,
+                        selectedServices: selectedServices,
                       ),
                     ),
                   );
@@ -119,88 +80,25 @@ class SelectProfessionalScreen extends StatelessWidget {
     );
   }
 
-  // -----------------------------------------------------
-  // ANY PROFESSIONAL UI
-  // -----------------------------------------------------
-  Widget _anyProfessionalCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.softIvory,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black, width: 2.5),
-      ),
-      child: const Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.group, size: 40, color: Colors.black),
-          SizedBox(height: 12),
-          Text(
-            "Any professional",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: "PoppinsSemiBold",
-              fontSize: 15,
-            ),
-          ),
-          SizedBox(height: 4),
-          Text(
-            "Maximum availability",
-            style: TextStyle(
-              fontFamily: "PoppinsRegular",
-              fontSize: 13,
-              color: Colors.black,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // -----------------------------------------------------
-  // INDIVIDUAL STAFF CARD UI
-  // -----------------------------------------------------
+  // ---------------- STAFF CARD UI ----------------
   Widget _professionalCard(Map<String, dynamic> staff) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.softIvory,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.black, width: 2.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 6,
-            offset: const Offset(0, 4),
-          )
-        ],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.black12,
-            ),
-            child: const Icon(Icons.person, size: 30, color: Colors.black),
-          ),
+          const Icon(Icons.person, size: 30),
           const SizedBox(height: 12),
-          const Text(
-            "Staff Name",
-            style: TextStyle(
-              fontFamily: "PoppinsSemiBold",
-              fontSize: 15,
-            ),
-          ),
-          const SizedBox(height: 4),
           Text(
-            staff["name"] ?? "N/A",
+            staff["name"] ?? "Staff",
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontFamily: "PoppinsRegular",
-              fontSize: 13,
-              color: Colors.black,
+              fontFamily: "PoppinsSemiBold",
+              fontSize: 15,
             ),
           ),
         ],

@@ -320,6 +320,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     required int rating,
   }) {
     return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: const BoxDecoration(
         color: AppColors.softIvory,
         // borderRadius: BorderRadius.circular(12),

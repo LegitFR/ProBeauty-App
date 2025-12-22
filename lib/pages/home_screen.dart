@@ -25,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> fetchSalons() async {
     try {
       final url = Uri.parse(
-          "https://probeauty-backend.onrender.com/api/v1/salons?page=1&limit=10");
+          "https://probeauty-backend.onrender.com/api/v1/salons?page=1");
 
       final response = await http.get(url);
 

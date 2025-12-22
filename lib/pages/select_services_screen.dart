@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:probeauty_app/pages/book_appointment_screen.dart'; // ✅ CHANGED
 import 'package:probeauty_app/pages/select_professional_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
@@ -26,7 +27,6 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
   late List<String> categories;
   late String selectedCategory;
 
-  /// ✅ STORE FULL SERVICE OBJECTS
   List<Map<String, dynamic>> selectedServices = [];
 
   @override
@@ -69,11 +69,8 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
             ),
           ),
         ),
-
-        // BODY
         body: Column(
           children: [
-            // ----------- CATEGORY TABS -----------
             Container(
               height: 50,
               padding: const EdgeInsets.only(left: 16, top: 6),
@@ -108,10 +105,7 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
                 },
               ),
             ),
-
             const Divider(thickness: 1),
-
-            // ----------- SERVICE LIST -----------
             Expanded(
               child: ListView.separated(
                 itemCount: filtered.length,
@@ -123,25 +117,23 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
             ),
           ],
         ),
-
-        // ----------- CONTINUE BUTTON -----------
         bottomNavigationBar: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           child: ElevatedButton(
             onPressed: selectedServices.isEmpty
                 ? null
                 : () {
+                    // ✅ ONLY THIS NAVIGATION CHANGED
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => SelectProfessionalScreen(
-                          salonId: widget.salonId,
-                          salonName: widget.salonName,
-                          rating: widget.rating,
-                          staffList: widget.salonStaffList,
-                          selectedServices: selectedServices,
-                        ),
-                      ),
+                          builder: (_) => SelectProfessionalScreen(
+                                salonId: widget.salonId,
+                                salonName: widget.salonName,
+                                rating: widget.rating,
+                                staffList: widget.salonStaffList,
+                                selectedServices: selectedServices,
+                              )),
                     );
                   },
             style: ElevatedButton.styleFrom(
@@ -164,12 +156,8 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
     );
   }
 
-  // -----------------------------------------------------------
-  // SERVICE TILE — USE ID FOR SELECTION CHECK (IMPORTANT!)
-  // -----------------------------------------------------------
   Widget _serviceTile(Map<String, dynamic> service) {
     final serviceId = service["id"];
-
     final isSelected = selectedServices.any((s) => s["id"] == serviceId);
 
     return GestureDetector(
@@ -197,7 +185,6 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
         ),
         child: Row(
           children: [
-            // LEFT SIDE TEXT
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,8 +214,6 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
                 ],
               ),
             ),
-
-            // RIGHT SIDE INDICATOR
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

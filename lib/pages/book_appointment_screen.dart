@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:probeauty_app/pages/first_visit_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
@@ -7,8 +9,8 @@ class BookAppointmentScreen extends StatefulWidget {
   final String salonId;
   final String salonName;
   final double rating;
-  final Map<String, dynamic> staff; // ONE staff object
-  final List<Map<String, dynamic>> selectedServices; // LIST of service objects
+  final Map<String, dynamic> staff;
+  final List<Map<String, dynamic>> selectedServices;
 
   const BookAppointmentScreen({
     super.key,
@@ -25,17 +27,23 @@ class BookAppointmentScreen extends StatefulWidget {
 
 class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
   DateTime selectedDate = DateTime.now();
-  String? selectedTime;
+  int? selectedSlotIndex;
 
-  List<String> availableTimes = [];
+  bool loadingSlots = false;
+  List<dynamic> slots = [];
+
+  Map<String, dynamic> get service => widget.selectedServices.first;
 
   @override
   void initState() {
     super.initState();
-    _generateTimesForDate(selectedDate);
+    _fetchSlotsForDate(selectedDate);
   }
 
-  String _weekdayToKey(int weekday) {
+  // --------------------------------------------------
+  // WEEKDAY KEY
+  // --------------------------------------------------
+  String _weekdayKey(DateTime date) {
     return [
       "monday",
       "tuesday",
@@ -44,70 +52,67 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       "friday",
       "saturday",
       "sunday"
-    ][weekday - 1];
+    ][date.weekday - 1];
   }
 
-  void _generateTimesForDate(DateTime date) {
-    availableTimes = [];
-    final dayKey = _weekdayToKey(date.weekday);
-    final availability = widget.staff["availability"][dayKey];
+  // --------------------------------------------------
+  // STAFF WORKING DAY CHECK
+  // --------------------------------------------------
+  bool _isStaffAvailableOn(DateTime date) {
+    final dayKey = _weekdayKey(date);
+    final availability = widget.staff["availability"]?[dayKey];
+    return availability != null && availability["isAvailable"] == true;
+  }
 
-    if (availability == null || availability is! Map) {
-      setState(() {});
+  // --------------------------------------------------
+  // FETCH SLOTS FROM BACKEND
+  // --------------------------------------------------
+  Future<void> _fetchSlotsForDate(DateTime date) async {
+    if (!_isStaffAvailableOn(date)) {
+      setState(() {
+        slots = [];
+        selectedSlotIndex = null;
+      });
       return;
     }
 
-    final bool isAvailable = availability["isAvailable"] == true;
-    final slots = availability["slots"];
+    setState(() {
+      loadingSlots = true;
+      slots = [];
+      selectedSlotIndex = null;
+    });
 
-    if (!isAvailable || slots == null || slots is! List) {
-      setState(() {});
-      return;
+    final dateStr = DateFormat("yyyy-MM-dd").format(date);
+
+    final uri = Uri.parse(
+      "https://probeauty-backend.onrender.com/api/v1/bookings/availability"
+      "?salonId=${widget.salonId}"
+      "&serviceId=${service["id"]}"
+      "&staffId=${widget.staff["id"]}"
+      "&date=$dateStr",
+    );
+
+    final res = await http.get(uri);
+
+    if (res.statusCode == 200) {
+      final body = jsonDecode(res.body);
+      setState(() {
+        slots = body["data"]["slots"]; // ✅ includes availability
+        loadingSlots = false;
+      });
+    } else {
+      setState(() => loadingSlots = false);
     }
-
-    for (var slot in slots) {
-      if (slot is Map && slot["start"] != null && slot["end"] != null) {
-        availableTimes.addAll(
-          _generateHalfHourSlots(slot["start"], slot["end"], date),
-        );
-      }
-    }
-
-    setState(() {});
   }
 
-  List<String> _generateHalfHourSlots(String start, String end, DateTime date) {
-    final fmt = DateFormat("HH:mm");
-    DateTime s = fmt.parse(start);
-    DateTime e = fmt.parse(end);
-
-    DateTime cursor =
-        DateTime(date.year, date.month, date.day, s.hour, s.minute);
-    DateTime limit =
-        DateTime(date.year, date.month, date.day, e.hour, e.minute);
-
-    List<String> slots = [];
-    final now = DateTime.now();
-
-    while (cursor.isBefore(limit)) {
-      if (!(isSameDay(cursor, now) && cursor.isBefore(now))) {
-        slots.add(fmt.format(cursor));
-      }
-      cursor = cursor.add(const Duration(minutes: 30));
-    }
-
-    return slots;
-  }
-
-  bool isSameDay(DateTime a, DateTime b) =>
-      a.year == b.year && a.month == b.month && a.day == b.day;
-
-  String displayTime(String hhmm) {
-    final dt = DateFormat("HH:mm").parse(hhmm);
+  String displayTime(String iso) {
+    final dt = DateTime.parse(iso).toLocal();
     return DateFormat("hh:mm a").format(dt).toLowerCase();
   }
 
-  // ===================== CALENDAR (ONLY THIS PART CHANGED) =====================
+  // --------------------------------------------------
+  // CALENDAR (UNCHANGED UI, LOGIC EXTENDED)
+  // --------------------------------------------------
   Widget _buildCalendar() {
     final now = DateTime.now();
     final firstDay = DateTime(now.year, now.month, 1);
@@ -122,20 +127,21 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     for (int d = 1; d <= lastDay.day; d++) {
       final date = DateTime(now.year, now.month, d);
       final isPast = date.isBefore(DateTime(now.year, now.month, now.day));
-      final isSelected = isSameDay(date, selectedDate);
-      final isWeekend =
-          date.weekday == DateTime.saturday || date.weekday == DateTime.sunday;
+      final isSelected = date.year == selectedDate.year &&
+          date.month == selectedDate.month &&
+          date.day == selectedDate.day;
+
+      final isWorkingDay = _isStaffAvailableOn(date);
 
       tiles.add(
         GestureDetector(
-          onTap: isPast
+          onTap: (isPast || !isWorkingDay)
               ? null
               : () {
                   setState(() {
                     selectedDate = date;
-                    selectedTime = null;
                   });
-                  _generateTimesForDate(date);
+                  _fetchSlotsForDate(date);
                 },
           child: Container(
             padding: const EdgeInsets.all(10),
@@ -150,11 +156,9 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                   fontFamily: "PoppinsSemiBold",
                   color: isSelected
                       ? Colors.white
-                      : isPast
+                      : (isPast || !isWorkingDay)
                           ? Colors.grey
-                          : isWeekend
-                              ? AppColors.rusticSunset
-                              : Colors.black,
+                          : Colors.black,
                 ),
               ),
             ),
@@ -165,7 +169,6 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
 
     return Column(
       children: [
-        // WEEKDAY HEADER
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: Row(
@@ -176,8 +179,8 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
               _WeekDay("We"),
               _WeekDay("Th"),
               _WeekDay("Fr"),
-              _WeekDay("Sa", weekend: true),
-              _WeekDay("Su", weekend: true),
+              _WeekDay("Sa"),
+              _WeekDay("Su"),
             ],
           ),
         ),
@@ -190,90 +193,108 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       ],
     );
   }
-  // ===========================================================================
 
+  // --------------------------------------------------
+  // UI
+  // --------------------------------------------------
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      bottom: true,
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: AppColors.softIvory,
+      appBar: AppBar(
         backgroundColor: AppColors.softIvory,
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: AppColors.softIvory,
-          leading: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-          ),
-          centerTitle: true,
-          title: const Text(
-            "Book an appointment",
-            style:
-                TextStyle(fontFamily: "PoppinsSemiBold", color: Colors.black),
-          ),
+        elevation: 0,
+        centerTitle: true,
+        title: const Text(
+          "Book an appointment",
+          style: TextStyle(fontFamily: "PoppinsSemiBold"),
         ),
-        body: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Text(
-                  DateFormat("MMMM yyyy").format(DateTime.now()),
-                  style: const TextStyle(
-                    fontFamily: "PoppinsSemiBold",
-                    fontSize: 20,
-                  ),
-                ),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                DateFormat("MMMM yyyy").format(selectedDate),
+                style: const TextStyle(
+                    fontFamily: "PoppinsSemiBold", fontSize: 20),
               ),
-              _buildCalendar(),
-              const Divider(thickness: 1),
+            ),
+            _buildCalendar(),
+            const Divider(),
+
+            // ---------------- TIME SLOTS ----------------
+            if (loadingSlots)
+              const Padding(
+                padding: EdgeInsets.all(20),
+                child: CircularProgressIndicator(),
+              )
+            else
               SizedBox(
                 height: 70,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
-                  itemCount: availableTimes.length,
+                  itemCount: slots.length,
                   separatorBuilder: (_, __) => const SizedBox(width: 12),
                   itemBuilder: (_, i) {
-                    final t = availableTimes[i];
-                    final selected = t == selectedTime;
+                    final slot = slots[i];
+                    final isAvailable = slot["available"] == true;
+                    final isSelected = selectedSlotIndex == i;
 
                     return GestureDetector(
-                      onTap: () {
-                        setState(() => selectedTime = t);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => FirstVisitScreen(
-                              salonId: widget.salonId,
-                              salonName: widget.salonName,
-                              staff: widget.staff,
-                              rating: widget.rating,
-                              date: selectedDate,
-                              time: t,
-                              selectedServices: widget.selectedServices,
-                            ),
-                          ),
-                        );
-                      },
+                      onTap: !isAvailable
+                          ? null
+                          : () {
+                              setState(() {
+                                selectedSlotIndex = i;
+                              });
+
+                              final startTime =
+                                  DateTime.parse(slot["startTime"]).toLocal();
+                              final formattedTime =
+                                  DateFormat("HH:mm").format(startTime);
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => FirstVisitScreen(
+                                    salonId: widget.salonId,
+                                    salonName: widget.salonName,
+                                    staff: widget.staff,
+                                    rating: widget.rating,
+                                    date: selectedDate,
+                                    time: formattedTime,
+                                    selectedServices: widget.selectedServices,
+                                  ),
+                                ),
+                              );
+                            },
                       child: Container(
                         margin: const EdgeInsets.symmetric(vertical: 12),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 12),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(15),
-                          border: Border.all(color: Colors.black),
-                          color: selected
-                              ? AppColors.rusticSunset
-                              : AppColors.softIvory,
+                          border: Border.all(
+                              color:
+                                  isAvailable ? Colors.black : Colors.black26),
+                          color: !isAvailable
+                              ? Colors.grey.shade400
+                              : isSelected
+                                  ? AppColors.rusticSunset
+                                  : AppColors.softIvory,
                         ),
                         child: Text(
-                          displayTime(t),
+                          displayTime(slot["startTime"]),
                           style: TextStyle(
                             fontFamily: "PoppinsSemiBold",
-                            color: selected ? Colors.white : Colors.black,
+                            color: !isAvailable
+                                ? Colors.black45
+                                : isSelected
+                                    ? Colors.white
+                                    : Colors.black,
                           ),
                         ),
                       ),
@@ -281,95 +302,19 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                   },
                 ),
               ),
-              const SizedBox(height: 18),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  children: widget.selectedServices
-                      .map((s) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _serviceTile(s),
-                          ))
-                      .toList(),
-                ),
-              ),
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Text(
-                    "+ Add another service",
-                    style: TextStyle(
-                      color: AppColors.rusticSunset,
-                      fontFamily: "PoppinsSemiBold",
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          ],
         ),
-      ),
-    );
-  }
-
-  Widget _serviceTile(Map<String, dynamic> s) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.black26),
-        borderRadius: BorderRadius.circular(12),
-        color: AppColors.softIvory,
-      ),
-      child: Row(
-        children: [
-          const CircleAvatar(
-            backgroundColor: Colors.black12,
-            radius: 20,
-            child: Icon(Icons.cut, color: Colors.black),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(s["title"],
-                    style: const TextStyle(
-                        fontFamily: "PoppinsSemiBold", fontSize: 15)),
-                const SizedBox(height: 4),
-                Text("${s["durationMinutes"]} mins",
-                    style: const TextStyle(
-                        fontFamily: "PoppinsRegular",
-                        fontSize: 13,
-                        color: Colors.black54)),
-              ],
-            ),
-          ),
-          Text(
-            "₹${s["price"]}",
-            style: const TextStyle(fontFamily: "PoppinsSemiBold", fontSize: 15),
-          ),
-        ],
       ),
     );
   }
 }
 
-// WEEKDAY HEADER WIDGET
 class _WeekDay extends StatelessWidget {
   final String label;
-  final bool weekend;
-
-  const _WeekDay(this.label, {this.weekend = false});
+  const _WeekDay(this.label);
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      label,
-      style: TextStyle(
-        fontFamily: "PoppinsRegular",
-        color: weekend ? AppColors.rusticSunset : Colors.black,
-      ),
-    );
+    return Text(label, style: const TextStyle(fontFamily: "PoppinsRegular"));
   }
 }

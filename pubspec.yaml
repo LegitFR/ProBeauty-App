@@ -46,6 +46,9 @@ dependencies:
   geolocator: ^14.0.2
   geocoding: ^2.1.0
   provider: ^6.1.5+1
+  lottie: ^3.3.2
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
@@ -80,6 +83,7 @@ flutter:
     - assets/images/shop/
     - assets/images/offers/
     - assets/images/services/
+    - assets/lottie/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
