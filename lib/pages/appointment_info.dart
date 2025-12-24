@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:probeauty_app/l10n/app_localizations.dart";
 import "package:probeauty_app/resources/AppColors.dart";
 
 class AppointmentInfo extends StatelessWidget {
@@ -6,6 +7,7 @@ class AppointmentInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -45,9 +47,9 @@ class AppointmentInfo extends StatelessWidget {
                 color: Colors.black),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text(
-            "Essensuals by Toni & Guy",
-            style: TextStyle(
+          title: Text(
+            l10n.appointmentInfoSalonTitle,
+            style: const TextStyle(
               color: Colors.black,
               fontFamily: "PoppinsSemiBold",
             ),
@@ -120,7 +122,7 @@ class AppointmentInfo extends StatelessWidget {
                               color: Colors.white, size: 18),
                           const SizedBox(width: 6),
                           Text(
-                            "Confirmed",
+                            l10n.appointmentStatusConfirmed,
                             style: TextStyle(
                               fontSize: screenWidth * 0.035,
                               fontFamily: "PoppinsMedium",

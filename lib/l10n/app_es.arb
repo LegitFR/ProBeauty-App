@@ -1,0 +1,178 @@
+{
+  "@@locale": "es",
+
+  "decisionGreeting": "¡Hola!",
+  "decisionSubtitle": "Crea tu cuenta o inicia sesión para reservar y gestionar tus citas.",
+  "loginButton": "Iniciar sesión",
+  "signupButton": "Registrarse",
+  "signInWith": "Iniciar sesión con",
+  "continueAsGuest": "Continuar como invitado",
+
+  "loginWelcomeBack": "Bienvenido de nuevo,",
+  "loginSubtitle": "¡Inicia sesión!",
+
+  "loginEmailHint": "Correo electrónico o número de teléfono",
+  "loginPasswordHint": "Contraseña",
+  "loginEmptyFieldsError": "Por favor ingresa correo/teléfono y contraseña",
+  "loginSuccessMessage": "¡Inicio de sesión exitoso!",
+  "loginFailedMessage": "Error al iniciar sesión",
+  "loginErrorMessage": "Error: {error}",
+
+  "signupWelcome": "Bienvenido,",
+  "signupSubtitle": "¡Regístrate!",
+
+  "signupFirstNameHint": "Nombre",
+  "signupLastNameHint": "Apellido",
+  "signupContactHint": "Correo electrónico o número de teléfono",
+  "signupPasswordHint": "Contraseña",
+
+  "signupGetOtpButton": "Obtener OTP",
+  "signupLoginButton": "Iniciar sesión",
+
+  "signupAlreadyMember": "¿Ya eres miembro?",
+  "signupOrText": "O",
+  "signupWithText": "Regístrate con",
+
+  "signupEmptyFieldsError": "Por favor completa todos los campos",
+  "signupSuccessMessage": "¡Registro exitoso!",
+  "signupFailedMessage": "Error en el registro",
+  "signupErrorMessage": "Error: {error}",
+
+  "bottomNavHome": "Mi Precut",
+  "bottomNavExplore": "Explorar",
+  "bottomNavShop": "Tienda",
+  "bottomNavAppointments": "Citas",
+  "bottomNavProfile": "Perfil",
+
+  "homeSpecialOffers": "Ofertas especiales",
+  "homeRecommended": "Recomendado",
+
+  "categoryHaircut": "Corte de cabello",
+  "categorySpa": "Spa",
+  "categoryNails": "Uñas",
+  "categoryFacial": "Facial",
+
+  "homeSalonLabel": "Salón",
+  "homeSaveUpto": "Ahorra hasta {percent}%",
+
+  "homeReviewCount": "({count})",
+
+  "exploreTitle": "Explorar",
+
+  "exploreSearchHint": "Cualquier tratamiento o lugar",
+  "exploreAnyDate": "Cualquier fecha",
+  "exploreAnyTime": "Cualquier hora",
+  "exploreSearchButton": "Buscar Probeauty",
+
+  "exploreMorning": "Mañana",
+  "exploreAfternoon": "Tarde",
+  "exploreEvening": "Noche",
+
+  "exploreSort": "Ordenar",
+  "exploreMaxPrice": "Precio máximo",
+  "exploreVenueType": "Tipo de lugar",
+
+  "exploreAppointmentsBooked": "{count} citas reservadas hoy",
+
+  "exploreServices": "Servicios",
+
+  "exploreSortByTitle": "Ordenar por",
+  "exploreSortRecommended": "Recomendado",
+  "exploreSortTopRated": "Mejor valorado",
+  "exploreSortNearest": "Más cercano",
+
+  "exploreMaximumPrice": "Precio máximo",
+
+  "exploreVenueEveryone": "Todos",
+  "exploreVenueMaleOnly": "Solo hombres",
+  "exploreVenueFemaleOnly": "Solo mujeres",
+
+  "exploreFiltersTitle": "Filtros",
+  "exploreClearAll": "Borrar todo",
+  "exploreApply": "Aplicar",
+
+  "exploreDetectingLocation": "Detectando ubicación...",
+
+  "shopSearchHint": "Buscar",
+
+  "shopCategoryShampoo": "Champú",
+  "shopCategoryHairColour": "Color de cabello",
+  "shopCategoryConditioner": "Acondicionador",
+  "shopCategoryHairOil": "Aceite capilar",
+
+  "shopSpecialOffers": "Ofertas especiales",
+
+  "shopNoProducts": "No hay productos disponibles.",
+  "shopLoadingSalon": "Cargando...",
+
+  "shopButton": "Comprar",
+
+  "appointmentsTitle": "Citas",
+  "appointmentsLoading": "Cargando...",
+  "appointmentsEmpty": "No se encontraron reservas",
+
+  "appointmentsConfirmedTitle": "Confirmadas",
+  "appointmentsPreviousTitle": "Anteriores",
+
+  "appointmentsUnknownSalon": "Salón desconocido",
+
+  "appointmentsGetDirections": "Obtener direcciones",
+  "appointmentsBookAgain": "Reservar de nuevo",
+
+  "appointmentsDurationPriceService": "{minutes} min | ₹{price} | {service}",
+
+  "profileTitle": "Perfil",
+  "profileEdit": "Editar perfil",
+  "profileDefaultUser": "Usuario",
+
+  "profileMenuFavourites": "Favoritos",
+  "profileMenuSavedAddresses": "Direcciones guardadas",
+  "profileMenuOrders": "Pedidos",
+  "profileMenuPaymentMethods": "Métodos de pago",
+  "profileMenuGiftCard": "Tarjeta regalo",
+  "profileMenuNotifications": "Notificaciones",
+  "profileMenuSettings": "Configuración",
+
+  "profileLanguageEnglish": "Inglés",
+  "profileSupport": "Soporte",
+  "profileLogout": "Cerrar sesión",
+
+  "profileEditTitle": "Editar detalles del perfil",
+
+  "profileFirstNameLabel": "Nombre",
+  "profileLastNameLabel": "Apellido",
+  "profileMobileLabel": "Número de móvil",
+  "profileEmailLabel": "Correo electrónico",
+  "profileDobLabel": "Fecha de nacimiento",
+
+  "profileFirstNameRequired": "Nombre requerido",
+  "profileInvalidPhone": "Número de teléfono inválido",
+  "profileUserNotLoggedIn": "Usuario no autenticado",
+
+  "profileUpdateSuccess": "¡Perfil actualizado con éxito!",
+  "profileUpdateFailed": "Error al actualizar",
+  "profileUpdateError": "Error: {error}",
+
+  "profileDayHint": "Día",
+  "profileMonthHint": "Mes",
+  "profileYearHint": "Año",
+
+  "profileEmailOptionLabel": "Seleccionar opción",
+  "profileSaveButton": "Guardar",
+  "profileLoading": "Guardando...",
+
+  "favouritesTitle": "Favoritos",
+  "favouritesLoginRequired": "Inicia sesión para ver favoritos",
+  "favouritesLoadFailed": "Error al cargar favoritos",
+  "favouritesEmpty": "Aún no hay favoritos",
+
+  "favouritesRemovedSuccess": "Eliminado de favoritos",
+  "favouritesRemoveFailed": "Error al eliminar favorito",
+
+  "favouritesAddToCart": "Añadir al carrito",
+  "favouritesAddedToCart": "Añadido al carrito",
+  "favouritesAddToCartFailed": "Error al añadir al carrito",
+  "favouritesLoginToAddCart": "Inicia sesión para añadir al carrito",
+
+  "favouritesError": "Error: {error}"
+}

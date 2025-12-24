@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -98,19 +99,24 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Removed from favourites")),
+          SnackBar(
+              content:
+                  Text(AppLocalizations.of(context)!.favouritesRemovedSuccess)),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Failed to remove favourite"),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.favouritesRemoveFailed),
             backgroundColor: Colors.red,
           ),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+        SnackBar(
+            content: Text(
+                AppLocalizations.of(context)!.favouritesError(e.toString())),
+            backgroundColor: Colors.red),
       );
     }
   }
@@ -127,8 +133,9 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
 
       if (token == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Please login to add items to cart"),
+          SnackBar(
+            content:
+                Text(AppLocalizations.of(context)!.favouritesLoginToAddCart),
             backgroundColor: Colors.red,
           ),
         );
@@ -151,20 +158,26 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
 
       if (resp.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Added to cart")),
+          SnackBar(
+              content:
+                  Text(AppLocalizations.of(context)!.favouritesAddedToCart)),
         );
       } else {
         final body = jsonDecode(resp.body);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(body["message"] ?? "Failed to add to cart"),
+            content: Text(body["message"] ??
+                AppLocalizations.of(context)!.favouritesAddToCartFailed),
             backgroundColor: Colors.red,
           ),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+        SnackBar(
+            content: Text(
+                AppLocalizations.of(context)!.favouritesError(e.toString())),
+            backgroundColor: Colors.red),
       );
     } finally {
       setState(() => _addingToCartId = null);
@@ -176,6 +189,8 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
   // ==========================
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: AppColors.softIvory,
       appBar: AppBar(
@@ -186,9 +201,10 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          "Favourites",
-          style: TextStyle(fontFamily: "PoppinsMedium", color: Colors.black),
+        title: Text(
+          l10n.favouritesTitle,
+          style:
+              const TextStyle(fontFamily: "PoppinsMedium", color: Colors.black),
         ),
       ),
       body: _buildBody(),
@@ -206,9 +222,9 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
     }
 
     if (_favourites.isEmpty) {
-      return const Center(
-        child: Text("No favourites yet",
-            style: TextStyle(fontFamily: "PoppinsRegular")),
+      return Center(
+        child: Text(AppLocalizations.of(context)!.favouritesEmpty,
+            style: const TextStyle(fontFamily: "PoppinsRegular")),
       );
     }
 
@@ -307,8 +323,8 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
                     child: CircularProgressIndicator(
                         strokeWidth: 2, color: Colors.white),
                   )
-                : const Text("Add to cart",
-                    style: TextStyle(
+                : Text(AppLocalizations.of(context)!.favouritesAddToCart,
+                    style: const TextStyle(
                         fontFamily: "PoppinsSemiBold",
                         fontSize: 12,
                         color: Colors.white)),

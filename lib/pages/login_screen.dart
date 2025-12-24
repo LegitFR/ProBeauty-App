@@ -1,6 +1,9 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,7 +16,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
-  bool _rememberMe = false;
+  // bool _rememberMe = false;
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -40,8 +43,12 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text;
 
     if (identifier.isEmpty || password.isEmpty) {
+      final l10n = AppLocalizations.of(context)!;
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter email/phone and password")),
+        SnackBar(
+          content: Text(l10n.loginEmptyFieldsError),
+        ),
       );
       return;
     }
@@ -82,18 +89,27 @@ class _LoginScreenState extends State<LoginScreen> {
 
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Login successful!")),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!.loginSuccessMessage)),
         );
 
         Navigator.pushNamedAndRemoveUntil(context, "/main", (route) => false);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data["message"] ?? "Login failed")),
+          SnackBar(
+              content: Text(data["message"] ??
+                  AppLocalizations.of(context)!.loginFailedMessage)),
         );
       }
     } catch (e) {
+      final l10n = AppLocalizations.of(context)!;
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
+        SnackBar(
+          content: Text(
+            l10n.loginErrorMessage(e.toString()),
+          ),
+        ),
       );
     } finally {
       setState(() => _isLoading = false);
@@ -122,6 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -161,7 +178,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Welcome back,",
+                        l10n.loginWelcomeBack,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: screenWidth * 0.08,
@@ -170,7 +187,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       SizedBox(height: screenHeight * 0.005),
                       Text(
-                        "Log in!",
+                        l10n.loginSubtitle,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: screenWidth * 0.05,
@@ -201,7 +218,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ? AppColors.rusticSunset
                               : AppColors.greyTone,
                         ),
-                        hintText: "Email or Phone number",
+                        hintText: l10n.loginEmailHint,
                         hintStyle: const TextStyle(
                           color: AppColors.greyTone,
                           fontFamily: "PoppinsRegular",
@@ -249,7 +266,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             });
                           },
                         ),
-                        hintText: "Password",
+                        hintText: l10n.loginPasswordHint,
                         hintStyle: const TextStyle(
                           color: AppColors.greyTone,
                           fontFamily: "PoppinsRegular",
@@ -291,7 +308,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ],
                               )
                             : Text(
-                                "Log in",
+                                l10n.loginButton,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: screenWidth * 0.04,

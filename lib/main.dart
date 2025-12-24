@@ -1,4 +1,6 @@
 import "package:flutter/material.dart";
+import 'package:probeauty_app/app_locale.dart';
+import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/favourites_screen.dart';
 import 'package:probeauty_app/pages/ordersScreen.dart';
 import 'package:probeauty_app/pages/appointment_info.dart';
@@ -16,28 +18,57 @@ import 'package:probeauty_app/pages/splash_screen.dart';
 import 'package:probeauty_app/providers/cart_provider.dart';
 import 'package:probeauty_app/providers/order_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'pages/appointments_screen.dart';
 import 'pages/decision_screen.dart';
 import 'pages/notification_screen.dart';
 import 'models/product.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  final code = prefs.getString('languageCode') ?? 'en';
+
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => CartProvider()),
       ChangeNotifierProvider(create: (_) => OrderProvider()),
+      ChangeNotifierProvider(
+        create: (_) => AppLocale(code),
+        child: const MyApp(),
+      )
     ],
     child: const MyApp(),
   ));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
   Widget build(BuildContext context) {
+    final appLocale = context.watch<AppLocale>();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      locale: appLocale.locale,
+      supportedLocales: const [
+        Locale('en'),
+        Locale('pt'),
+        Locale('fr'),
+        Locale('es'),
+      ],
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: const SplashScreen(),
 
       // ------------- FIXED: onGenerateRoute for passing arguments -------------

@@ -1,6 +1,9 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -67,7 +70,9 @@ class _SignupScreenState extends State<SignupScreen> {
         contact.isEmpty ||
         password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields')),
+        SnackBar(
+            content:
+                Text(AppLocalizations.of(context)!.signupEmptyFieldsError)),
       );
       return;
     }
@@ -98,7 +103,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
       if (response.statusCode == 201 || data['success'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Signup successful!")),
+          SnackBar(
+              content:
+                  Text(AppLocalizations.of(context)!.signupSuccessMessage)),
         );
         Navigator.pushNamed(
           context,
@@ -107,18 +114,23 @@ class _SignupScreenState extends State<SignupScreen> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? "Signup failed")),
+          SnackBar(
+              content: Text(data['message'] ??
+                  AppLocalizations.of(context)!.signupFailedMessage)),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
+        SnackBar(
+            content: Text(AppLocalizations.of(context)!
+                .signupErrorMessage(e.toString()))),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -161,7 +173,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Welcome,",
+                        l10n.signupWelcome,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: screenWidth * 0.08,
@@ -170,7 +182,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       SizedBox(height: screenHeight * 0.005),
                       Text(
-                        "Sign up!",
+                        l10n.signupSubtitle,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: screenWidth * 0.05,
@@ -204,7 +216,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           color:
                               _iconColor(_firstNameController, _firstNameFocus),
                         ),
-                        hintText: "First Name",
+                        hintText: l10n.signupFirstNameHint,
                         hintStyle: const TextStyle(
                           color: AppColors.greyTone,
                           fontFamily: "PoppinsRegular",
@@ -236,7 +248,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           color:
                               _iconColor(_lastNameController, _lastNameFocus),
                         ),
-                        hintText: "Last Name",
+                        hintText: l10n.signupLastNameHint,
                         hintStyle: const TextStyle(
                           color: AppColors.greyTone,
                           fontFamily: "PoppinsRegular",
@@ -267,7 +279,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           Icons.call,
                           color: _iconColor(_contactController, _contactFocus),
                         ),
-                        hintText: "Email or Phone number",
+                        hintText: l10n.signupContactHint,
                         hintStyle: const TextStyle(
                           color: AppColors.greyTone,
                           fontFamily: "PoppinsRegular",
@@ -314,7 +326,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             });
                           },
                         ),
-                        hintText: "Password",
+                        hintText: l10n.signupPasswordHint,
                         hintStyle: const TextStyle(
                           color: AppColors.greyTone,
                           fontFamily: "PoppinsRegular",
@@ -349,7 +361,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         onPressed: _signupUser, // 🔥 Backend integrated
                         child: Text(
-                          "Get OTP",
+                          l10n.signupGetOtpButton,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: screenWidth * 0.04,
@@ -358,11 +370,14 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                       ),
                     ),
+                    const SizedBox(
+                      height: 10,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "Already a member? ",
+                          "${l10n.signupAlreadyMember}  ",
                           style: TextStyle(
                             color: AppColors.greyTone,
                             fontSize: screenWidth * 0.03,
@@ -374,7 +389,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             Navigator.popAndPushNamed(context, "/login");
                           },
                           child: Text(
-                            "Login",
+                            l10n.signupLoginButton,
                             style: TextStyle(
                               color: AppColors.rusticSunset,
                               fontSize: screenWidth * 0.03,
@@ -387,7 +402,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
                     SizedBox(height: screenHeight * 0.04),
 
-                    // ⚫ Horizontal Divider with "Or"
                     Row(
                       children: [
                         const Expanded(
@@ -400,7 +414,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           padding: EdgeInsets.symmetric(
                               horizontal: screenWidth * 0.03),
                           child: Text(
-                            "OR",
+                            l10n.signupOrText,
                             style: TextStyle(
                               fontFamily: "PoppinsBold",
                               fontSize: screenWidth * 0.03,
@@ -420,7 +434,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     SizedBox(height: screenHeight * 0.04),
 
                     Text(
-                      "Sign up with",
+                      l10n.signInWith,
                       style: TextStyle(
                         color: AppColors.rusticSunset,
                         fontSize: screenWidth * 0.03,
@@ -463,7 +477,6 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
 
                     SizedBox(height: screenHeight * 0.05),
-                    // ... rest of your UI (Login text, social icons, etc.)
                   ],
                 ),
               ),

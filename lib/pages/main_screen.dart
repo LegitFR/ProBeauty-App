@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/appointments_screen.dart';
 import 'package:probeauty_app/pages/explore_screen.dart';
 import 'package:probeauty_app/pages/home_screen.dart';
@@ -34,16 +35,16 @@ class _MainScreenState extends State<MainScreen> {
     'assets/images/icons/profile_icon.svg',
   ];
 
-  final List<String> _labels = const [
-    'My Precut',
-    'Explore',
-    'Shop',
-    'Appointments',
-    'Profile',
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final List<String> labels = [
+      l10n.bottomNavHome,
+      l10n.bottomNavExplore,
+      l10n.bottomNavShop,
+      l10n.bottomNavAppointments,
+      l10n.bottomNavProfile,
+    ];
     return Scaffold(
       backgroundColor: AppColors.softIvory,
       body: _screens[_selectedIndex],
@@ -87,7 +88,7 @@ class _MainScreenState extends State<MainScreen> {
               right: 0,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: List.generate(_labels.length, (index) {
+                children: List.generate(labels.length, (index) {
                   bool isSelected = index == _selectedIndex;
                   return Expanded(
                     child: Center(
@@ -96,7 +97,7 @@ class _MainScreenState extends State<MainScreen> {
                         duration: const Duration(milliseconds: 200),
                         child: isSelected
                             ? Text(
-                                _labels[index],
+                                labels[index],
                                 style: const TextStyle(
                                   fontSize: 11,
                                   color: AppColors.rusticSunset,

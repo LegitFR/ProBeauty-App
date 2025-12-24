@@ -1,0 +1,674 @@
+{
+  "@@locale": "en",
+  "decisionGreeting": "Hello!",
+  "decisionSubtitle": "Create your account or login in to book and manage your appointments.",
+  "loginButton": "Login",
+  "signupButton": "Sign Up",
+  "signInWith": "Sign in with",
+  "continueAsGuest": "Continue as Guest",
+
+
+  "loginWelcomeBack": "Welcome back,",
+  "loginSubtitle": "Log in!",
+
+  "loginEmailHint": "Email or Phone number",
+  "loginPasswordHint": "Password",
+  "loginEmptyFieldsError": "Please enter email/phone and password",
+  "loginSuccessMessage": "Login successful!",
+  "loginFailedMessage": "Login failed",
+  "loginErrorMessage": "Error: {error}",
+
+  "@loginErrorMessage": {
+    "description": "Shown when an unexpected login error occurs",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "signupWelcome": "Welcome,",
+  "signupSubtitle": "Sign up!",
+
+  "signupFirstNameHint": "First Name",
+  "signupLastNameHint": "Last Name",
+  "signupContactHint": "Email or Phone number",
+  "signupPasswordHint": "Password",
+
+  "signupGetOtpButton": "Get OTP",
+  "signupLoginButton": "Login",
+
+  "signupAlreadyMember": "Already a member?",
+  "signupOrText": "OR",
+  "signupWithText": "Sign up with",
+
+  "signupEmptyFieldsError": "Please fill all fields",
+  "signupSuccessMessage": "Signup successful!",
+  "signupFailedMessage": "Signup failed",
+  "signupErrorMessage": "Error: {error}",
+
+  "@signupErrorMessage": {
+    "description": "Shown when signup fails due to an unexpected error",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "bottomNavHome": "My Precut",
+  "bottomNavExplore": "Explore",
+  "bottomNavShop": "Shop",
+  "bottomNavAppointments": "Appointments",
+  "bottomNavProfile": "Profile",
+
+
+
+  "homeSpecialOffers": "Special Offers",
+  "homeRecommended": "Recommended",
+
+  "categoryHaircut": "Haircut",
+  "categorySpa": "Spa",
+  "categoryNails": "Nails",
+  "categoryFacial": "Facial",
+
+  "homeSalonLabel": "Salon",
+  "homeSaveUpto": "Save up to {percent}%",
+
+  "@homeSaveUpto": {
+    "description": "Discount label shown on salon cards",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+
+  "homeReviewCount": "({count})",
+
+  "@homeReviewCount": {
+    "description": "Number of reviews shown in parentheses",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "exploreTitle": "Explore",
+
+  "exploreSearchHint": "Any treatment or venue",
+  "exploreAnyDate": "Any date",
+  "exploreAnyTime": "Any time",
+  "exploreSearchButton": "Search Probeauty",
+
+  "exploreMorning": "Morning",
+  "exploreAfternoon": "Afternoon",
+  "exploreEvening": "Evening",
+
+  "exploreSort": "Sort",
+  "exploreMaxPrice": "Max price",
+  "exploreVenueType": "Venue type",
+
+  "exploreAppointmentsBooked": "{count} appointments booked today",
+
+  "@exploreAppointmentsBooked": {
+    "description": "Shows number of appointments booked today",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+
+  "exploreServices": "Services",
+
+  "exploreSortByTitle": "Sort by",
+  "exploreSortRecommended": "Recommended",
+  "exploreSortTopRated": "Top-rated",
+  "exploreSortNearest": "Nearest",
+
+  "exploreMaximumPrice": "Maximum price",
+
+  "exploreVenueEveryone": "Everyone",
+  "exploreVenueMaleOnly": "Male only",
+  "exploreVenueFemaleOnly": "Female only",
+
+  "exploreFiltersTitle": "Filters",
+  "exploreClearAll": "Clear all",
+  "exploreApply": "Apply",
+
+  "exploreDetectingLocation": "Detecting location...",
+
+  "shopSearchHint": "Search",
+
+  "shopCategoryShampoo": "Shampoo",
+  "shopCategoryHairColour": "Hair Colour",
+  "shopCategoryConditioner": "Conditioner",
+  "shopCategoryHairOil": "Hair Oil",
+
+  "shopSpecialOffers": "Special offers",
+
+  "shopNoProducts": "No products available.",
+  "shopLoadingSalon": "Loading...",
+
+  "shopButton": "Shop",
+
+
+  "appointmentsTitle": "Appointments",
+
+  "appointmentsLoading": "Loading...",
+
+  "appointmentsEmpty": "No bookings found",
+
+  "appointmentsConfirmedTitle": "Confirmed",
+  "appointmentsPreviousTitle": "Previous",
+
+  "appointmentsUnknownSalon": "Unknown Salon",
+
+  "appointmentsGetDirections": "Get directions",
+
+  "appointmentsBookAgain": "Book Again",
+
+  "appointmentsDurationPriceService": "{minutes} mins | ₹{price} | {service}",
+
+  "@appointmentsDurationPriceService": {
+    "description": "Shows service duration, price and service name",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "price": {
+        "type": "String"
+      },
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+
+   "profileTitle": "Profile",
+
+  "profileEdit": "Edit profile",
+
+  "profileDefaultUser": "User",
+
+  "profileMenuFavourites": "Favourites",
+  "profileMenuSavedAddresses": "Saved addresses",
+  "profileMenuOrders": "Orders",
+  "profileMenuPaymentMethods": "Payment methods",
+  "profileMenuGiftCard": "Gift card",
+  "profileMenuNotifications": "Notifications",
+  "profileMenuSettings": "Settings",
+
+  "profileLanguageEnglish": "English",
+  "profileSupport": "Support",
+
+  "profileLogout": "Logout",
+
+
+"profileEditTitle": "Edit profile details",
+
+  "profileFirstNameLabel": "First Name",
+  "profileLastNameLabel": "Last Name",
+  "profileMobileLabel": "Mobile number",
+  "profileEmailLabel": "Email Address",
+  "profileDobLabel": "Date of birth",
+
+  "profileFirstNameRequired": "First name required",
+  "profileInvalidPhone": "Invalid phone number",
+  "profileUserNotLoggedIn": "User not logged in",
+
+  "profileUpdateSuccess": "Profile updated successfully!",
+  "profileUpdateFailed": "Update failed",
+  "profileUpdateError": "Error: {error}",
+
+  "@profileUpdateError": {
+    "description": "Shown when profile update API throws an error",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "profileDayHint": "Day",
+  "profileMonthHint": "Month",
+  "profileYearHint": "Year",
+
+  "profileEmailOptionLabel": "Select Option",
+
+  "profileSaveButton": "Save",
+
+  "profileLoading": "Saving...",
+
+
+  "favouritesTitle": "Favourites",
+
+  "favouritesLoginRequired": "Please login to view favourites",
+  "favouritesLoadFailed": "Failed to load favourites",
+
+  "favouritesEmpty": "No favourites yet",
+
+  "favouritesRemovedSuccess": "Removed from favourites",
+  "favouritesRemoveFailed": "Failed to remove favourite",
+
+  "favouritesAddToCart": "Add to cart",
+  "favouritesAddedToCart": "Added to cart",
+  "favouritesAddToCartFailed": "Failed to add to cart",
+  "favouritesLoginToAddCart": "Please login to add items to cart",
+
+  "favouritesError": "Error: {error}",
+
+  "@favouritesError": {
+    "description": "Shown when an unexpected error occurs in favourites screen",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "@@locale": "en",
+
+  "savedAddressTitle": "Saved addresses",
+
+  "savedAddressHomeLabel": "Home",
+  "savedAddressAddNew": "Add new address",
+
+  "savedAddressHouseLabel": "House No & Floor *",
+  "savedAddressBuildingLabel": "Building Name & Block no*",
+  "savedAddressLandmarkLabel": "Area & Landmark *",
+  "savedAddressCityLabel": "City *",
+  "savedAddressDistrictLabel": "District *",
+  "savedAddressPincodeLabel": "Pincode*",
+
+  "savedAddressSaveAs": "Save this address as",
+
+  "savedAddressTypeHome": "Home",
+  "savedAddressTypeWork": "Work",
+  "savedAddressTypeOthers": "Others",
+
+  "savedAddressSaveButton": "Save",
+  "savedAddressUpdateButton": "Update Address",
+
+  "savedAddressSavedSuccess": "Address saved successfully!",
+  "savedAddressUpdatedSuccess": "Address updated successfully!",
+
+  "savedAddressFailed": "Failed: {error}",
+
+  "@savedAddressFailed": {
+    "description": "Shown when saving or updating address fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "ordersTitle": "Orders",
+
+  "ordersActiveTitle": "Active Orders",
+
+  "ordersLoading": "Loading...",
+  "ordersEmpty": "No active orders",
+
+  "ordersOrderLabel": "Order #{id}",
+  "ordersDeliveryOn": "Delivery on —",
+
+  "ordersItemPrice": "₹{price} ({quantity} item)",
+
+  "@ordersItemPrice": {
+    "description": "Shows total price and item count in an order",
+    "placeholders": {
+      "price": {
+        "type": "num"
+      },
+      "quantity": {
+        "type": "int"
+      }
+    }
+  },
+
+  "ordersTrackButton": "Track",
+  "ordersCancelButton": "Cancel Order",
+
+
+  "notificationsTitle": "Notifications",
+
+  "notificationsUnreadCount": "Unread ({count})",
+
+  "@notificationsUnreadCount": {
+    "description": "Shows number of unread notifications",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "notificationAppointmentSuccessTitle": "Appointment Success",
+
+  "notificationAppointmentScheduledMessage":
+      "Your appointment has been successfully scheduled with Dr. Meera at 4:30 PM...",
+
+  "notificationAppointmentConfirmedMessage":
+      "Your appointment has been successfully confirmed for tomorrow...",
+
+  "notificationTimeJustNow": "Just now",
+
+  "notificationSettingsTitle": "Notification Settings",
+
+  "notificationSettingAppointmentTitle": "Text message appointment",
+  "notificationSettingAppointmentDesc":
+      "Receive texts based on your sender’s settings",
+
+  "notificationSettingEmailTitle": "Email Marketing",
+  "notificationSettingEmailDesc":
+      "Receive offers and news via email",
+
+  "notificationSettingOrderSupportTitle": "Order and Support",
+  "notificationSettingOrderSupportDesc":
+      "Receive notifications related to your order status, payments and support communications",
+
+  "notificationSettingWhatsappTitle": "WhatsApp Messages",
+  "notificationSettingWhatsappDesc":
+      "Get updates from us on WhatsApp",
+
+"appointmentInfoSalonTitle": "Essensuals by Toni & Guy",
+
+  "appointmentStatusConfirmed": "Confirmed",
+
+  "appointmentDateTime": "{date} at\n{time}",
+
+  "@appointmentDateTime": {
+    "description": "Shows appointment date and time",
+    "placeholders": {
+      "date": { "type": "String" },
+      "time": { "type": "String" }
+    }
+  },
+
+  "appointmentDuration": "{hours} hour duration",
+
+  "@appointmentDuration": {
+    "description": "Shows appointment duration in hours",
+    "placeholders": {
+      "hours": { "type": "int" }
+    }
+  },
+
+  "appointmentActionAddCalendar": "Add to Calendar",
+  "appointmentActionAddCalendarDesc": "Set yourself a reminder",
+
+  "appointmentActionManage": "Manage appointment",
+  "appointmentActionManageDesc": "Reschedule or Cancel",
+
+  "appointmentActionGettingThere": "Getting there",
+  "appointmentActionGettingThereDesc": "{location}",
+
+  "@appointmentActionGettingThereDesc": {
+    "description": "Location of the salon",
+    "placeholders": {
+      "location": { "type": "String" }
+    }
+  },
+
+  "appointmentActionVenueDetails": "Venue details",
+  "appointmentActionVenueDetailsDesc": "{venueName}",
+
+  "@appointmentActionVenueDetailsDesc": {
+    "description": "Salon or venue name",
+    "placeholders": {
+      "venueName": { "type": "String" }
+    }
+  },
+
+  "appointmentOverviewTitle": "Overview",
+
+  "appointmentServiceName": "{serviceName}",
+  "appointmentServicePrice": "{currency}{price}",
+
+  "@appointmentServicePrice": {
+    "description": "Service price",
+    "placeholders": {
+      "currency": { "type": "String" },
+      "price": { "type": "num" }
+    }
+  },
+
+  "appointmentServiceDuration": "{duration} hour",
+
+  "@appointmentServiceDuration": {
+    "description": "Service duration",
+    "placeholders": {
+      "duration": { "type": "int" }
+    }
+  },
+
+  "appointmentTaxes": "Taxes",
+  "appointmentTotal": "Total",
+
+  "appointmentPayAtVenue": "Pay at venue",
+
+  "salonOpenUntil": "Open until {time}",
+
+  "@salonOpenUntil": {
+    "description": "Shows salon closing time",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+
+  "salonTabServices": "SERVICES",
+  "salonTabReviews": "REVIEWS",
+  "salonTabTeam": "TEAM",
+  "salonTabGiftCards": "GIFT CARDS",
+  "salonTabDetails": "DETAILS",
+
+  "salonServiceDuration": "{minutes} mins",
+
+  "@salonServiceDuration": {
+    "description": "Service duration in minutes",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+
+  "salonServicesAvailable": "{count} services available",
+
+  "@salonServicesAvailable": {
+    "description": "Shows number of services available in a salon",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "salonBookNow": "Book now",
+  "salonBookButton": "BOOK",
+
+   "reviewsTabServices": "SERVICES",
+  "reviewsTabReviews": "REVIEWS",
+  "reviewsTabTeam": "TEAM",
+  "reviewsTabGiftCards": "GIFT CARDS",
+  "reviewsTabDetails": "DETAILS",
+
+  "reviewsUnableToLoad": "Unable to load reviews",
+
+  "reviewsTitle": "Reviews",
+
+  "reviewsTotalCount": "{count} reviews",
+  "@reviewsTotalCount": {
+    "description": "Shows total number of reviews",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "reviewsVerifiedUser": "Verified precut user",
+
+  "reviewsInfoNote":
+    "Precut guarantees that reviews with \"verified precut user\" tag have been added by registered precut users who have had an appointment with the provider. A registered precut user can add a review only after the service has been provided.",
+
+  "reviewsServiceLabel": "Service: {service}",
+  "@reviewsServiceLabel": {
+    "description": "Shows reviewed service name",
+    "placeholders": {
+      "service": { "type": "String" }
+    }
+  },
+
+  "reviewsBookNow": "Book now",
+
+  "reviewsReport": "Report",
+
+  "reviewsUserFallback": "User",
+  "reviewsServiceFallback": "Service",
+
+  "reviewsMonthJan": "Jan",
+  "reviewsMonthFeb": "Feb",
+  "reviewsMonthMar": "Mar",
+  "reviewsMonthApr": "Apr",
+  "reviewsMonthMay": "May",
+  "reviewsMonthJun": "Jun",
+  "reviewsMonthJul": "Jul",
+  "reviewsMonthAug": "Aug",
+  "reviewsMonthSep": "Sep",
+  "reviewsMonthOct": "Oct",
+  "reviewsMonthNov": "Nov",
+  "reviewsMonthDec": "Dec",
+
+
+   "selectServicesTitle": "Select Services",
+
+  "selectServicesFeaturedCategory": "Featured",
+
+  "selectServicesContinue": "Continue",
+
+  "selectServicesDuration": "{minutes} mins",
+
+  "@selectServicesDuration": {
+    "description": "Service duration in minutes",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+
+  "selectServicesPrice": "₹{price}",
+
+  "@selectServicesPrice": {
+    "description": "Service price",
+    "placeholders": {
+      "price": {
+        "type": "num"
+      }
+    }
+  },
+
+  "selectProfessionalTitle": "Select professional",
+
+  "selectProfessionalFallbackName": "Staff",
+
+
+  "bookAppointmentTitle": "Book an appointment",
+
+  "bookAppointmentMonthYear": "{monthYear}",
+  "@bookAppointmentMonthYear": {
+    "description": "Displayed month and year above the calendar",
+    "placeholders": {
+      "monthYear": { "type": "String" }
+    }
+  },
+
+  "bookAppointmentLoadingSlots": "Loading slots...",
+
+  "bookAppointmentWeekMon": "Mo",
+  "bookAppointmentWeekTue": "Tu",
+  "bookAppointmentWeekWed": "We",
+  "bookAppointmentWeekThu": "Th",
+  "bookAppointmentWeekFri": "Fr",
+  "bookAppointmentWeekSat": "Sa",
+  "bookAppointmentWeekSun": "Su",
+
+
+  "firstVisitTitle": "Is this your first visit to\n{salonName}?",
+
+  "@firstVisitTitle": {
+    "description": "Asks user if this is their first visit to the salon",
+    "placeholders": {
+      "salonName": { "type": "String" }
+    }
+  },
+
+  "firstVisitYesTitle": "Yes",
+  "firstVisitYesSubtitle": "This is my first visit",
+
+  "firstVisitNoTitle": "No",
+  "firstVisitNoSubtitle": "I've visited before",
+
+   "reviewConfirmTitle": "Review and Confirm",
+
+  "reviewConfirmBookingSuccess": "Booking confirmed successfully 🎉",
+  "reviewConfirmGenericError": "Something went wrong. Please try again.",
+
+  "reviewConfirmAuthError": "User not authenticated",
+
+  "reviewConfirmStaffUnavailable":
+    "Selected staff is not available at this time. Please choose another slot.",
+
+  "reviewConfirmSalonAddress": "Anna Nagar, Chennai",
+
+  "reviewConfirmTimeRange": "{startTime} - {endTime}",
+  "@reviewConfirmTimeRange": {
+    "description": "Shows appointment start and end time",
+    "placeholders": {
+      "startTime": { "type": "String" },
+      "endTime": { "type": "String" }
+    }
+  },
+
+  "reviewConfirmDate": "{date}",
+  "@reviewConfirmDate": {
+    "description": "Shows selected appointment date",
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+
+  "reviewConfirmServiceDuration": "{minutes} mins",
+  "@reviewConfirmServiceDuration": {
+    "description": "Service duration in minutes",
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+
+  "reviewConfirmTaxes": "Taxes",
+  "reviewConfirmTotal": "Total",
+  "reviewConfirmPayNow": "Pay now",
+  "reviewConfirmPayAtVenue": "Pay at venue",
+
+  "reviewConfirmBottomSummary":
+    "{currency}{amount}\n{count} service",
+  "@reviewConfirmBottomSummary": {
+    "description": "Bottom bar total price and service count",
+    "placeholders": {
+      "currency": { "type": "String" },
+      "amount": { "type": "int" },
+      "count": { "type": "int" }
+    }
+  },
+
+  "reviewConfirmConfirmButton": "Confirm",
+
+  "reviewConfirmBookingFailed": "Booking failed"
+
+}

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/book_appointment_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
@@ -20,6 +21,7 @@ class SelectProfessionalScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SafeArea(
       bottom: true,
       child: Scaffold(
@@ -32,9 +34,9 @@ class SelectProfessionalScreen extends StatelessWidget {
             child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
           ),
           centerTitle: true,
-          title: const Text(
-            "Select professional",
-            style: TextStyle(
+          title: Text(
+            l10n.selectProfessionalTitle,
+            style: const TextStyle(
               fontFamily: "PoppinsSemiBold",
               color: Colors.black,
               fontSize: 18,
@@ -71,7 +73,7 @@ class SelectProfessionalScreen extends StatelessWidget {
                     ),
                   );
                 },
-                child: _professionalCard(staff),
+                child: _professionalCard(staff, context),
               );
             },
           ),
@@ -81,7 +83,7 @@ class SelectProfessionalScreen extends StatelessWidget {
   }
 
   // ---------------- STAFF CARD UI ----------------
-  Widget _professionalCard(Map<String, dynamic> staff) {
+  Widget _professionalCard(Map<String, dynamic> staff, BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.softIvory,
@@ -94,7 +96,8 @@ class SelectProfessionalScreen extends StatelessWidget {
           const Icon(Icons.person, size: 30),
           const SizedBox(height: 12),
           Text(
-            staff["name"] ?? "Staff",
+            staff["name"] ??
+                AppLocalizations.of(context)!.selectProfessionalFallbackName,
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontFamily: "PoppinsSemiBold",

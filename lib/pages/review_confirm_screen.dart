@@ -1,7 +1,10 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -56,7 +59,6 @@ class ReviewConfirmScreen extends StatelessWidget {
       time.minute,
     );
 
-    print(dt);
     return dt.toUtc().toIso8601String();
   }
 
@@ -118,8 +120,9 @@ class ReviewConfirmScreen extends StatelessWidget {
 
       // ✅ SUCCESS
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Booking confirmed successfully 🎉"),
+        SnackBar(
+          content:
+              Text(AppLocalizations.of(context)!.reviewConfirmBookingSuccess),
           backgroundColor: Colors.green,
         ),
       );
@@ -128,7 +131,7 @@ class ReviewConfirmScreen extends StatelessWidget {
     } on BookingException catch (e) {
       // ❌ BUSINESS ERROR (like staff not available)
       final msg = e.message.contains("not available")
-          ? "Selected staff is not available at this time. Please choose another slot."
+          ? AppLocalizations.of(context)!.reviewConfirmStaffUnavailable
           : e.message;
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -140,8 +143,9 @@ class ReviewConfirmScreen extends StatelessWidget {
     } catch (_) {
       // ❌ UNKNOWN ERROR
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Something went wrong. Please try again."),
+        SnackBar(
+          content:
+              Text(AppLocalizations.of(context)!.reviewConfirmGenericError),
           backgroundColor: Colors.red,
         ),
       );
@@ -153,7 +157,10 @@ class ReviewConfirmScreen extends StatelessWidget {
   // --------------------------------------------------
   @override
   Widget build(BuildContext context) {
-    final dateText = DateFormat("EEEE d MMMM").format(selectedDate);
+    final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).toString();
+
+    final dateText = DateFormat("EEEE d MMMM", locale).format(selectedDate);
     final timeText =
         DateFormat("hh:mm a").format(DateFormat("HH:mm").parse(selectedTime));
 
@@ -174,10 +181,10 @@ class ReviewConfirmScreen extends StatelessWidget {
           elevation: 0,
           leading: const BackButton(color: Colors.black),
           centerTitle: true,
-          title: const Text(
-            "Review and Confirm",
-            style:
-                TextStyle(fontFamily: "PoppinsSemiBold", color: Colors.black),
+          title: Text(
+            l10n.reviewConfirmTitle,
+            style: const TextStyle(
+                fontFamily: "PoppinsSemiBold", color: Colors.black),
           ),
           actions: [
             GestureDetector(
@@ -269,7 +276,10 @@ class ReviewConfirmScreen extends StatelessWidget {
                           Text(s["title"],
                               style: const TextStyle(
                                   fontFamily: "PoppinsSemiBold")),
-                          Text("${s["durationMinutes"]} mins"),
+                          Text(
+                            l10n.reviewConfirmServiceDuration(
+                                s["durationMinutes"]),
+                          ),
                         ],
                       ),
                       Text("₹$price",
@@ -281,11 +291,11 @@ class ReviewConfirmScreen extends StatelessWidget {
               }),
 
               const Divider(),
-              _priceRow("Taxes", taxes),
+              _priceRow(l10n.reviewConfirmTaxes, taxes),
               const Divider(),
-              _priceRow("Total", grandTotal, bold: true),
-              _priceRow("Pay now", 0, green: true),
-              _priceRow("Pay at venue", grandTotal),
+              _priceRow(l10n.reviewConfirmTotal, grandTotal, bold: true),
+              _priceRow(l10n.reviewConfirmPayNow, 0, green: true),
+              _priceRow(l10n.reviewConfirmPayAtVenue, grandTotal),
 
               const SizedBox(height: 90),
             ],
@@ -300,7 +310,8 @@ class ReviewConfirmScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  "₹$grandTotal\n${selectedServices.length} service",
+                  l10n.reviewConfirmBottomSummary(
+                      "₹", grandTotal, selectedServices.length),
                   style: const TextStyle(
                       fontFamily: "PoppinsSemiBold", fontSize: 13),
                 ),
@@ -314,9 +325,9 @@ class ReviewConfirmScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
                 ),
-                child: const Text(
-                  "Confirm",
-                  style: TextStyle(
+                child: Text(
+                  l10n.reviewConfirmConfirmButton,
+                  style: const TextStyle(
                       fontFamily: "PoppinsSemiBold", color: Colors.white),
                 ),
               )

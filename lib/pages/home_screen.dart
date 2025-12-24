@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/salon_detail_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
@@ -51,6 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final size = MediaQuery.of(context).size;
     final width = size.width;
     final height = size.height;
@@ -104,15 +106,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   scrollDirection: Axis.horizontal,
                   children: [
                     categoryItem('assets/images/categories/haircut.png',
-                        'Haircut', width, height),
-                    categoryItem('assets/images/categories/spa.png', 'Spa',
-                        width, height),
-                    categoryItem('assets/images/categories/nail.png', 'Nails',
-                        width, height),
+                        l10n.categoryHaircut, width, height),
+                    categoryItem('assets/images/categories/spa.png',
+                        l10n.categorySpa, width, height),
+                    categoryItem('assets/images/categories/nail.png',
+                        l10n.categoryNails, width, height),
                     categoryItem('assets/images/categories/facial.png',
-                        'Facial', width, height),
+                        l10n.categoryFacial, width, height),
                     categoryItem('assets/images/categories/haircut.png',
-                        'Haircut', width, height),
+                        l10n.categoryHaircut, width, height),
                   ],
                 ),
               ),
@@ -150,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               // === Special Offers section ===
               Text(
-                "Special Offers",
+                l10n.homeSpecialOffers,
                 style: TextStyle(
                   fontFamily: "PoppinsSemiBold",
                   fontSize: width * 0.05,
@@ -165,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(height: height * 0.04),
 
               Text(
-                "Recommended",
+                l10n.homeRecommended,
                 style: TextStyle(
                   fontFamily: "PoppinsSemiBold",
                   fontSize: width * 0.05,
@@ -185,6 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // === Salon Card List (Horizontal)
   Widget buildSalonList(double width, double height, List images) {
+    final l10n = AppLocalizations.of(context)!;
     return SizedBox(
       height: height * 0.3,
       child: ListView.builder(
@@ -307,39 +310,53 @@ class _HomeScreenState extends State<HomeScreen> {
                                     color: AppColors.lighterGreyTone,
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: const Text(
-                                    "Salon",
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        fontFamily: "PoppinsRegular"),
+                                  child: Text(
+                                    l10n.homeSalonLabel,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontFamily: "PoppinsRegular",
+                                    ),
                                   ),
                                 ),
+
                                 SizedBox(width: width * 0.02),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: width * 0.02,
-                                    vertical: height * 0.004,
+
+                                // 👇 THIS is mandatory
+                                Flexible(
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: width * 0.02,
+                                      vertical: height * 0.004,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.rusticSunset,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Image.asset(
+                                          'assets/images/icons/discount_tag.png',
+                                          width: width * 0.035,
+                                        ),
+                                        SizedBox(width: width * 0.01),
+
+                                        // 👇 text constrained properly
+                                        Expanded(
+                                          child: Text(
+                                            l10n.homeSaveUpto("10"),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: width * 0.03,
+                                              fontFamily: "PoppinsRegular",
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.rusticSunset,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Image.asset(
-                                        'assets/images/icons/discount_tag.png',
-                                        width: width * 0.035,
-                                      ),
-                                      SizedBox(width: width * 0.01),
-                                      const Text(
-                                        "Save up to 10%",
-                                        style: TextStyle(
-                                            fontSize: 12,
-                                            fontFamily: "PoppinsRegular"),
-                                      ),
-                                    ],
-                                  ),
-                                )
+                                ),
                               ],
                             )
                           ],

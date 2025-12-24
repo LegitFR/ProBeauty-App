@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/book_appointment_screen.dart'; // ✅ CHANGED
 import 'package:probeauty_app/pages/select_professional_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
@@ -44,6 +45,7 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final filtered = widget.services
         .where(
             (s) => (s["category"] ?? "Featured").toString() == selectedCategory)
@@ -61,9 +63,9 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
             child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
           ),
           centerTitle: true,
-          title: const Text(
-            "Select Services",
-            style: TextStyle(
+          title: Text(
+            l10n.selectServicesTitle,
+            style: const TextStyle(
               fontFamily: "PoppinsSemiBold",
               color: Colors.black,
             ),
@@ -123,7 +125,6 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
             onPressed: selectedServices.isEmpty
                 ? null
                 : () {
-                    // ✅ ONLY THIS NAVIGATION CHANGED
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -143,9 +144,9 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text(
-              "Continue",
-              style: TextStyle(
+            child: Text(
+              l10n.selectServicesContinue,
+              style: const TextStyle(
                   fontFamily: "PoppinsSemiBold",
                   fontSize: 14,
                   color: Colors.white),
@@ -157,6 +158,7 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
   }
 
   Widget _serviceTile(Map<String, dynamic> service) {
+    final l10n = AppLocalizations.of(context)!;
     final serviceId = service["id"];
     final isSelected = selectedServices.any((s) => s["id"] == serviceId);
 
@@ -196,7 +198,7 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
                       )),
                   const SizedBox(height: 4),
                   Text(
-                    "${service["durationMinutes"]} mins",
+                    l10n.selectServicesDuration(service["durationMinutes"]),
                     style: const TextStyle(
                       fontFamily: "PoppinsRegular",
                       fontSize: 13,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
 class DecisionScreen extends StatefulWidget {
@@ -61,7 +62,7 @@ class _DecisionScreenState extends State<DecisionScreen> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "Hello!",
+                          AppLocalizations.of(context)!.decisionGreeting,
                           style: TextStyle(
                             fontSize: size.width * 0.075,
                             color: Colors.white,
@@ -73,7 +74,7 @@ class _DecisionScreenState extends State<DecisionScreen> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "Create your account or login in to book and manage your appointments.",
+                          AppLocalizations.of(context)!.decisionSubtitle,
                           style: TextStyle(
                             fontSize: size.width * 0.035,
                             color: Colors.white,
@@ -96,7 +97,7 @@ class _DecisionScreenState extends State<DecisionScreen> {
                             Navigator.pushNamed(context, '/login');
                           },
                           child: Text(
-                            "Login",
+                            AppLocalizations.of(context)!.loginButton,
                             style: TextStyle(
                               fontFamily: 'PoppinsRegular',
                               fontSize: size.width * 0.04,
@@ -121,7 +122,7 @@ class _DecisionScreenState extends State<DecisionScreen> {
                             Navigator.pushNamed(context, '/signup');
                           },
                           child: Text(
-                            "Sign Up",
+                            AppLocalizations.of(context)!.signupButton,
                             style: TextStyle(
                               fontFamily: 'PoppinsRegular',
                               fontSize: size.width * 0.04,
@@ -132,7 +133,7 @@ class _DecisionScreenState extends State<DecisionScreen> {
                       ),
                       SizedBox(height: size.height * 0.04),
                       Text(
-                        "Sign in with",
+                        AppLocalizations.of(context)!.signInWith,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: size.width * 0.03,
@@ -155,7 +156,7 @@ class _DecisionScreenState extends State<DecisionScreen> {
                       ),
                       SizedBox(height: size.height * 0.03),
                       Text(
-                        "Continue as Guest",
+                        AppLocalizations.of(context)!.continueAsGuest,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: size.width * 0.03,

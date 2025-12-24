@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:probeauty_app/l10n/app_localizations.dart";
 import "package:probeauty_app/resources/AppColors.dart";
 
 class NotificationScreen extends StatelessWidget {
@@ -6,6 +7,7 @@ class NotificationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
 
     return SafeArea(
@@ -38,7 +40,7 @@ class NotificationScreen extends StatelessWidget {
                       onPressed: () => Navigator.pop(context),
                     ),
                     Text(
-                      "Notifications",
+                      l10n.notificationsTitle,
                       style: TextStyle(
                         fontSize: screenWidth * 0.05,
                         fontFamily: "PoppinsSemiBold",
@@ -66,7 +68,7 @@ class NotificationScreen extends StatelessWidget {
             children: [
               const SizedBox(height: 17),
               Text(
-                "Unread (2)",
+                l10n.notificationsUnreadCount(2),
                 style: TextStyle(
                   fontSize: screenWidth * 0.05,
                   fontFamily: "PoppinsSemiBold",

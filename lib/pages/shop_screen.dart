@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/models/product.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
@@ -85,7 +87,6 @@ class _ShopScreenState extends State<ShopScreen> {
   // ---------------- Fetch Single Salon Name ----------------
   Future<void> _fetchSalonName(String salonId) async {
     try {
-      print(salonId);
       final res = await http.get(
         Uri.parse('$_baseUrl/api/v1/salons/$salonId'),
         headers: {'Content-Type': 'application/json'},
@@ -106,6 +107,7 @@ class _ShopScreenState extends State<ShopScreen> {
   // ---------------------- UI ----------------------
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final size = MediaQuery.of(context).size;
     final width = size.width;
     final height = size.height;
@@ -140,10 +142,10 @@ class _ShopScreenState extends State<ShopScreen> {
                       children: [
                         Icon(Icons.search, color: Colors.grey[600], size: 22),
                         SizedBox(width: width * 0.025),
-                        const Expanded(
+                        Expanded(
                           child: TextField(
                             decoration: InputDecoration(
-                              hintText: "Search",
+                              hintText: l10n.shopSearchHint,
                               border: InputBorder.none,
                             ),
                           ),
@@ -165,14 +167,14 @@ class _ShopScreenState extends State<ShopScreen> {
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       children: [
-                        categoryItem(
-                            'assets/images/shop/shampoo.png', 'Shampoo', width),
+                        categoryItem('assets/images/shop/shampoo.png',
+                            l10n.shopCategoryShampoo, width),
                         categoryItem('assets/images/shop/haircolor.png',
-                            'Hair Colour', width),
+                            l10n.shopCategoryConditioner, width),
                         categoryItem('assets/images/shop/conditioner.png',
-                            'Conditioner', width),
+                            l10n.shopCategoryHairColour, width),
                         categoryItem('assets/images/shop/hairoil.png',
-                            'Hair Oil', width),
+                            l10n.shopCategoryHairOil, width),
                       ],
                     ),
                   ),
@@ -209,7 +211,7 @@ class _ShopScreenState extends State<ShopScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Special offers",
+                        l10n.shopSpecialOffers,
                         style: TextStyle(
                           fontFamily: "PoppinsSemiBold",
                           fontSize: width * 0.045,
@@ -239,10 +241,11 @@ class _ShopScreenState extends State<ShopScreen> {
 
   // ---------------- Build Product List ----------------
   Widget _buildSpecialOffersList(double width) {
+    final l10n = AppLocalizations.of(context)!;
     if (_loading) return const Center(child: CircularProgressIndicator());
     if (_error != null)
       return Text(_error!, style: const TextStyle(color: Colors.red));
-    if (_products.isEmpty) return const Text("No products available.");
+    if (_products.isEmpty) return Text(l10n.shopNoProducts);
 
     return ListView.builder(
       scrollDirection: Axis.horizontal,
@@ -250,7 +253,7 @@ class _ShopScreenState extends State<ShopScreen> {
       itemBuilder: (context, index) {
         final p = _products[index];
         final image = p.images.isNotEmpty ? p.images[0] : null;
-        final salonName = salonNames[p.salonId] ?? "Loading...";
+        final salonName = salonNames[p.salonId] ?? l10n.shopLoadingSalon;
 
         return GestureDetector(
           onTap: () {
@@ -259,7 +262,8 @@ class _ShopScreenState extends State<ShopScreen> {
               '/product_screen',
               arguments: {
                 "product": p,
-                "salonName": salonName == "Loading..." ? "Salon" : salonName,
+                "salonName":
+                    salonName == l10n.shopLoadingSalon ? "Salon" : salonName,
               },
             );
           },
@@ -307,14 +311,15 @@ class _ShopScreenState extends State<ShopScreen> {
     required String discount,
     String? imageUrl,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       width: width * 0.5,
       margin: EdgeInsets.only(right: width * 0.035),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          const BoxShadow(blurRadius: 8, color: Colors.black12),
+        boxShadow: const [
+          BoxShadow(blurRadius: 8, color: Colors.black12),
         ],
       ),
       child: Column(
@@ -363,10 +368,10 @@ class _ShopScreenState extends State<ShopScreen> {
                 bottomRight: Radius.circular(14),
               ),
             ),
-            child: const Center(
+            child: Center(
               child: Text(
-                "Shop",
-                style: TextStyle(color: Colors.white),
+                l10n.shopButton,
+                style: const TextStyle(color: Colors.white),
               ),
             ),
           )

@@ -1,0 +1,352 @@
+{
+  "@@locale": "fr",
+
+  "decisionGreeting": "Bonjour !",
+  "decisionSubtitle": "Créez votre compte ou connectez-vous pour réserver et gérer vos rendez-vous.",
+  "loginButton": "Connexion",
+  "signupButton": "S'inscrire",
+  "signInWith": "Se connecter avec",
+  "continueAsGuest": "Continuer en tant qu'invité",
+
+  "loginWelcomeBack": "Bon retour,",
+  "loginSubtitle": "Connexion !",
+
+  "loginEmailHint": "E-mail ou numéro de téléphone",
+  "loginPasswordHint": "Mot de passe",
+  "loginEmptyFieldsError": "Veuillez saisir l’e-mail/le téléphone et le mot de passe",
+  "loginSuccessMessage": "Connexion réussie !",
+  "loginFailedMessage": "Échec de la connexion",
+  "loginErrorMessage": "Erreur : {error}",
+
+  "signupWelcome": "Bienvenue,",
+  "signupSubtitle": "Inscription !",
+
+  "signupFirstNameHint": "Prénom",
+  "signupLastNameHint": "Nom",
+  "signupContactHint": "E-mail ou numéro de téléphone",
+  "signupPasswordHint": "Mot de passe",
+
+  "signupGetOtpButton": "Obtenir le code OTP",
+  "signupLoginButton": "Connexion",
+
+  "signupAlreadyMember": "Déjà membre ?",
+  "signupOrText": "OU",
+  "signupWithText": "S'inscrire avec",
+
+  "signupEmptyFieldsError": "Veuillez remplir tous les champs",
+  "signupSuccessMessage": "Inscription réussie !",
+  "signupFailedMessage": "Échec de l'inscription",
+  "signupErrorMessage": "Erreur : {error}",
+
+  "bottomNavHome": "Mon Precut",
+  "bottomNavExplore": "Explorer",
+  "bottomNavShop": "Boutique",
+  "bottomNavAppointments": "Rendez-vous",
+  "bottomNavProfile": "Profil",
+
+  "homeSpecialOffers": "Offres spéciales",
+  "homeRecommended": "Recommandé",
+
+  "categoryHaircut": "Coupe de cheveux",
+  "categorySpa": "Spa",
+  "categoryNails": "Ongles",
+  "categoryFacial": "Soin du visage",
+
+  "homeSalonLabel": "Salon",
+  "homeSaveUpto": "Économisez jusqu’à {percent} %",
+
+  "homeReviewCount": "({count})",
+
+  "exploreTitle": "Explorer",
+  "exploreSearchHint": "Tout soin ou établissement",
+  "exploreAnyDate": "N'importe quelle date",
+  "exploreAnyTime": "N'importe quelle heure",
+  "exploreSearchButton": "Rechercher sur Probeauty",
+
+  "exploreMorning": "Matin",
+  "exploreAfternoon": "Après-midi",
+  "exploreEvening": "Soir",
+
+  "exploreSort": "Trier",
+  "exploreMaxPrice": "Prix maximum",
+  "exploreVenueType": "Type d’établissement",
+
+  "exploreAppointmentsBooked": "{count} rendez-vous réservés aujourd'hui",
+
+  "exploreServices": "Services",
+
+  "exploreSortByTitle": "Trier par",
+  "exploreSortRecommended": "Recommandé",
+  "exploreSortTopRated": "Les mieux notés",
+  "exploreSortNearest": "Les plus proches",
+
+  "exploreMaximumPrice": "Prix maximum",
+
+  "exploreVenueEveryone": "Tout le monde",
+  "exploreVenueMaleOnly": "Hommes uniquement",
+  "exploreVenueFemaleOnly": "Femmes uniquement",
+
+  "exploreFiltersTitle": "Filtres",
+  "exploreClearAll": "Tout effacer",
+  "exploreApply": "Appliquer",
+
+  "exploreDetectingLocation": "Détection de la localisation...",
+
+  "shopSearchHint": "Rechercher",
+  "shopCategoryShampoo": "Shampooing",
+  "shopCategoryHairColour": "Coloration",
+  "shopCategoryConditioner": "Après-shampooing",
+  "shopCategoryHairOil": "Huile capillaire",
+
+  "shopSpecialOffers": "Offres spéciales",
+  "shopNoProducts": "Aucun produit disponible.",
+  "shopLoadingSalon": "Chargement...",
+  "shopButton": "Acheter",
+
+  "appointmentsTitle": "Rendez-vous",
+  "appointmentsLoading": "Chargement...",
+  "appointmentsEmpty": "Aucune réservation trouvée",
+
+  "appointmentsConfirmedTitle": "Confirmé",
+  "appointmentsPreviousTitle": "Précédent",
+  "appointmentsUnknownSalon": "Salon inconnu",
+  "appointmentsGetDirections": "Obtenir l’itinéraire",
+  "appointmentsBookAgain": "Réserver à nouveau",
+
+  "appointmentsDurationPriceService": "{minutes} min | ₹{price} | {service}",
+
+  "profileTitle": "Profil",
+  "profileEdit": "Modifier le profil",
+  "profileDefaultUser": "Utilisateur",
+
+  "profileMenuFavourites": "Favoris",
+  "profileMenuSavedAddresses": "Adresses enregistrées",
+  "profileMenuOrders": "Commandes",
+  "profileMenuPaymentMethods": "Moyens de paiement",
+  "profileMenuGiftCard": "Carte cadeau",
+  "profileMenuNotifications": "Notifications",
+  "profileMenuSettings": "Paramètres",
+
+  "profileLanguageEnglish": "Anglais",
+  "profileSupport": "Support",
+  "profileLogout": "Déconnexion",
+
+  "savedAddressTitle": "Adresses enregistrées",
+  "savedAddressAddNew": "Ajouter une nouvelle adresse",
+
+  "ordersTitle": "Commandes",
+  "ordersActiveTitle": "Commandes actives",
+  "ordersLoading": "Chargement...",
+  "ordersEmpty": "Aucune commande active",
+  "ordersOrderLabel": "Commande n°{id}",
+  "ordersDeliveryOn": "Livraison le —",
+  "ordersItemPrice": "₹{price} ({quantity} article)",
+  "ordersTrackButton": "Suivre",
+  "ordersCancelButton": "Annuler la commande",
+
+  "notificationsTitle": "Notifications",
+  "notificationsUnreadCount": "Non lues ({count})",
+
+  "notificationAppointmentSuccessTitle": "Rendez-vous réussi",
+  "notificationAppointmentScheduledMessage":
+    "Votre rendez-vous a été programmé avec succès avec le Dr Meera à 16h30...",
+  "notificationAppointmentConfirmedMessage":
+    "Votre rendez-vous a été confirmé avec succès pour demain...",
+  "notificationTimeJustNow": "À l'instant",
+
+  "notificationSettingsTitle": "Paramètres des notifications",
+
+  "notificationSettingAppointmentTitle": "Rendez-vous par SMS",
+  "notificationSettingAppointmentDesc":
+    "Recevez des messages selon les paramètres de l’expéditeur",
+
+  "notificationSettingEmailTitle": "Marketing par e-mail",
+  "notificationSettingEmailDesc":
+    "Recevez des offres et des actualités par e-mail",
+
+  "notificationSettingOrderSupportTitle": "Commandes et support",
+  "notificationSettingOrderSupportDesc":
+    "Recevez des notifications concernant vos commandes, paiements et communications de support",
+
+  "notificationSettingWhatsappTitle": "Messages WhatsApp",
+  "notificationSettingWhatsappDesc":
+    "Recevez des mises à jour via WhatsApp",
+
+  "appointmentStatusConfirmed": "Confirmé",
+  "appointmentActionAddCalendar": "Ajouter au calendrier",
+  "appointmentActionAddCalendarDesc": "Définir un rappel",
+  "appointmentActionManage": "Gérer le rendez-vous",
+  "appointmentActionManageDesc": "Reprogrammer ou annuler",
+  "appointmentOverviewTitle": "Aperçu",
+
+  "appointmentTaxes": "Taxes",
+  "appointmentTotal": "Total",
+  "appointmentPayAtVenue": "Payer sur place",
+
+  "salonOpenUntil": "Ouvert jusqu’à {time}",
+
+  "salonTabServices": "SERVICES",
+  "salonTabReviews": "AVIS",
+  "salonTabTeam": "ÉQUIPE",
+  "salonTabGiftCards": "CARTES CADEAUX",
+  "salonTabDetails": "DÉTAILS",
+
+  "salonServicesAvailable": "{count} services disponibles",
+  "salonBookNow": "Réserver maintenant",
+  "salonBookButton": "RÉSERVER",
+
+  "reviewsTitle": "Avis",
+  "reviewsTotalCount": "{count} avis",
+
+  "reviewsTabServices": "SERVICES",
+  "reviewsTabReviews": "AVIS",
+  "reviewsTabTeam": "ÉQUIPE",
+  "reviewsTabGiftCards": "CARTES CADEAUX",
+  "reviewsTabDetails": "DÉTAILS",
+
+  "reviewsVerifiedUser": "Utilisateur Precut vérifié",
+  "reviewsUnableToLoad": "Impossible de charger les avis",
+  "reviewsBookNow": "Réserver maintenant",
+  "reviewsReport": "Signaler",
+  "reviewsUserFallback": "Utilisateur",
+  "reviewsServiceFallback": "Service",
+
+  "reviewsMonthJan": "Jan",
+  "reviewsMonthFeb": "Fév",
+  "reviewsMonthMar": "Mar",
+  "reviewsMonthApr": "Avr",
+  "reviewsMonthMay": "Mai",
+  "reviewsMonthJun": "Juin",
+  "reviewsMonthJul": "Juil",
+  "reviewsMonthAug": "Août",
+  "reviewsMonthSep": "Sep",
+  "reviewsMonthOct": "Oct",
+  "reviewsMonthNov": "Nov",
+  "reviewsMonthDec": "Déc",
+
+
+
+  "selectServicesTitle": "Sélectionner des services",
+
+  "selectServicesFeaturedCategory": "En vedette",
+
+  "selectServicesContinue": "Continuer",
+
+  "selectServicesDuration": "{minutes} min",
+
+  "@selectServicesDuration": {
+    "description": "Durée du service en minutes",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+
+  "selectServicesPrice": "₹{price}",
+
+  "@selectServicesPrice": {
+    "description": "Prix du service",
+    "placeholders": {
+      "price": {
+        "type": "num"
+      }
+    }
+  },
+
+  "selectProfessionalTitle": "Sélectionner un professionnel",
+
+  "selectProfessionalFallbackName": "Personnel",
+
+   "bookAppointmentTitle": "Prendre un rendez-vous",
+
+  "bookAppointmentMonthYear": "{monthYear}",
+  "@bookAppointmentMonthYear": {
+    "description": "Mois et année affichés au-dessus du calendrier",
+    "placeholders": {
+      "monthYear": { "type": "String" }
+    }
+  },
+
+  "bookAppointmentLoadingSlots": "Chargement des créneaux...",
+
+  "bookAppointmentWeekMon": "Lu",
+  "bookAppointmentWeekTue": "Ma",
+  "bookAppointmentWeekWed": "Me",
+  "bookAppointmentWeekThu": "Je",
+  "bookAppointmentWeekFri": "Ve",
+  "bookAppointmentWeekSat": "Sa",
+  "bookAppointmentWeekSun": "Di",
+
+  "firstVisitTitle": "Est-ce votre première visite chez\n{salonName} ?",
+
+  "@firstVisitTitle": {
+    "description": "Demande à l’utilisateur s’il s’agit de sa première visite au salon",
+    "placeholders": {
+      "salonName": { "type": "String" }
+    }
+  },
+
+  "firstVisitYesTitle": "Oui",
+  "firstVisitYesSubtitle": "C’est ma première visite",
+
+  "firstVisitNoTitle": "Non",
+  "firstVisitNoSubtitle": "J’y suis déjà allé(e)",
+
+   "reviewConfirmTitle": "Vérifier et confirmer",
+
+  "reviewConfirmBookingSuccess": "Réservation confirmée avec succès 🎉",
+  "reviewConfirmGenericError": "Une erreur s’est produite. Veuillez réessayer.",
+
+  "reviewConfirmAuthError": "Utilisateur non authentifié",
+
+  "reviewConfirmStaffUnavailable":
+    "Le professionnel sélectionné n’est pas disponible à ce créneau. Veuillez choisir un autre horaire.",
+
+  "reviewConfirmSalonAddress": "Anna Nagar, Chennai",
+
+  "reviewConfirmTimeRange": "{startTime} - {endTime}",
+  "@reviewConfirmTimeRange": {
+    "description": "Affiche l’heure de début et de fin du rendez-vous",
+    "placeholders": {
+      "startTime": { "type": "String" },
+      "endTime": { "type": "String" }
+    }
+  },
+
+  "reviewConfirmDate": "{date}",
+  "@reviewConfirmDate": {
+    "description": "Affiche la date du rendez-vous",
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+
+  "reviewConfirmServiceDuration": "{minutes} min",
+  "@reviewConfirmServiceDuration": {
+    "description": "Durée du service en minutes",
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+
+  "reviewConfirmTaxes": "Taxes",
+  "reviewConfirmTotal": "Total",
+  "reviewConfirmPayNow": "Payer maintenant",
+  "reviewConfirmPayAtVenue": "Payer sur place",
+
+  "reviewConfirmBottomSummary":
+    "{currency}{amount}\n{count} service",
+  "@reviewConfirmBottomSummary": {
+    "description": "Résumé du prix et du nombre de services",
+    "placeholders": {
+      "currency": { "type": "String" },
+      "amount": { "type": "int" },
+      "count": { "type": "int" }
+    }
+  },
+
+  "reviewConfirmConfirmButton": "Confirmer",
+
+  "reviewConfirmBookingFailed": "Échec de la réservation"
+}

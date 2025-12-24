@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/reviews_screen.dart';
 import 'package:probeauty_app/pages/select_services_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
@@ -35,6 +36,7 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final size = MediaQuery.of(context).size;
     final width = size.width;
     final height = size.height;
@@ -183,9 +185,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                       ),
 
                       const SizedBox(height: 4),
-                      const Text(
-                        "Open until 10:00 pm",
-                        style: TextStyle(
+                      Text(
+                        l10n.salonOpenUntil("10:00pm"),
+                        style: const TextStyle(
                           fontFamily: "PoppinsRegular",
                           fontSize: 14,
                           color: Colors.black54,
@@ -197,17 +199,19 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                       // ---------------------------
                       // TAB BAR
                       // ---------------------------
-                      const SizedBox(
+                      SizedBox(
                         height: 45,
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
-                              _TabButton(title: "SERVICES", index: 0),
-                              _TabButton(title: "REVIEWS", index: 1),
-                              _TabButton(title: "TEAM", index: 2),
-                              _TabButton(title: "GIFT CARDS", index: 3),
-                              _TabButton(title: "DETAILS", index: 4),
+                              _TabButton(
+                                  title: l10n.salonTabServices, index: 0),
+                              _TabButton(title: l10n.salonTabReviews, index: 1),
+                              _TabButton(title: l10n.salonTabTeam, index: 2),
+                              _TabButton(title: l10n.salonTabDetails, index: 3),
+                              _TabButton(
+                                  title: l10n.salonTabGiftCards, index: 4),
                             ],
                           ),
                         ),
@@ -222,7 +226,8 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                       for (var s in widget.services) ...[
                         _serviceTile(
                           title: s["title"] ?? "",
-                          subtitle: "${s["durationMinutes"]} mins",
+                          subtitle:
+                              l10n.salonServiceDuration(s["durationMinutes"]),
                           price: "₹${s["price"]}",
                         ),
                         const SizedBox(height: 12),
@@ -247,7 +252,8 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "${widget.services.length} services available",
+                l10n.salonServicesAvailable(widget.services.length),
+                // "${widget.services.length} services available",
                 style: const TextStyle(
                   fontFamily: "PoppinsRegular",
                   fontSize: 13,

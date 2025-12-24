@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter/cupertino.dart";
+import "package:probeauty_app/l10n/app_localizations.dart";
 import "package:probeauty_app/resources/AppColors.dart";
 
 class NotificationSettings extends StatefulWidget {
@@ -17,6 +18,7 @@ class _NotificationSettingsState extends State<NotificationSettings> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -50,7 +52,7 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                       onPressed: () => Navigator.pop(context),
                     ),
                     Text(
-                      "Notification Settings",
+                      l10n.notificationSettingsTitle,
                       style: TextStyle(
                         fontSize: screenWidth * 0.05,
                         fontFamily: "PoppinsSemiBold",
@@ -73,30 +75,29 @@ class _NotificationSettingsState extends State<NotificationSettings> {
             children: [
               SizedBox(height: screenHeight * 0.03),
               _buildSettingItem(
-                title: "Text message appointment",
-                description: "Receive texts based on your sender’s settings",
+                title: l10n.notificationSettingAppointmentTitle,
+                description: l10n.notificationSettingAppointmentDesc,
                 value: appointmentAlerts,
                 onChanged: (val) => setState(() => appointmentAlerts = val),
               ),
               SizedBox(height: screenHeight * 0.03),
               _buildSettingItem(
-                title: "Email Marketing",
-                description: "Receive offers and news via email",
+                title: l10n.notificationSettingEmailTitle,
+                description: l10n.notificationSettingEmailDesc,
                 value: offerUpdates,
                 onChanged: (val) => setState(() => offerUpdates = val),
               ),
               SizedBox(height: screenHeight * 0.03),
               _buildSettingItem(
-                title: "Order and Support",
-                description:
-                    "Receive notifications related to your order status, payments and support communications",
+                title: l10n.notificationSettingOrderSupportTitle,
+                description: l10n.notificationSettingOrderSupportDesc,
                 value: systemNotifications,
                 onChanged: (val) => setState(() => systemNotifications = val),
               ),
               SizedBox(height: screenHeight * 0.03),
               _buildSettingItem(
-                title: "WhatsApp Messages",
-                description: "Get updates from us on WhatsApp",
+                title: l10n.notificationSettingWhatsappTitle,
+                description: l10n.notificationSettingWhatsappDesc,
                 value: reminders,
                 onChanged: (val) => setState(() => reminders = val),
               ),

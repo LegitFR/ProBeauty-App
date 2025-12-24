@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
+import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
 class ReviewsScreen extends StatefulWidget {
@@ -79,6 +80,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   // ========================
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.softIvory,
 
@@ -121,11 +123,12 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                       onTap: () {
                         Navigator.pop(context);
                       },
-                      child: const _TopTab(title: "SERVICES", isActive: false)),
-                  const _TopTab(title: "REVIEWS", isActive: true),
-                  const _TopTab(title: "TEAM", isActive: false),
-                  const _TopTab(title: "GIFT CARDS", isActive: false),
-                  const _TopTab(title: "DETAILS", isActive: false),
+                      child: _TopTab(
+                          title: l10n.reviewsTabServices, isActive: false)),
+                  _TopTab(title: l10n.reviewsTabReviews, isActive: true),
+                  _TopTab(title: l10n.reviewsTabTeam, isActive: false),
+                  _TopTab(title: l10n.reviewsTabGiftCards, isActive: false),
+                  _TopTab(title: l10n.reviewsTabDetails, isActive: false),
                 ],
               ),
             ),
@@ -173,7 +176,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  "$_totalReviews reviews",
+                                  l10n.reviewsTotalCount(_totalReviews),
                                   style: const TextStyle(
                                     fontFamily: "PoppinsRegular",
                                     fontSize: 13,
@@ -185,7 +188,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                             const SizedBox(width: 24),
 
                             // RIGHT
-                            Expanded(
+                            const Expanded(
                               child: Column(
                                 children: const [
                                   _RatingDistribution(star: 5, count: 1190),
@@ -204,9 +207,9 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                         // ------------------------
                         // REVIEWS HEADER
                         // ------------------------
-                        const Text(
-                          "Reviews",
-                          style: TextStyle(
+                        Text(
+                          l10n.reviewsTitle,
+                          style: const TextStyle(
                             fontFamily: "PoppinsSemiBold",
                             fontSize: 16,
                           ),
@@ -267,9 +270,9 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          child: const Text(
-            "Book now",
-            style: TextStyle(
+          child: Text(
+            AppLocalizations.of(context)!.reviewsBookNow,
+            style: const TextStyle(
               fontFamily: "PoppinsSemiBold",
               color: Colors.white,
               fontSize: 14,
@@ -291,20 +294,22 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   }
 
   String _month(int m) {
-    const months = [
+    final l10n = AppLocalizations.of(context)!;
+
+    final months = [
       "",
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec"
+      l10n.reviewsMonthJan,
+      l10n.reviewsMonthFeb,
+      l10n.reviewsMonthMar,
+      l10n.reviewsMonthApr,
+      l10n.reviewsMonthMay,
+      l10n.reviewsMonthJun,
+      l10n.reviewsMonthJul,
+      l10n.reviewsMonthAug,
+      l10n.reviewsMonthSep,
+      l10n.reviewsMonthOct,
+      l10n.reviewsMonthNov,
+      l10n.reviewsMonthDec,
     ];
     return months[m];
   }
@@ -337,18 +342,18 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
           children: [
             Text(name, style: const TextStyle(fontFamily: "PoppinsSemiBold")),
             const Spacer(),
-            const Row(
-              children: const [
+            Row(
+              children: [
                 Text(
-                  "Verified precut user",
-                  style: TextStyle(
+                  AppLocalizations.of(context)!.reviewsVerifiedUser,
+                  style: const TextStyle(
                     fontFamily: "PoppinsMedium",
                     fontSize: 12,
                     color: AppColors.rusticSunset,
                   ),
                 ),
-                SizedBox(width: 4),
-                Icon(Icons.check_circle,
+                const SizedBox(width: 4),
+                const Icon(Icons.check_circle,
                     size: 14, color: AppColors.rusticSunset),
               ],
             ),
@@ -369,7 +374,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
           ),
         ),
         const SizedBox(height: 6),
-        Text("Service: $service",
+        Text(AppLocalizations.of(context)!.reviewsServiceLabel(name),
             style: const TextStyle(fontFamily: "PoppinsMedium", fontSize: 13)),
         const SizedBox(height: 6),
         Text(review, style: const TextStyle(fontFamily: "PoppinsRegular")),
@@ -380,8 +385,8 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
             const SizedBox(width: 12),
             const Icon(Icons.thumb_down_outlined, size: 18),
             const Spacer(),
-            const Text(
-              "Report",
+            Text(
+              AppLocalizations.of(context)!.reviewsReport,
               style: TextStyle(fontFamily: "PoppinsRegular", fontSize: 12),
             ),
             const SizedBox(width: 12),

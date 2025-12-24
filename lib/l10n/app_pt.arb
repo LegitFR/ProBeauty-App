@@ -1,0 +1,248 @@
+{
+  "@@locale": "pt",
+
+  "decisionGreeting": "Olá!",
+  "decisionSubtitle": "Crie sua conta ou faça login para reservar e gerenciar seus compromissos.",
+  "loginButton": "Entrar",
+  "signupButton": "Cadastrar",
+  "signInWith": "Entrar com",
+  "continueAsGuest": "Continuar como convidado",
+
+  "loginWelcomeBack": "Bem-vindo de volta,",
+  "loginSubtitle": "Entrar!",
+
+  "loginEmailHint": "E-mail ou número de telefone",
+  "loginPasswordHint": "Senha",
+  "loginEmptyFieldsError": "Por favor, insira e-mail/telefone e senha",
+  "loginSuccessMessage": "Login realizado com sucesso!",
+  "loginFailedMessage": "Falha no login",
+  "loginErrorMessage": "Erro: {error}",
+
+  "signupWelcome": "Bem-vindo,",
+  "signupSubtitle": "Cadastrar!",
+
+  "signupFirstNameHint": "Nome",
+  "signupLastNameHint": "Sobrenome",
+  "signupContactHint": "E-mail ou número de telefone",
+  "signupPasswordHint": "Senha",
+
+  "signupGetOtpButton": "Obter OTP",
+  "signupLoginButton": "Entrar",
+
+  "signupAlreadyMember": "Já é membro?",
+  "signupOrText": "OU",
+  "signupWithText": "Cadastre-se com",
+
+  "signupEmptyFieldsError": "Por favor, preencha todos os campos",
+  "signupSuccessMessage": "Cadastro realizado com sucesso!",
+  "signupFailedMessage": "Falha no cadastro",
+  "signupErrorMessage": "Erro: {error}",
+
+  "bottomNavHome": "Meu Precut",
+  "bottomNavExplore": "Explorar",
+  "bottomNavShop": "Loja",
+  "bottomNavAppointments": "Compromissos",
+  "bottomNavProfile": "Perfil",
+
+  "homeSpecialOffers": "Ofertas especiais",
+  "homeRecommended": "Recomendado",
+
+  "categoryHaircut": "Corte de cabelo",
+  "categorySpa": "Spa",
+  "categoryNails": "Unhas",
+  "categoryFacial": "Facial",
+
+  "homeSalonLabel": "Salão",
+  "homeSaveUpto": "Economize até {percent}%",
+
+  "homeReviewCount": "({count})",
+
+  "exploreTitle": "Explorar",
+
+  "exploreSearchHint": "Qualquer tratamento ou local",
+  "exploreAnyDate": "Qualquer data",
+  "exploreAnyTime": "Qualquer horário",
+  "exploreSearchButton": "Buscar Probeauty",
+
+  "exploreMorning": "Manhã",
+  "exploreAfternoon": "Tarde",
+  "exploreEvening": "Noite",
+
+  "exploreSort": "Ordenar",
+  "exploreMaxPrice": "Preço máximo",
+  "exploreVenueType": "Tipo de local",
+
+  "exploreAppointmentsBooked": "{count} compromissos reservados hoje",
+
+  "exploreServices": "Serviços",
+
+  "exploreSortByTitle": "Ordenar por",
+  "exploreSortRecommended": "Recomendado",
+  "exploreSortTopRated": "Mais bem avaliados",
+  "exploreSortNearest": "Mais próximos",
+
+  "exploreMaximumPrice": "Preço máximo",
+
+  "exploreVenueEveryone": "Todos",
+  "exploreVenueMaleOnly": "Somente homens",
+  "exploreVenueFemaleOnly": "Somente mulheres",
+
+  "exploreFiltersTitle": "Filtros",
+  "exploreClearAll": "Limpar tudo",
+  "exploreApply": "Aplicar",
+
+  "exploreDetectingLocation": "Detectando localização...",
+
+  "shopSearchHint": "Pesquisar",
+
+  "shopCategoryShampoo": "Shampoo",
+  "shopCategoryHairColour": "Tintura de cabelo",
+  "shopCategoryConditioner": "Condicionador",
+  "shopCategoryHairOil": "Óleo capilar",
+
+  "shopSpecialOffers": "Ofertas especiais",
+
+  "shopNoProducts": "Nenhum produto disponível.",
+  "shopLoadingSalon": "Carregando...",
+
+  "shopButton": "Comprar",
+
+  "appointmentsTitle": "Compromissos",
+  "appointmentsLoading": "Carregando...",
+  "appointmentsEmpty": "Nenhuma reserva encontrada",
+
+  "appointmentsConfirmedTitle": "Confirmados",
+  "appointmentsPreviousTitle": "Anteriores",
+
+  "appointmentsUnknownSalon": "Salão desconhecido",
+
+  "appointmentsGetDirections": "Obter direções",
+  "appointmentsBookAgain": "Reservar novamente",
+
+  "appointmentsDurationPriceService": "{minutes} min | ₹{price} | {service}",
+
+  "profileTitle": "Perfil",
+  "profileEdit": "Editar perfil",
+  "profileDefaultUser": "Usuário",
+
+  "profileMenuFavourites": "Favoritos",
+  "profileMenuSavedAddresses": "Endereços salvos",
+  "profileMenuOrders": "Pedidos",
+  "profileMenuPaymentMethods": "Métodos de pagamento",
+  "profileMenuGiftCard": "Cartão presente",
+  "profileMenuNotifications": "Notificações",
+  "profileMenuSettings": "Configurações",
+
+  "profileLanguageEnglish": "Inglês",
+  "profileSupport": "Suporte",
+  "profileLogout": "Sair",
+
+  "profileEditTitle": "Editar detalhes do perfil",
+
+  "profileFirstNameLabel": "Nome",
+  "profileLastNameLabel": "Sobrenome",
+  "profileMobileLabel": "Número de celular",
+  "profileEmailLabel": "Endereço de e-mail",
+  "profileDobLabel": "Data de nascimento",
+
+  "profileFirstNameRequired": "Nome é obrigatório",
+  "profileInvalidPhone": "Número de telefone inválido",
+  "profileUserNotLoggedIn": "Usuário não autenticado",
+
+  "profileUpdateSuccess": "Perfil atualizado com sucesso!",
+  "profileUpdateFailed": "Falha na atualização",
+  "profileUpdateError": "Erro: {error}",
+
+  "profileDayHint": "Dia",
+  "profileMonthHint": "Mês",
+  "profileYearHint": "Ano",
+
+  "profileEmailOptionLabel": "Selecionar opção",
+  "profileSaveButton": "Salvar",
+  "profileLoading": "Salvando...",
+
+  "favouritesTitle": "Favoritos",
+  "favouritesLoginRequired": "Faça login para ver os favoritos",
+  "favouritesLoadFailed": "Falha ao carregar favoritos",
+  "favouritesEmpty": "Nenhum favorito ainda",
+
+  "favouritesRemovedSuccess": "Removido dos favoritos",
+  "favouritesRemoveFailed": "Falha ao remover favorito",
+
+  "favouritesAddToCart": "Adicionar ao carrinho",
+  "favouritesAddedToCart": "Adicionado ao carrinho",
+  "favouritesAddToCartFailed": "Falha ao adicionar ao carrinho",
+  "favouritesLoginToAddCart": "Faça login para adicionar itens ao carrinho",
+
+  "favouritesError": "Erro: {error}",
+
+  "savedAddressTitle": "Endereços salvos",
+  "savedAddressHomeLabel": "Casa",
+  "savedAddressAddNew": "Adicionar novo endereço",
+
+  "savedAddressHouseLabel": "Número da casa e andar *",
+  "savedAddressBuildingLabel": "Nome do prédio e bloco *",
+  "savedAddressLandmarkLabel": "Área e ponto de referência *",
+  "savedAddressCityLabel": "Cidade *",
+  "savedAddressDistrictLabel": "Distrito *",
+  "savedAddressPincodeLabel": "CEP *",
+
+  "savedAddressSaveAs": "Salvar este endereço como",
+
+  "savedAddressTypeHome": "Casa",
+  "savedAddressTypeWork": "Trabalho",
+  "savedAddressTypeOthers": "Outros",
+
+  "savedAddressSaveButton": "Salvar",
+  "savedAddressUpdateButton": "Atualizar endereço",
+
+  "savedAddressSavedSuccess": "Endereço salvo com sucesso!",
+  "savedAddressUpdatedSuccess": "Endereço atualizado com sucesso!",
+
+  "savedAddressFailed": "Falha: {error}",
+
+  "ordersTitle": "Pedidos",
+  "ordersActiveTitle": "Pedidos ativos",
+
+  "ordersLoading": "Carregando...",
+  "ordersEmpty": "Nenhum pedido ativo",
+
+  "ordersOrderLabel": "Pedido #{id}",
+  "ordersDeliveryOn": "Entrega em —",
+
+  "ordersItemPrice": "₹{price} ({quantity} item)",
+
+  "ordersTrackButton": "Rastrear",
+  "ordersCancelButton": "Cancelar pedido",
+
+  "notificationsTitle": "Notificações",
+  "notificationsUnreadCount": "Não lidas ({count})",
+
+  "notificationAppointmentSuccessTitle": "Compromisso confirmado",
+
+  "notificationAppointmentScheduledMessage":
+    "Seu compromisso foi agendado com sucesso com a Dra. Meera às 16:30...",
+
+  "notificationAppointmentConfirmedMessage":
+    "Seu compromisso foi confirmado com sucesso para amanhã...",
+
+  "notificationTimeJustNow": "Agora mesmo",
+
+  "notificationSettingsTitle": "Configurações de notificações",
+
+  "notificationSettingAppointmentTitle": "Mensagem de texto de compromisso",
+  "notificationSettingAppointmentDesc":
+    "Receba mensagens de texto com base nas configurações do remetente",
+
+  "notificationSettingEmailTitle": "Marketing por e-mail",
+  "notificationSettingEmailDesc":
+    "Receba ofertas e novidades por e-mail",
+
+  "notificationSettingOrderSupportTitle": "Pedidos e suporte",
+  "notificationSettingOrderSupportDesc":
+    "Receba notificações sobre status do pedido, pagamentos e suporte",
+
+  "notificationSettingWhatsappTitle": "Mensagens do WhatsApp",
+  "notificationSettingWhatsappDesc":
+    "Receba atualizações pelo WhatsApp"
+}

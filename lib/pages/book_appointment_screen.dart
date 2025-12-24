@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/first_visit_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
@@ -114,6 +115,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
   // CALENDAR (UNCHANGED UI, LOGIC EXTENDED)
   // --------------------------------------------------
   Widget _buildCalendar() {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final firstDay = DateTime(now.year, now.month, 1);
     final lastDay = DateTime(now.year, now.month + 1, 0);
@@ -173,14 +175,14 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              _WeekDay("Mo"),
-              _WeekDay("Tu"),
-              _WeekDay("We"),
-              _WeekDay("Th"),
-              _WeekDay("Fr"),
-              _WeekDay("Sa"),
-              _WeekDay("Su"),
+            children: [
+              _WeekDay(l10n.bookAppointmentWeekMon),
+              _WeekDay(l10n.bookAppointmentWeekTue),
+              _WeekDay(l10n.bookAppointmentWeekWed),
+              _WeekDay(l10n.bookAppointmentWeekThu),
+              _WeekDay(l10n.bookAppointmentWeekFri),
+              _WeekDay(l10n.bookAppointmentWeekSat),
+              _WeekDay(l10n.bookAppointmentWeekSun),
             ],
           ),
         ),
@@ -199,15 +201,17 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
   // --------------------------------------------------
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).toString();
     return Scaffold(
       backgroundColor: AppColors.softIvory,
       appBar: AppBar(
         backgroundColor: AppColors.softIvory,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
-          "Book an appointment",
-          style: TextStyle(fontFamily: "PoppinsSemiBold"),
+        title: Text(
+          l10n.bookAppointmentTitle,
+          style: const TextStyle(fontFamily: "PoppinsSemiBold"),
         ),
       ),
       body: SingleChildScrollView(
@@ -216,7 +220,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
             Padding(
               padding: const EdgeInsets.all(20),
               child: Text(
-                DateFormat("MMMM yyyy").format(selectedDate),
+                DateFormat("MMMM yyyy", locale).format(selectedDate),
                 style: const TextStyle(
                     fontFamily: "PoppinsSemiBold", fontSize: 20),
               ),

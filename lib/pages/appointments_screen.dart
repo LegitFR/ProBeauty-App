@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -30,7 +31,6 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       final token = prefs.getString("accessToken");
 
       if (token == null) {
-        print("❌ No token found!");
         setState(() => loading = false);
         return;
       }
@@ -42,9 +42,6 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
           "Authorization": "Bearer $token",
         },
       );
-
-      print("📥 BOOKINGS STATUS: ${response.statusCode}");
-      print("📥 BOOKINGS BODY: ${response.body}");
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -64,7 +61,6 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         setState(() => loading = false);
       }
     } catch (e) {
-      print("❌ ERROR: $e");
       setState(() => loading = false);
     }
   }
@@ -97,6 +93,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -111,10 +108,10 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     if (allBookings.isEmpty) {
       return Scaffold(
         backgroundColor: AppColors.softIvory,
-        body: const Center(
+        body: Center(
           child: Text(
-            "No bookings found",
-            style: TextStyle(fontSize: 18, fontFamily: "PoppinsMedium"),
+            l10n.appointmentsEmpty,
+            style: const TextStyle(fontSize: 18, fontFamily: "PoppinsMedium"),
           ),
         ),
       );
@@ -139,7 +136,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
 
                 /// ------------ TITLE ------------
                 Text(
-                  "Appointments",
+                  l10n.appointmentsTitle,
                   style: TextStyle(
                     fontSize: screenWidth * 0.08,
                     fontFamily: "PlayfairDisplayBold",
@@ -151,7 +148,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
 
                 /// ------------ CONFIRMED SECTION TITLE ------------
                 Text(
-                  "Confirmed",
+                  l10n.appointmentsConfirmedTitle,
                   style: TextStyle(
                     fontSize: screenWidth * 0.05,
                     fontFamily: "PoppinsSemiBold",
@@ -168,7 +165,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
 
                 /// ------------ PREVIOUS SECTION TITLE ------------
                 Text(
-                  "Previous",
+                  l10n.appointmentsPreviousTitle,
                   style: TextStyle(
                     fontSize: screenWidth * 0.05,
                     fontFamily: "PoppinsSemiBold",
@@ -196,6 +193,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   /// ----------------------------------------------------
   Widget _buildConfirmedCard(
       dynamic b, double screenWidth, double screenHeight) {
+    final l10n = AppLocalizations.of(context)!;
     final salon = b["salon"];
     final service = b["service"];
 
@@ -234,7 +232,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    salon?["name"] ?? "Unknown Salon",
+                    salon?["name"] ?? l10n.appointmentsUnknownSalon,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     style: TextStyle(
@@ -255,7 +253,10 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   ),
                   SizedBox(height: screenHeight * 0.02),
                   Text(
-                    "${service?["durationMinutes"] ?? 60} mins | ₹${service?["price"] ?? "0"} | ${service?["title"] ?? ""}",
+                    l10n.appointmentsDurationPriceService(
+                        service?["durationMinutes"] ?? 60,
+                        service?["price"] ?? "0",
+                        service?["title"] ?? ""),
                     maxLines: 1,
                     style: TextStyle(
                       fontSize: screenWidth * 0.035,
@@ -272,7 +273,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                         icon: const Icon(Icons.navigation_outlined,
                             color: Colors.white),
                         label: Text(
-                          "Get directions",
+                          l10n.appointmentsGetDirections,
                           style: TextStyle(
                             fontFamily: "PoppinsRegular",
                             fontSize: screenHeight * 0.013,
@@ -324,6 +325,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   /// PREVIOUS BOOKING CARD (Same UI)
   /// ----------------------------------------------------
   Widget _buildPreviousCard(dynamic b, double screenWidth) {
+    final l10n = AppLocalizations.of(context)!;
     final salon = b["salon"];
     final service = b["service"];
 
@@ -349,7 +351,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  salon?["name"] ?? "Unknown Salon",
+                  salon?["name"] ?? l10n.appointmentsUnknownSalon,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -371,7 +373,10 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  "${service?["durationMinutes"] ?? 60} mins | ₹${service?["price"] ?? "0"} | ${service?["title"] ?? ""}",
+                  l10n.appointmentsDurationPriceService(
+                      service?["durationMinutes"] ?? 60,
+                      service?["price"] ?? "0",
+                      service?["title"] ?? ""),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -394,7 +399,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             ),
             child: Text(
-              "Book Again",
+              l10n.appointmentsBookAgain,
               style: TextStyle(
                 fontSize: screenWidth * 0.03,
                 fontFamily: "PoppinsRegular",

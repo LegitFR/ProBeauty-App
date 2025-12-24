@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/review_confirm_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
@@ -43,6 +44,7 @@ class FirstVisitScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SafeArea(
       bottom: true,
       child: Scaffold(
@@ -64,7 +66,7 @@ class FirstVisitScreen extends StatelessWidget {
 
               // ---------- TITLE ----------
               Text(
-                "is this your first visit to\n$salonName?",
+                l10n.firstVisitTitle(salonName),
                 style: const TextStyle(
                   fontFamily: "PoppinsSemiBold",
                   fontSize: 22,
@@ -77,8 +79,8 @@ class FirstVisitScreen extends StatelessWidget {
 
               // ---------- YES ----------
               _optionCard(
-                title: "Yes",
-                subtitle: "This is my first visit",
+                title: l10n.firstVisitYesTitle,
+                subtitle: l10n.firstVisitYesSubtitle,
                 onTap: () => _goNext(context, true),
               ),
 
@@ -86,8 +88,8 @@ class FirstVisitScreen extends StatelessWidget {
 
               // ---------- NO ----------
               _optionCard(
-                title: "No",
-                subtitle: "I've visited before",
+                title: l10n.firstVisitNoTitle,
+                subtitle: l10n.firstVisitNoSubtitle,
                 onTap: () => _goNext(context, false),
               ),
             ],

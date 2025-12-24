@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
+import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -153,14 +154,12 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
         );
       }
 
-      print("📥 Response: ${response.body}");
-
       if (response.statusCode == 201 || response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(isEditMode
-                ? "Address updated successfully!"
-                : "Address saved successfully!"),
+                ? AppLocalizations.of(context)!.savedAddressUpdatedSuccess
+                : AppLocalizations.of(context)!.savedAddressSavedSuccess),
             backgroundColor: Colors.green,
           ),
         );
@@ -176,7 +175,8 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Failed: $e"),
+          content: Text(
+              AppLocalizations.of(context)!.savedAddressFailed(e.toString())),
           backgroundColor: Colors.red,
         ),
       );
@@ -190,6 +190,7 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
   // -------------------------------------------------------
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SafeArea(
       bottom: true,
       child: Scaffold(
@@ -198,9 +199,9 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
           centerTitle: true,
           backgroundColor: const Color(0xFFF5ECE3),
           elevation: 0,
-          title: const Text(
-            "Saved addresses",
-            style: TextStyle(
+          title: Text(
+            l10n.savedAddressTitle,
+            style: const TextStyle(
               fontFamily: "PoppinsSemiBold",
               color: Colors.black,
             ),
@@ -228,9 +229,9 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
                     ),
                   ),
                   const SizedBox(width: 6),
-                  const Text(
-                    "Home",
-                    style: TextStyle(
+                  Text(
+                    l10n.savedAddressHomeLabel,
+                    style: const TextStyle(
                       fontFamily: "PoppinsRegular",
                       fontSize: 14,
                       color: AppColors.rusticSunset,
@@ -307,9 +308,9 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
                     ),
                   ),
                   const SizedBox(width: 6),
-                  const Text(
-                    "Add new address",
-                    style: TextStyle(
+                  Text(
+                    AppLocalizations.of(context)!.savedAddressAddNew,
+                    style: const TextStyle(
                       fontFamily: "PoppinsRegular",
                       fontSize: 14,
                       color: AppColors.rusticSunset,
@@ -321,22 +322,22 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
               const SizedBox(height: 20),
 
               // FORM FIELDS
-              _labelField("House No & Floor *", houseController),
+              _labelField(l10n.savedAddressHouseLabel, houseController),
               const SizedBox(height: 15),
-              _labelField("Building Name & Block no*", buildingController),
+              _labelField(l10n.savedAddressBuildingLabel, buildingController),
               const SizedBox(height: 15),
-              _labelField("Area & Landmark *", landmarkController),
+              _labelField(l10n.savedAddressLandmarkLabel, landmarkController),
               const SizedBox(height: 15),
-              _labelField("City *", cityController),
+              _labelField(l10n.savedAddressCityLabel, cityController),
               const SizedBox(height: 15),
-              _labelField("District *", districtController),
+              _labelField(l10n.savedAddressLandmarkLabel, districtController),
               const SizedBox(height: 15),
-              _labelField("Pincode*", pincodeController),
+              _labelField(l10n.savedAddressPincodeLabel, pincodeController),
 
               const SizedBox(height: 20),
-              const Text(
-                "Save this address as",
-                style: TextStyle(
+              Text(
+                l10n.savedAddressSaveAs,
+                style: const TextStyle(
                     fontFamily: "PoppinsRegular",
                     fontSize: 14,
                     color: Colors.black54),
@@ -346,9 +347,9 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _typeChip("Home"),
-                  _typeChip("Work"),
-                  _typeChip("Others"),
+                  _typeChip(l10n.savedAddressTypeHome),
+                  _typeChip(l10n.savedAddressTypeWork),
+                  _typeChip(l10n.savedAddressTypeOthers),
                 ],
               ),
 
@@ -370,7 +371,9 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
                     child: isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
                         : Text(
-                            isEditMode ? "Update Address" : "Save",
+                            isEditMode
+                                ? l10n.savedAddressUpdateButton
+                                : l10n.savedAddressSaveButton,
                             style: const TextStyle(
                               fontFamily: "PoppinsSemiBold",
                               fontSize: 16,

@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/explore_results_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:intl/intl.dart';
@@ -152,9 +153,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _timeOption("Morning"),
-              _timeOption("Afternoon"),
-              _timeOption("Evening"),
+              _timeOption(AppLocalizations.of(context)!.exploreMorning),
+              _timeOption(AppLocalizations.of(context)!.exploreAfternoon),
+              _timeOption(AppLocalizations.of(context)!.exploreEvening),
             ],
           ),
         );
@@ -180,6 +181,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
 
@@ -196,7 +198,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 SizedBox(height: height * 0.03),
 
                 Text(
-                  "Explore",
+                  l10n.exploreTitle,
                   style: TextStyle(
                     fontFamily: "PlayfairDisplayBold",
                     fontSize: width * 0.08,
@@ -221,7 +223,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     children: [
                       _buildSearchField(
                         controller: searchController,
-                        hint: "Any treatment or venue",
+                        hint: l10n.exploreSearchHint,
                         svgIcon: "assets/images/icons/search_icon.svg",
                       ),
                       SizedBox(height: height * 0.02),
@@ -236,7 +238,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                 svgIcon:
                                     "assets/images/icons/calendar_icon.svg",
                                 label: selectedDate == null
-                                    ? "Any date"
+                                    ? l10n.exploreAnyDate
                                     : _formatDate(selectedDate!),
                               ),
                             ),
@@ -247,7 +249,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                               onTap: _selectTimeSlot,
                               child: _buildChip(
                                 svgIcon: "assets/images/icons/time_icon.svg",
-                                label: selectedTimeSlot ?? "Any time",
+                                label: selectedTimeSlot ?? l10n.exploreAnyTime,
                               ),
                             ),
                           ),
@@ -282,10 +284,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                               ),
-                              child: const Center(
+                              child: Center(
                                 child: Text(
-                                  "Search Probeauty",
-                                  style: TextStyle(
+                                  l10n.exploreSearchButton,
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
                                     fontFamily: "PoppinsMedium",
@@ -310,11 +312,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     children: [
                       _buildFilterIcon(onTap: _openCombinedFilterSheet),
                       SizedBox(width: width * 0.03),
-                      _buildFilterChip("Sort", onTap: _openSortSheet),
+                      _buildFilterChip(l10n.exploreSort, onTap: _openSortSheet),
                       SizedBox(width: width * 0.03),
-                      _buildFilterChip("Max price", onTap: _openMaxPriceSheet),
+                      _buildFilterChip(l10n.exploreMaxPrice,
+                          onTap: _openMaxPriceSheet),
                       SizedBox(width: width * 0.03),
-                      _buildFilterChip("Venue type",
+                      _buildFilterChip(l10n.exploreVenueType,
                           onTap: _openVenueTypeSheet),
                     ],
                   ),
@@ -324,7 +327,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
                 Center(
                   child: Text(
-                    "446,305 appointments booked today",
+                    l10n.exploreAppointmentsBooked(446305.toString()),
                     style: TextStyle(
                       fontFamily: "PoppinsRegular",
                       fontSize: width * 0.035,
@@ -337,7 +340,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
                 // ----------------------- SERVICES SECTION -----------------------
                 Text(
-                  "Services",
+                  l10n.exploreServices,
                   style: TextStyle(
                     fontFamily: "PoppinsSemiBold",
                     fontSize: width * 0.055,
@@ -480,6 +483,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   Widget _buildLocationField() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
@@ -500,7 +504,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
             child: Text(
               currentCity?.isNotEmpty == true
                   ? currentCity!
-                  : "Detecting location...",
+                  : l10n.exploreDetectingLocation,
               style: const TextStyle(
                 fontFamily: "PoppinsMedium",
                 fontSize: 15,
@@ -532,12 +536,17 @@ class _ExploreScreenState extends State<ExploreScreen> {
             colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
           ),
           const SizedBox(width: 10),
-          Text(
-            label,
-            style: const TextStyle(
-              fontFamily: "PoppinsMedium",
-              fontSize: 15,
-              color: Colors.black,
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              softWrap: false,
+              style: const TextStyle(
+                fontFamily: "PoppinsMedium",
+                fontSize: 15,
+                color: Colors.black,
+              ),
             ),
           ),
         ],
@@ -600,7 +609,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
-        String selectedSort = "Recommended";
+        // String selectedSort = "Recommended";
+        final l10n = AppLocalizations.of(context)!;
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Padding(
@@ -626,9 +636,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        "Sort by",
-                        style: TextStyle(
+                      Text(
+                        l10n.exploreSort,
+                        style: const TextStyle(
                           fontFamily: "PoppinsSemiBold",
                           fontSize: 20,
                           color: Colors.black,
@@ -644,9 +654,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
                   const SizedBox(height: 22),
 
-                  const Text(
-                    "Sort by",
-                    style: TextStyle(
+                  Text(
+                    l10n.exploreSort,
+                    style: const TextStyle(
                       fontFamily: "PoppinsSemiBold",
                       fontSize: 16,
                       color: Colors.black,
@@ -656,9 +666,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   const SizedBox(height: 10),
 
                   // === Options ===
-                  _sortOption("Recommended", setModalState),
-                  _sortOption("Top-rated", setModalState),
-                  _sortOption("Nearest", setModalState),
+                  _sortOption(l10n.exploreSortRecommended, setModalState),
+                  _sortOption(l10n.exploreSortTopRated, setModalState),
+                  _sortOption(l10n.exploreSortNearest, setModalState),
 
                   const SizedBox(height: 22),
                 ],
@@ -737,6 +747,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Padding(
@@ -762,9 +773,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        "Maximum price",
-                        style: TextStyle(
+                      Text(
+                        l10n.exploreMaximumPrice,
+                        style: const TextStyle(
                           fontFamily: "PoppinsSemiBold",
                           fontSize: 20,
                           color: Colors.black,
@@ -780,9 +791,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
                   const SizedBox(height: 22),
 
-                  const Text(
-                    "Max price",
-                    style: TextStyle(
+                  Text(
+                    l10n.exploreMaxPrice,
+                    style: const TextStyle(
                       fontFamily: "PoppinsSemiBold",
                       fontSize: 16,
                       color: Colors.black,
@@ -830,7 +841,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       value: maxPrice,
                       onChanged: (value) {
                         setModalState(() => maxPrice = value);
-                        setState(() {}); // update main screen
+                        setState(() {});
                       },
                     ),
                   ),
@@ -854,6 +865,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Padding(
@@ -876,9 +888,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        "Venue type",
-                        style: TextStyle(
+                      Text(
+                        l10n.exploreVenueType,
+                        style: const TextStyle(
                           fontFamily: "PoppinsSemiBold",
                           fontSize: 20,
                           color: Colors.black,
@@ -892,9 +904,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     ],
                   ),
                   const SizedBox(height: 22),
-                  const Text(
-                    "Venue type",
-                    style: TextStyle(
+                  Text(
+                    l10n.exploreVenueType,
+                    style: const TextStyle(
                       fontFamily: "PoppinsSemiBold",
                       fontSize: 15,
                       color: Colors.black,
@@ -904,9 +916,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   Wrap(
                     spacing: 10,
                     children: [
-                      _venueOption("Everyone", setModalState),
-                      _venueOption("Male only", setModalState),
-                      _venueOption("Female only", setModalState),
+                      _venueOption(l10n.exploreVenueEveryone, setModalState),
+                      _venueOption(l10n.exploreVenueMaleOnly, setModalState),
+                      _venueOption(l10n.exploreVenueFemaleOnly, setModalState),
                     ],
                   ),
                   const SizedBox(height: 24),
@@ -935,6 +947,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        margin: const EdgeInsets.symmetric(vertical: 5),
         decoration: BoxDecoration(
           color: selected ? AppColors.rusticSunset : AppColors.softIvory,
           borderRadius: BorderRadius.circular(25),
@@ -963,6 +976,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Padding(
@@ -988,9 +1002,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        "Filters",
-                        style: TextStyle(
+                      Text(
+                        l10n.exploreFiltersTitle,
+                        style: const TextStyle(
                           fontFamily: "PoppinsSemiBold",
                           fontSize: 20,
                           color: Colors.black,
@@ -1006,9 +1020,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   const SizedBox(height: 25),
 
                   // ---------------------- SORT BY ----------------------
-                  const Text(
-                    "Sort by",
-                    style: TextStyle(
+                  Text(
+                    l10n.exploreSortByTitle,
+                    style: const TextStyle(
                       fontFamily: "PoppinsSemiBold",
                       fontSize: 15,
                       color: Colors.black,
@@ -1016,16 +1030,17 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  _combinedSortOption("Recommended", setModalState),
-                  _combinedSortOption("Top-rated", setModalState),
-                  _combinedSortOption("Nearest", setModalState),
+                  _combinedSortOption(
+                      l10n.exploreSortRecommended, setModalState),
+                  _combinedSortOption(l10n.exploreSortTopRated, setModalState),
+                  _combinedSortOption(l10n.exploreSortNearest, setModalState),
 
                   const SizedBox(height: 25),
 
                   // ---------------------- MAX PRICE ----------------------
-                  const Text(
-                    "Maximum price",
-                    style: TextStyle(
+                  Text(
+                    l10n.exploreMaximumPrice,
+                    style: const TextStyle(
                       fontFamily: "PoppinsSemiBold",
                       fontSize: 15,
                       color: Colors.black,
@@ -1075,9 +1090,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   const SizedBox(height: 25),
 
                   // ---------------------- VENUE TYPE ----------------------
-                  const Text(
-                    "Venue type",
-                    style: TextStyle(
+                  Text(
+                    l10n.exploreVenueType,
+                    style: const TextStyle(
                       fontFamily: "PoppinsSemiBold",
                       fontSize: 15,
                       color: Colors.black,
@@ -1089,9 +1104,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   Wrap(
                     spacing: 10,
                     children: [
-                      _combinedVenueChip("Everyone", setModalState),
-                      _combinedVenueChip("Male only", setModalState),
-                      _combinedVenueChip("Female only", setModalState),
+                      _combinedVenueChip(
+                          l10n.exploreVenueEveryone, setModalState),
+                      _combinedVenueChip(
+                          l10n.exploreVenueMaleOnly, setModalState),
+                      _combinedVenueChip(
+                          l10n.exploreVenueFemaleOnly, setModalState),
                     ],
                   ),
 
@@ -1116,9 +1134,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                               });
                               setState(() {});
                             },
-                            child: const Text(
-                              "Clear all",
-                              style: TextStyle(
+                            child: Text(
+                              l10n.exploreClearAll,
+                              style: const TextStyle(
                                 fontFamily: "PoppinsSemiBold",
                                 color: Colors.black,
                               ),
@@ -1136,9 +1154,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           ),
                           child: TextButton(
                             onPressed: () => Navigator.pop(context),
-                            child: const Text(
-                              "Apply",
-                              style: TextStyle(
+                            child: Text(
+                              l10n.exploreApply,
+                              style: const TextStyle(
                                 fontFamily: "PoppinsSemiBold",
                                 color: Colors.white,
                               ),
@@ -1228,6 +1246,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
         setState(() {});
       },
       child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 5),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: selected ? AppColors.rusticSunset : AppColors.softIvory,

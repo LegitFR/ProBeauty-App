@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:probeauty_app/providers/order_provider.dart';
@@ -23,6 +24,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final ordersProvider = context.watch<OrderProvider>();
 
     return SafeArea(
@@ -37,9 +39,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
             child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
           ),
           centerTitle: true,
-          title: const Text(
-            "Orders",
-            style: TextStyle(
+          title: Text(
+            l10n.ordersTitle,
+            style: const TextStyle(
               fontFamily: "PoppinsSemiBold",
               color: Colors.black,
               fontSize: 20,
@@ -85,11 +87,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 child: Text(
-                  "Active Orders",
-                  style: TextStyle(
+                  l10n.ordersActiveTitle,
+                  style: const TextStyle(
                     fontFamily: "PoppinsSemiBold",
                     fontSize: 16,
                     color: Colors.black,
@@ -115,11 +118,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   ),
                 )
               else if (ordersProvider.orders.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.only(left: 20, top: 10),
+                Padding(
+                  padding: const EdgeInsets.only(left: 20, top: 10),
                   child: Text(
-                    "No active orders",
-                    style: TextStyle(
+                    l10n.ordersEmpty,
+                    style: const TextStyle(
                       fontFamily: "PoppinsRegular",
                       fontSize: 14,
                       color: Colors.black,
@@ -210,7 +213,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
                 Text(
                   order.price > 0
-                      ? "₹${order.price} (${order.quantity} item)"
+                      ? AppLocalizations.of(context)!
+                          .ordersItemPrice(order.price, order.quantity)
                       : "",
                   style: const TextStyle(
                     fontFamily: "PoppinsSemiBold",
@@ -231,10 +235,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           color: AppColors.rusticSunset,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Center(
+                        child: Center(
                           child: Text(
-                            "Track",
-                            style: TextStyle(
+                            AppLocalizations.of(context)!.ordersTrackButton,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontFamily: "PoppinsSemiBold",
                               fontSize: 12,
@@ -251,10 +255,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           color: Colors.black,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Center(
+                        child: Center(
                           child: Text(
-                            "Cancel Order",
-                            style: TextStyle(
+                            AppLocalizations.of(context)!.ordersCancelButton,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontFamily: "PoppinsSemiBold",
                               fontSize: 12,

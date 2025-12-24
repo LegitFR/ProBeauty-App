@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -61,6 +62,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
 
   // 🔵 API CALL → UPDATE PROFILE
   Future<void> _updateProfile() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_saving) return;
 
     final first = _firstNameController.text.trim();
@@ -69,12 +71,12 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     final fullName = "$first $last".trim();
 
     if (first.isEmpty) {
-      _showMessage("First name required");
+      _showMessage(l10n.profileFirstNameRequired);
       return;
     }
 
     if (phone.isNotEmpty && !RegExp(r'^[6-9]\d{9}$').hasMatch(phone)) {
-      _showMessage("Invalid phone number");
+      _showMessage(l10n.profileInvalidPhone);
       return;
     }
 
@@ -84,7 +86,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     final token = prefs.getString("accessToken");
 
     if (token == null) {
-      _showMessage("User not logged in");
+      _showMessage(l10n.profileUserNotLoggedIn);
       return;
     }
 
@@ -109,13 +111,13 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         await prefs.setString("userName", fullName);
         await prefs.setString("userPhone", phone);
 
-        _showMessage("Profile updated successfully!");
+        _showMessage(l10n.profileUpdateSuccess);
         Navigator.pop(context);
       } else {
-        _showMessage(data["message"] ?? "Update failed");
+        _showMessage(data["message"] ?? l10n.profileUpdateFailed);
       }
     } catch (e) {
-      _showMessage("Error: $e");
+      _showMessage(l10n.profileUpdateError(e.toString()));
     }
 
     setState(() => _saving = false);
@@ -123,6 +125,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SafeArea(
       bottom: true,
       child: Scaffold(
@@ -133,9 +136,9 @@ class _ProfileDetailsState extends State<ProfileDetails> {
             icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text(
-            'Edit profile details',
-            style: TextStyle(
+          title: Text(
+            l10n.profileEditTitle,
+            style: const TextStyle(
                 color: Colors.black,
                 fontSize: 18,
                 fontFamily: "PoppinsSemiBold"),
@@ -147,27 +150,27 @@ class _ProfileDetailsState extends State<ProfileDetails> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildLabel('First Name'),
+              _buildLabel(l10n.profileFirstNameLabel),
               const SizedBox(height: 8),
               _buildTextField(_firstNameController),
               const SizedBox(height: 20),
-              _buildLabel('Last Name'),
+              _buildLabel(l10n.profileLastNameLabel),
               const SizedBox(height: 8),
               _buildTextField(_lastNameController),
               const SizedBox(height: 20),
-              _buildLabel('Mobile number'),
+              _buildLabel(l10n.profileMobileLabel),
               const SizedBox(height: 8),
               _buildPhoneField(),
               const SizedBox(height: 20),
-              _buildLabel('Email Address'),
+              _buildLabel(l10n.profileEmailLabel),
               const SizedBox(height: 8),
               _buildTextField(_emailController),
               const SizedBox(height: 20),
-              _buildLabel('Date of birth'),
+              _buildLabel(l10n.profileDobLabel),
               const SizedBox(height: 8),
               _buildDateFields(),
               const SizedBox(height: 20),
-              _buildLabel('Email Address'),
+              _buildLabel(l10n.profileEmailLabel),
               const SizedBox(height: 8),
               _buildDropdownField(),
               const SizedBox(height: 40),
@@ -243,13 +246,18 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   }
 
   Widget _buildDateFields() {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
-        Expanded(flex: 2, child: _buildDateTextField(_dayController, 'Day')),
+        Expanded(
+            flex: 2,
+            child: _buildDateTextField(_dayController, l10n.profileDayHint)),
         const SizedBox(width: 12),
-        Expanded(flex: 2, child: _buildDateDropdown('Month')),
+        Expanded(flex: 2, child: _buildDateDropdown(l10n.profileMonthHint)),
         const SizedBox(width: 12),
-        Expanded(flex: 2, child: _buildDateTextField(_yearController, 'Year')),
+        Expanded(
+            flex: 2,
+            child: _buildDateTextField(_yearController, l10n.profileYearHint)),
       ],
     );
   }
@@ -298,6 +306,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   }
 
   Widget _buildDropdownField() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         color: AppColors.softIvory,
@@ -307,11 +316,11 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _selectedEmailOption,
-          hint: const Padding(
+          hint: Padding(
             padding: EdgeInsets.only(left: 15),
             child: Text(
-              'Select Option',
-              style: TextStyle(color: Colors.grey),
+              l10n.profileEmailOptionLabel,
+              style: const TextStyle(color: Colors.grey),
             ),
           ),
           icon: const Icon(Icons.keyboard_arrow_down, size: 20),
@@ -331,6 +340,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   }
 
   Widget _buildSaveButton() {
+    final l10n = AppLocalizations.of(context)!;
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
@@ -344,9 +354,9 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         ),
         child: _saving
             ? const CircularProgressIndicator(color: Colors.white)
-            : const Text(
-                'Save',
-                style: TextStyle(
+            : Text(
+                l10n.profileSaveButton,
+                style: const TextStyle(
                     fontSize: 16,
                     color: Colors.white,
                     fontFamily: "PoppinsRegular"),

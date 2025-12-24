@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/decision_screen.dart';
+import 'package:probeauty_app/pages/language_selection_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -45,6 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
@@ -60,7 +63,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               // Title
               Text(
-                'Profile',
+                l10n.profileTitle,
                 style: TextStyle(
                   fontFamily: 'PlayfairDisplayBold',
                   color: Colors.black,
@@ -133,9 +136,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             const SizedBox(height: 6),
 
                             // Subtitle
-                            const Text(
-                              'Edit profile',
-                              style: TextStyle(
+                            Text(
+                              l10n.profileEdit,
+                              style: const TextStyle(
                                 fontSize: 14,
                                 color: Colors.black,
                                 fontFamily: 'PoppinsRegular',
@@ -152,22 +155,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 25),
 
               // Menu items
-              _buildMenuItem(Icons.favorite_border, 'Favourites', () {
+              _buildMenuItem(Icons.favorite_border, l10n.profileMenuFavourites,
+                  () {
                 Navigator.pushNamed(context, "/favourites");
               }),
-              _buildMenuItem(Icons.location_on_outlined, 'Saved addresses', () {
+              _buildMenuItem(
+                  Icons.location_on_outlined, l10n.profileMenuSavedAddresses,
+                  () {
                 Navigator.pushNamed(context, "/saved_address");
               }),
-              _buildMenuItem(Icons.shopping_bag_outlined, 'Orders', () {
+              _buildMenuItem(
+                  Icons.shopping_bag_outlined, l10n.profileMenuOrders, () {
                 Navigator.pushNamed(context, "/orders");
               }),
+              _buildMenuItem(Icons.credit_card_outlined,
+                  l10n.profileMenuPaymentMethods, () {}),
+              _buildMenuItem(Icons.card_giftcard_outlined,
+                  l10n.profileMenuGiftCard, () {}),
               _buildMenuItem(
-                  Icons.credit_card_outlined, 'Payment methods', () {}),
-              _buildMenuItem(Icons.card_giftcard_outlined, 'Gift card', () {}),
-              _buildMenuItem(Icons.notifications_outlined, 'Notifications', () {
+                  Icons.notifications_outlined, l10n.profileMenuNotifications,
+                  () {
                 Navigator.pushNamed(context, "/notification");
               }),
-              _buildMenuItem(Icons.settings_outlined, 'Settings', () {}),
+              _buildMenuItem(
+                  Icons.settings_outlined, l10n.profileMenuSettings, () {}),
 
               const SizedBox(height: 8),
 
@@ -176,7 +187,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   TextButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const LanguageSelectionScreen(),
+                        ),
+                      );
+                    },
                     icon: SvgPicture.asset(
                       'assets/images/icons/english_icon.svg',
                       height: 22,
@@ -185,9 +203,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         BlendMode.srcIn,
                       ),
                     ),
-                    label: const Text(
-                      'English',
-                      style: TextStyle(
+                    label: Text(
+                      l10n.profileLanguageEnglish,
+                      style: const TextStyle(
                         color: AppColors.rusticSunset,
                         fontFamily: 'PoppinsMedium',
                       ),
@@ -204,9 +222,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         BlendMode.srcIn,
                       ),
                     ),
-                    label: const Text(
-                      'Support',
-                      style: TextStyle(
+                    label: Text(
+                      l10n.profileSupport,
+                      style: const TextStyle(
                         color: AppColors.rusticSunset,
                         fontFamily: 'PoppinsMedium',
                       ),
@@ -238,9 +256,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       borderRadius: BorderRadius.circular(15),
                     ),
                   ),
-                  child: const Text(
-                    'Logout',
-                    style: TextStyle(
+                  child: Text(
+                    l10n.profileLogout,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontFamily: 'PoppinsSemiBold',
