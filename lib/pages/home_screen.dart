@@ -16,37 +16,47 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> salons = [];
   bool isLoading = true;
+  int currentPage = 1;
+  bool isFetchingMore = false;
+  bool hasMoreData = true;
 
   @override
   void initState() {
     super.initState();
-    fetchSalons();
+
+    fetchSalons(page: 2);
   }
 
-  Future<void> fetchSalons() async {
+  Future<void> fetchSalons({int page = 1}) async {
+    if (isFetchingMore || !hasMoreData) return;
+
+    setState(() => isFetchingMore = true);
+
     try {
       final url = Uri.parse(
-          "https://probeauty-backend.onrender.com/api/v1/salons?page=1");
+        "https://probeauty-backend.onrender.com/api/v1/salons?page=$page",
+      );
 
       final response = await http.get(url);
 
-      print("SALON STATUS: ${response.statusCode}");
-      print("SALON BODY: ${response.body}");
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        final List newSalons = data["data"] ?? [];
+
         setState(() {
-          salons = data["data"] ?? [];
-          isLoading = false;
-        });
-      } else {
-        setState(() {
+          if (newSalons.isEmpty) {
+            hasMoreData = false;
+          } else {
+            salons.addAll(newSalons);
+            currentPage = page;
+          }
           isLoading = false;
         });
       }
     } catch (e) {
-      print("Salon Fetch Error: $e");
-      setState(() => isLoading = false);
+      debugPrint(e.toString());
+    } finally {
+      setState(() => isFetchingMore = false);
     }
   }
 
@@ -82,10 +92,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   Row(
                     children: [
-                      Image.asset(
-                        'assets/images/icons/notification.png',
-                        width: width * 0.07,
-                        height: width * 0.07,
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, "/notification");
+                        },
+                        child: Image.asset(
+                          'assets/images/icons/notification.png',
+                          width: width * 0.07,
+                          height: width * 0.07,
+                        ),
                       ),
                       SizedBox(width: width * 0.04),
                       Image.asset(
@@ -126,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: height * 0.20,
                   autoPlay: true,
                   enlargeCenterPage: true,
-                  viewportFraction: 0.85,
+                  viewportFraction: 0.90,
                   aspectRatio: 16 / 9,
                   autoPlayInterval: const Duration(seconds: 3),
                 ),
@@ -150,7 +165,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
               SizedBox(height: height * 0.04),
 
-              // === Special Offers section ===
               Text(
                 l10n.homeSpecialOffers,
                 style: TextStyle(
@@ -188,187 +202,198 @@ class _HomeScreenState extends State<HomeScreen> {
   // === Salon Card List (Horizontal)
   Widget buildSalonList(double width, double height, List images) {
     final l10n = AppLocalizations.of(context)!;
+
     return SizedBox(
       height: height * 0.3,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: salons.length,
-        itemBuilder: (context, index) {
-          final salon = salons[index];
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          if (notification.metrics.pixels >=
+                  notification.metrics.maxScrollExtent - 100 &&
+              !isFetchingMore &&
+              hasMoreData) {
+            fetchSalons(page: currentPage + 1);
+          }
+          return false;
+        },
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: salons.length,
+          itemBuilder: (context, index) {
+            final salon = salons[index];
 
-          final String id = salon["id"] ?? "id";
-          final String name = salon["name"] ?? "Salon";
-          final String address = salon["address"] ?? "Unknown location";
-          final List services =
-              salon["services"] is List ? salon["services"] : [];
-          final List salonStaffList =
-              salon["staff"] is List ? salon["staff"] : [];
-          final img = images[index % images.length];
+            final String id = salon["id"] ?? "id";
+            final String name = salon["name"] ?? "Salon";
+            final String address = salon["address"] ?? "Unknown location";
+            final List services =
+                salon["services"] is List ? salon["services"] : [];
+            final List salonStaffList =
+                salon["staff"] is List ? salon["staff"] : [];
+            final img = salon["thumbnail"] ?? images[index % images.length];
 
-          return GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => SalonDetailScreen(
-                    id: id,
-                    name: name,
-                    address: address,
-                    rating: 4.5,
-                    reviews: 1200,
-                    image: img,
-                    services: services,
-                    salonStaffList: salonStaffList,
-                  ),
-                ),
-              );
-            },
-            child: Padding(
-              padding: EdgeInsets.only(right: width * 0.04),
-              child: Container(
-                width: width * 0.65,
-                decoration: BoxDecoration(
-                  color: AppColors.softIvory,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.black, width: 4),
-                ),
-                child: Column(
-                  children: [
-                    ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
-                      ),
-                      child: Image.asset(
-                        img,
-                        width: double.infinity,
-                        height: height * 0.135,
-                        fit: BoxFit.cover,
-                      ),
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => SalonDetailScreen(
+                      id: id,
+                      name: name,
+                      address: address,
+                      rating: 4.5,
+                      reviews: 1200,
+                      image: img,
+                      services: services,
+                      salonStaffList: salonStaffList,
                     ),
-                    Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: width * 0.03,
-                          vertical: height * 0.01,
+                  ),
+                );
+              },
+              child: Padding(
+                padding: EdgeInsets.only(right: width * 0.04),
+                child: Container(
+                  width: width * 0.65,
+                  decoration: BoxDecoration(
+                    color: AppColors.softIvory,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.black, width: 4),
+                  ),
+                  child: Column(
+                    children: [
+                      ClipRRect(
+                        child: Image(
+                          image: img.startsWith('http')
+                              ? NetworkImage(img)
+                              : AssetImage(img) as ImageProvider,
+                          width: double.infinity,
+                          height: height * 0.135,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) =>
+                              const Icon(Icons.image_not_supported),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              name,
-                              style: TextStyle(
-                                fontFamily: "PoppinsSemiBold",
-                                fontSize: width * 0.04,
-                              ),
-                            ),
-                            SizedBox(height: height * 0.005),
-
-                            // Fake stars
-                            Row(
-                              children: [
-                                ...List.generate(
-                                  5,
-                                  (starIndex) => Icon(
-                                    Icons.star,
-                                    size: width * 0.035,
-                                    color: starIndex < 4
-                                        ? AppColors.rusticSunset
-                                        : AppColors.greyTone,
-                                  ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: width * 0.03,
+                            vertical: height * 0.01,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                name,
+                                style: TextStyle(
+                                  fontFamily: "PoppinsSemiBold",
+                                  fontSize: width * 0.04,
                                 ),
-                                SizedBox(width: width * 0.01),
-                                Text(
-                                  "(1200)",
-                                  style: TextStyle(
-                                    fontSize: width * 0.03,
-                                    fontFamily: "PoppinsRegular",
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: height * 0.005),
-
-                            Text(
-                              address,
-                              style: TextStyle(
-                                fontFamily: "PoppinsRegular",
-                                fontSize: width * 0.032,
                               ),
-                            ),
+                              SizedBox(height: height * 0.005),
 
-                            SizedBox(height: height * 0.008),
-
-                            Row(
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: width * 0.02,
-                                    vertical: height * 0.004,
+                              // Fake stars
+                              Row(
+                                children: [
+                                  ...List.generate(
+                                    5,
+                                    (starIndex) => Icon(
+                                      Icons.star,
+                                      size: width * 0.035,
+                                      color: starIndex < 4
+                                          ? AppColors.rusticSunset
+                                          : AppColors.greyTone,
+                                    ),
                                   ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.lighterGreyTone,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    l10n.homeSalonLabel,
-                                    style: const TextStyle(
-                                      fontSize: 12,
+                                  SizedBox(width: width * 0.01),
+                                  Text(
+                                    "(1200)",
+                                    style: TextStyle(
+                                      fontSize: width * 0.03,
                                       fontFamily: "PoppinsRegular",
                                     ),
                                   ),
+                                ],
+                              ),
+                              SizedBox(height: height * 0.005),
+
+                              Text(
+                                address,
+                                style: TextStyle(
+                                  fontFamily: "PoppinsRegular",
+                                  fontSize: width * 0.032,
                                 ),
+                              ),
 
-                                SizedBox(width: width * 0.02),
+                              SizedBox(height: height * 0.008),
 
-                                // 👇 THIS is mandatory
-                                Flexible(
-                                  child: Container(
+                              Row(
+                                children: [
+                                  Container(
                                     padding: EdgeInsets.symmetric(
                                       horizontal: width * 0.02,
                                       vertical: height * 0.004,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: AppColors.rusticSunset,
+                                      color: AppColors.lighterGreyTone,
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Image.asset(
-                                          'assets/images/icons/discount_tag.png',
-                                          width: width * 0.035,
-                                        ),
-                                        SizedBox(width: width * 0.01),
-
-                                        // 👇 text constrained properly
-                                        Expanded(
-                                          child: Text(
-                                            l10n.homeSaveUpto("10"),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              fontSize: width * 0.03,
-                                              fontFamily: "PoppinsRegular",
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                    child: Text(
+                                      l10n.homeSalonLabel,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontFamily: "PoppinsRegular",
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            )
-                          ],
+                                  SizedBox(width: width * 0.02),
+                                  Flexible(
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: width * 0.02,
+                                        vertical: height * 0.004,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.rusticSunset,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Image.asset(
+                                            'assets/images/icons/discount_tag.png',
+                                            width: width * 0.035,
+                                          ),
+                                          SizedBox(width: width * 0.01),
+
+                                          // 👇 text constrained properly
+                                          Expanded(
+                                            child: Center(
+                                              child: Text(
+                                                l10n.homeSaveUpto("10"),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontSize: width * 0.03,
+                                                  fontFamily: "PoppinsRegular",
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
                         ),
-                      ),
-                    )
-                  ],
+                      )
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

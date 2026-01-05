@@ -184,6 +184,7 @@ class _ShopScreenState extends State<ShopScreen> {
                   // Carousel banner
                   CarouselSlider(
                     options: CarouselOptions(
+                      viewportFraction: 0.9,
                       height: height * 0.20,
                       autoPlay: true,
                       enlargeCenterPage: true,
@@ -326,14 +327,22 @@ class _ShopScreenState extends State<ShopScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // image
-          Container(
-            height: width * 0.3,
-            alignment: Alignment.center,
-            child: imageUrl != null
-                ? Image.network(imageUrl,
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => const Icon(Icons.error))
-                : const Icon(Icons.image, size: 50),
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(14),
+              topRight: Radius.circular(14),
+            ),
+            child: SizedBox(
+              height: width * 0.3,
+              width: double.infinity,
+              child: imageUrl != null
+                  ? Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const Icon(Icons.error),
+                    )
+                  : const Icon(Icons.image, size: 50),
+            ),
           ),
 
           // text info

@@ -221,7 +221,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exploreApply => 'Apply';
 
   @override
-  String get exploreDetectingLocation => 'Detecting location...';
+  String get exploreDetectingLocation => 'Location';
 
   @override
   String get shopSearchHint => 'Search';

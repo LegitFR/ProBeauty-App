@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "568953432506",
+    "project_id": "probeauty-2025",
+    "storage_bucket": "probeauty-2025.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:568953432506:android:037b4146860a1813aad583",
+        "android_client_info": {
+          "package_name": "com.example.probeauty_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDiKJTqISvi0fN1jdqqROPp0mXe4pMNd8w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

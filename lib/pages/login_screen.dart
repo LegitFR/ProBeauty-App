@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:probeauty_app/services/notification_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,7 +17,6 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
-  // bool _rememberMe = false;
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -35,7 +35,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _onFocusChange() => setState(() {});
 
-  // 🟢 Login function
   Future<void> _login() async {
     if (_isLoading) return;
 
@@ -44,11 +43,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (identifier.isEmpty || password.isEmpty) {
       final l10n = AppLocalizations.of(context)!;
-
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.loginEmptyFieldsError),
-        ),
+        SnackBar(content: Text(l10n.loginEmptyFieldsError)),
       );
       return;
     }
@@ -78,7 +74,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
         await prefs.setString("accessToken", data["accessToken"]);
         await prefs.setString("refreshToken", data["refreshToken"]);
-
         await prefs.setString("userId", data["user"]["id"]);
         await prefs.setString("userName", data["user"]["name"]);
         await prefs.setString("userEmail", data["user"]["email"]);
@@ -87,29 +82,19 @@ class _LoginScreenState extends State<LoginScreen> {
           await prefs.setString("userPhone", data["user"]["phone"]);
         }
 
+        await NotificationService.registerDevice(data["accessToken"]);
+
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(AppLocalizations.of(context)!.loginSuccessMessage)),
-        );
 
         Navigator.pushNamedAndRemoveUntil(context, "/main", (route) => false);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(data["message"] ??
-                  AppLocalizations.of(context)!.loginFailedMessage)),
+          SnackBar(content: Text(data["message"] ?? "Login failed")),
         );
       }
     } catch (e) {
-      final l10n = AppLocalizations.of(context)!;
-
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.loginErrorMessage(e.toString()),
-          ),
-        ),
+        SnackBar(content: Text(e.toString())),
       );
     } finally {
       setState(() => _isLoading = false);
@@ -120,10 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Container(
       width: 8,
       height: 8,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 
@@ -139,171 +121,118 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final height = size.height;
 
     return SafeArea(
-      bottom: true,
       child: Scaffold(
         backgroundColor: AppColors.softIvory,
-        appBar: AppBar(
-          backgroundColor: AppColors.rusticSunset,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ),
-        body: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              height: screenHeight * 0.225,
-              decoration: const BoxDecoration(
-                color: AppColors.rusticSunset,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(40),
-                  bottomRight: Radius.circular(40),
-                ),
-              ),
-              child: Padding(
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              // 🔶 ORANGE HEADER (NOW SCROLLS WITH PAGE)
+              Container(
+                width: double.infinity,
+                height: height * 0.25,
                 padding: EdgeInsets.symmetric(
-                  horizontal: screenWidth * 0.08,
-                  vertical: screenHeight * 0.05,
+                  horizontal: width * 0.08,
+                  vertical: height * 0.05,
                 ),
-                child: Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.loginWelcomeBack,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: screenWidth * 0.08,
-                          fontFamily: "PlayfairDisplayBold",
-                        ),
-                      ),
-                      SizedBox(height: screenHeight * 0.005),
-                      Text(
-                        l10n.loginSubtitle,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: screenWidth * 0.05,
-                          fontFamily: "PoppinsRegular",
-                        ),
-                      ),
-                    ],
+                decoration: const BoxDecoration(
+                  color: AppColors.rusticSunset,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(40),
+                    bottomRight: Radius.circular(40),
                   ),
                 ),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.08),
+                alignment: Alignment.bottomLeft,
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextField(
-                      style: const TextStyle(color: AppColors.rusticSunset),
-                      cursorColor: AppColors.rusticSunset,
-                      controller: _emailController,
-                      focusNode: _emailFocus,
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(
-                          Icons.call,
-                          color: _emailFocus.hasFocus ||
-                                  _emailController.text.isNotEmpty
-                              ? AppColors.rusticSunset
-                              : AppColors.greyTone,
-                        ),
-                        hintText: l10n.loginEmailHint,
-                        hintStyle: const TextStyle(
-                          color: AppColors.greyTone,
-                          fontFamily: "PoppinsRegular",
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: const BorderSide(
-                              color: AppColors.greyTone, width: 1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: const BorderSide(
-                              color: AppColors.rusticSunset, width: 1.2),
-                        ),
+                    Text(
+                      l10n.loginWelcomeBack,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: width * 0.08,
+                        fontFamily: "PlayfairDisplayBold",
                       ),
                     ),
-                    SizedBox(height: screenHeight * 0.025),
+                    SizedBox(height: height * 0.005),
+                    Text(
+                      l10n.loginSubtitle,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: width * 0.05,
+                        fontFamily: "PoppinsRegular",
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // 🔹 FORM SECTION
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: width * 0.08,
+                  vertical: height * 0.06,
+                ),
+                child: Column(
+                  children: [
                     TextField(
-                      style: const TextStyle(color: AppColors.rusticSunset),
+                      controller: _emailController,
+                      focusNode: _emailFocus,
                       cursorColor: AppColors.rusticSunset,
+                      decoration: _inputDecoration(
+                        icon: Icons.call,
+                        hint: l10n.loginEmailHint,
+                        isActive: _emailFocus.hasFocus ||
+                            _emailController.text.isNotEmpty,
+                      ),
+                    ),
+                    SizedBox(height: height * 0.025),
+                    TextField(
                       controller: _passwordController,
                       focusNode: _passwordFocus,
                       obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(
-                          Icons.lock_outline,
-                          color: _passwordFocus.hasFocus ||
-                                  _passwordController.text.isNotEmpty
-                              ? AppColors.rusticSunset
-                              : AppColors.greyTone,
-                        ),
-                        suffixIcon: IconButton(
+                      cursorColor: AppColors.rusticSunset,
+                      decoration: _inputDecoration(
+                        icon: Icons.lock_outline,
+                        hint: l10n.loginPasswordHint,
+                        isActive: _passwordFocus.hasFocus ||
+                            _passwordController.text.isNotEmpty,
+                        suffix: IconButton(
                           icon: Icon(
                             _obscurePassword
                                 ? Icons.visibility_off
                                 : Icons.visibility,
-                            color: _passwordFocus.hasFocus ||
-                                    _passwordController.text.isNotEmpty
-                                ? AppColors.rusticSunset
-                                : AppColors.greyTone,
                           ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        ),
-                        hintText: l10n.loginPasswordHint,
-                        hintStyle: const TextStyle(
-                          color: AppColors.greyTone,
-                          fontFamily: "PoppinsRegular",
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: const BorderSide(
-                              color: AppColors.greyTone, width: 1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: const BorderSide(
-                              color: AppColors.rusticSunset, width: 1.2),
+                          onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword),
                         ),
                       ),
                     ),
-                    SizedBox(height: screenHeight * 0.035),
+                    SizedBox(height: height * 0.05),
                     SizedBox(
-                      width: screenWidth * 0.65,
+                      width: width * 0.65,
                       height: 45,
                       child: ElevatedButton(
+                        onPressed: _login,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.rusticSunset,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
                           ),
-                          elevation: 2,
                         ),
-                        onPressed: _login,
                         child: _isLoading
                             ? Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   _buildDot(AppColors.greyTone),
-                                  SizedBox(width: screenWidth * 0.015),
+                                  const SizedBox(width: 8),
                                   _buildDot(Colors.white),
-                                  SizedBox(width: screenWidth * 0.015),
+                                  const SizedBox(width: 8),
                                   _buildDot(AppColors.greyTone),
                                 ],
                               )
@@ -311,8 +240,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 l10n.loginButton,
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: screenWidth * 0.04,
-                                  fontFamily: "PoppinsRegular",
+                                  fontSize: width * 0.04,
                                 ),
                               ),
                       ),
@@ -320,9 +248,31 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration({
+    required IconData icon,
+    required String hint,
+    required bool isActive,
+    Widget? suffix,
+  }) {
+    return InputDecoration(
+      prefixIcon: Icon(icon,
+          color: isActive ? AppColors.rusticSunset : AppColors.greyTone),
+      suffixIcon: suffix,
+      hintText: hint,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: const BorderSide(color: AppColors.greyTone),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: const BorderSide(color: AppColors.rusticSunset, width: 1.2),
       ),
     );
   }

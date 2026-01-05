@@ -1,5 +1,10 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart'
+    hide NotificationSettings;
 import "package:flutter/material.dart";
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:probeauty_app/app_locale.dart';
+import 'package:probeauty_app/firebase_options.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/favourites_screen.dart';
 import 'package:probeauty_app/pages/ordersScreen.dart';
@@ -24,23 +29,79 @@ import 'pages/decision_screen.dart';
 import 'pages/notification_screen.dart';
 import 'models/product.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print("🔕 Background message received: ${message.data}");
+}
+
+Future<void> requestNotificationPermission() async {
+  await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+}
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+Future<void> setupNotificationChannel() async {
+  const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    'default',
+    'Default Notifications',
+    description: 'General notifications',
+    importance: Importance.high,
+  );
+
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
+}
+
+Future<void> initializeLocalNotifications() async {
+  const AndroidInitializationSettings androidSettings =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  const InitializationSettings initSettings =
+      InitializationSettings(android: androidSettings);
+
+  await flutterLocalNotificationsPlugin.initialize(initSettings);
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   final prefs = await SharedPreferences.getInstance();
   final code = prefs.getString('languageCode') ?? 'en';
 
-  runApp(MultiProvider(
-    providers: [
-      ChangeNotifierProvider(create: (_) => CartProvider()),
-      ChangeNotifierProvider(create: (_) => OrderProvider()),
-      ChangeNotifierProvider(
-        create: (_) => AppLocale(code),
-        child: const MyApp(),
-      )
-    ],
-    child: const MyApp(),
-  ));
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  await requestNotificationPermission();
+  await setupNotificationChannel();
+  await initializeLocalNotifications();
+
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+  Stripe.publishableKey =
+      'pk_test_51SSLPXFg60Wha3A5QhjKRseEZTKPkpEIfQdfGp0p2TKi7ScL6CSbJmsQUB6VzDwpZsN9foPJfmFZYVq5Z9JSX2I700VsaiuHRe';
+  await Stripe.instance.applySettings();
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => OrderProvider()),
+        ChangeNotifierProvider(create: (_) => AppLocale(code)),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -104,7 +165,7 @@ class _MyAppState extends State<MyApp> {
           case '/notification':
             return MaterialPageRoute(
                 builder: (_) => const NotificationScreen());
-          case '/notification_settings':
+          case '/notification_setting':
             return MaterialPageRoute(
                 builder: (_) => const NotificationSettings());
           case '/appointments':

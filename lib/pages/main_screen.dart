@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
+import 'package:probeauty_app/main.dart';
 import 'package:probeauty_app/pages/appointments_screen.dart';
 import 'package:probeauty_app/pages/explore_screen.dart';
 import 'package:probeauty_app/pages/home_screen.dart';
 import 'package:probeauty_app/pages/profile_screen.dart';
 import 'package:probeauty_app/pages/shop_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -18,6 +21,60 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 🔔 Foreground notification listener
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      final notification = message.notification;
+
+      if (notification == null) return;
+
+      flutterLocalNotificationsPlugin.show(
+        notification.hashCode,
+        notification.title,
+        notification.body,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'default', // MUST match backend + channel
+            'Default Notifications',
+            importance: Importance.high,
+            priority: Priority.high,
+          ),
+        ),
+      );
+    });
+
+    // 🔔 When user taps notification (background → open app)
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print("📲 Notification tapped");
+      _handleNotificationTap(message.data);
+    });
+
+    // 🔔 App opened from terminated state via notification
+    _checkInitialMessage();
+  }
+
+  Future<void> _checkInitialMessage() async {
+    final message = await FirebaseMessaging.instance.getInitialMessage();
+
+    if (message != null) {
+      print("🚀 App opened from terminated via notification");
+      _handleNotificationTap(message.data);
+    }
+  }
+
+  void _handleNotificationTap(Map<String, dynamic> data) {
+    final screen = data['screen'];
+
+    if (screen == 'BookingDetails') {
+      Navigator.pushNamed(context, '/bookingDetails');
+    } else if (screen == 'OrderDetails') {
+      Navigator.pushNamed(context, '/orderDetails');
+    }
+  }
 
   final List<Widget> _screens = const [
     HomeScreen(),
@@ -54,7 +111,7 @@ class _MainScreenState extends State<MainScreen> {
           clipBehavior: Clip.none,
           children: [
             CurvedNavigationBar(
-              backgroundColor: AppColors.softIvory,
+              backgroundColor: AppColors.softIvory2,
               color: AppColors.softIvory2,
               buttonBackgroundColor: AppColors.rusticSunset,
               height: 70,
@@ -98,6 +155,10 @@ class _MainScreenState extends State<MainScreen> {
                         child: isSelected
                             ? Text(
                                 labels[index],
+                                maxLines: 1, // ✅ force single line
+                                overflow: TextOverflow.ellipsis, // ✅ show ...
+                                softWrap: false,
+                                textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   fontSize: 11,
                                   color: AppColors.rusticSunset,

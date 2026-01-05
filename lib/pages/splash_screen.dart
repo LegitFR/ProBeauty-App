@@ -15,12 +15,11 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-  bool _moveUp = false;
+  bool _moveUp = false; // ❌ no longer used (kept as requested)
   late final AnimationController _lottieController;
 
-  /// 🔧 CONTROL THESE VALUES
-  static const double startProgress = 0.0; // where animation starts
-  static const double endProgress = 0.35; // where animation stops
+  static const double startProgress = 0.0;
+  static const double endProgress = 0.35;
 
   @override
   void initState() {
@@ -48,13 +47,12 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _afterPartialAnimation() {
-    /// ⏳ wait 1.5 seconds
     Future.delayed(const Duration(milliseconds: 1), () {
       if (!mounted) return;
 
-      setState(() => _moveUp = true);
+      // ❌ Logo movement disabled
+      // setState(() => _moveUp = true);
 
-      /// ➡️ navigate after move-up animation
       Future.delayed(const Duration(milliseconds: 700), _decideNextScreen);
     });
   }
@@ -76,7 +74,11 @@ class _SplashScreenState extends State<SplashScreen>
         body: AnimatedAlign(
           duration: const Duration(milliseconds: 700),
           curve: Curves.easeInOutCubic,
-          alignment: _moveUp ? const Alignment(0, -0.70) : Alignment.center,
+
+          // ❌ Fixed at center, no movement
+          // alignment: _moveUp ? const Alignment(0, -0.70) : Alignment.center,
+          alignment: Alignment.center,
+
           child: SizedBox(
             width: size.width * 0.9,
             height: size.width * 0.9,

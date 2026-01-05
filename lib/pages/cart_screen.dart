@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:provider/provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:probeauty_app/providers/cart_provider.dart';
@@ -12,6 +13,8 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
+  bool _isPaying = false;
+
   @override
   void initState() {
     super.initState();
@@ -24,7 +27,6 @@ class _CartScreenState extends State<CartScreen> {
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
-
     final cart = context.watch<CartProvider>();
 
     double totalAmount = cart.subtotal;
@@ -39,12 +41,8 @@ class _CartScreenState extends State<CartScreen> {
             style: TextStyle(fontFamily: "PoppinsSemiBold"),
           ),
           leading: GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: const Icon(
-              Icons.arrow_back_ios,
-            ),
+            onTap: () => Navigator.pop(context),
+            child: const Icon(Icons.arrow_back_ios),
           ),
           centerTitle: true,
           backgroundColor: AppColors.softIvory,
@@ -56,9 +54,7 @@ class _CartScreenState extends State<CartScreen> {
         // ======================
         bottomNavigationBar: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          decoration: const BoxDecoration(
-            color: AppColors.softIvory,
-          ),
+          decoration: const BoxDecoration(color: AppColors.softIvory),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -86,38 +82,72 @@ class _CartScreenState extends State<CartScreen> {
                 ],
               ),
               ElevatedButton(
-                onPressed: cart.items.isEmpty
+                onPressed: cart.items.isEmpty || _isPaying
                     ? null
                     : () async {
-                        final msg = await cart.checkout();
+                        setState(() => _isPaying = true);
 
-                        if (msg == null) {
-                          // SUCCESS
+                        try {
+                          // 1️⃣ Create order + payment intent
+                          final result = await cart.checkoutWithStripe();
+                          if (result == null) {
+                            throw Exception(cart.error ?? "Checkout failed");
+                          }
+
+                          final clientSecret = result['clientSecret'] as String;
+
+                          // 2️⃣ Confirm payment USING PROVIDER
+                          final success = await cart.confirmStripePayment(
+                            clientSecret,
+                          );
+
+                          if (!success) {
+                            throw Exception(cart.error ?? "Payment failed");
+                          }
+
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text("Order placed successfully!"),
+                                content: Text("Payment successful!"),
                                 backgroundColor: Colors.green,
                               ),
                             );
                           }
-                        } else {
-                          // ERROR
+
+                          await cart.fetchCart();
+                        } on StripeException catch (e) {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(msg),
+                                content: Text(
+                                  e.error.message ?? "Payment cancelled",
+                                ),
                                 backgroundColor: Colors.red,
                               ),
                             );
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(e.toString()),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        } finally {
+                          if (mounted) {
+                            setState(() => _isPaying = false);
                           }
                         }
                       },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.rusticSunset,
                   disabledBackgroundColor: Colors.grey.shade400,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 26,
+                    vertical: 12,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -136,23 +166,21 @@ class _CartScreenState extends State<CartScreen> {
         ),
 
         // ======================
-        // MAIN CONTENT (Scrollable)
+        // MAIN CONTENT (UNCHANGED)
         // ======================
         body: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: ConstrainedBox(
-                constraints:
-                    BoxConstraints(minHeight: constraints.maxHeight - 20),
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 20,
+                ),
                 child: IntrinsicHeight(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(height: height * 0.03),
-
-                      // ============ CART ITEMS ============
-
                       if (cart.isLoading)
                         const Center(
                           child: Padding(
@@ -183,80 +211,57 @@ class _CartScreenState extends State<CartScreen> {
                           ),
                         )
                       else ...[
-                        // Build a tile for each product in cart
                         for (int i = 0; i < cart.items.length; i++) ...[
                           _productQtyTile(cart.items[i], cart),
                           if (i != cart.items.length - 1)
                             const SizedBox(height: 12),
                         ],
                       ],
-
                       const SizedBox(height: 22),
-
-                      // =========================
-                      // BILL SUMMARY
-                      // =========================
                       const Text(
                         "Order Summary",
                         style: TextStyle(
-                            fontFamily: "PoppinsSemiBold",
-                            fontSize: 17,
-                            color: Colors.black),
+                          fontFamily: "PoppinsSemiBold",
+                          fontSize: 17,
+                          color: Colors.black,
+                        ),
                       ),
                       const SizedBox(height: 10),
-
-                      // Each item row: title + quantity × price
                       for (final item in cart.items)
                         _summaryRow(
                           item.title,
                           "${item.quantity} × ${item.price.toStringAsFixed(0)}",
                         ),
-
                       if (cart.items.isNotEmpty) const SizedBox(height: 4),
-
-                      // Placeholder discount row (static for now)
                       if (cart.items.isNotEmpty)
                         _summaryRow("Discount", "-₹0", green: true),
-
                       if (cart.items.isNotEmpty) const SizedBox(height: 4),
-
                       if (cart.items.isNotEmpty)
                         _summaryRow("Shipping", "Free"),
-
                       if (cart.items.isNotEmpty) const Divider(thickness: 1),
-
                       _summaryRow("Total", totalText, bold: true),
-
                       SizedBox(height: height * 0.03),
-
-                      // =========================
-                      // DELIVERY ADDRESS
-                      // =========================
                       const Text(
                         "Delivery Address",
                         style: TextStyle(
-                            fontFamily: "PoppinsSemiBold",
-                            fontSize: 17,
-                            color: Colors.black),
+                          fontFamily: "PoppinsSemiBold",
+                          fontSize: 17,
+                          color: Colors.black,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       _addressTile(),
-
                       SizedBox(height: height * 0.03),
-
-                      // =========================
-                      // PAYMENT METHOD
-                      // =========================
                       const Text(
                         "Payment Method",
                         style: TextStyle(
-                            fontFamily: "PoppinsSemiBold",
-                            fontSize: 17,
-                            color: Colors.black),
+                          fontFamily: "PoppinsSemiBold",
+                          fontSize: 17,
+                          color: Colors.black,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       _paymentTile(),
-
                       const SizedBox(height: 50),
                     ],
                   ),
@@ -269,9 +274,10 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  // ============================================================
-  // PRODUCT TILE (DYNAMIC FROM CART)
-  // ============================================================
+  // =========================
+  // UI METHODS (UNCHANGED)
+  // =========================
+
   Widget _productQtyTile(CartItemModel item, CartProvider cart) {
     return Container(
       padding: const EdgeInsets.all(14),
@@ -283,7 +289,6 @@ class _CartScreenState extends State<CartScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // PRODUCT DETAILS
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -310,8 +315,6 @@ class _CartScreenState extends State<CartScreen> {
               ],
             ),
           ),
-
-          // QUANTITY BUTTONS
           Container(
             decoration: BoxDecoration(
               color: AppColors.rusticSunset,
@@ -327,9 +330,9 @@ class _CartScreenState extends State<CartScreen> {
                       quantity: newQty,
                     );
                     if (msg != null && mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(msg)),
-                      );
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(msg)));
                     }
                   },
                   child: const Padding(
@@ -353,9 +356,9 @@ class _CartScreenState extends State<CartScreen> {
                       quantity: newQty,
                     );
                     if (msg != null && mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(msg)),
-                      );
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(msg)));
                     }
                   },
                   child: const Padding(
@@ -371,9 +374,12 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  // SUMMARY ROW UI
-  Widget _summaryRow(String title, String value,
-      {bool green = false, bool bold = false}) {
+  Widget _summaryRow(
+    String title,
+    String value, {
+    bool green = false,
+    bool bold = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -405,7 +411,6 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  // ADDRESS TILE UI
   Widget _addressTile() {
     return Container(
       padding: const EdgeInsets.all(14),
@@ -437,10 +442,7 @@ class _CartScreenState extends State<CartScreen> {
                 Text(
                   "38/38 Guruvappa st, Ayanavaram...",
                   maxLines: 2,
-                  style: TextStyle(
-                    fontFamily: "PoppinsRegular",
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(fontFamily: "PoppinsRegular", fontSize: 14),
                 ),
               ],
             ),
@@ -451,7 +453,6 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  // PAYMENT TILE UI
   Widget _paymentTile() {
     return Container(
       padding: const EdgeInsets.all(14),
@@ -483,15 +484,12 @@ class _CartScreenState extends State<CartScreen> {
                 Text(
                   "Cash will be collected after delivery",
                   maxLines: 2,
-                  style: TextStyle(
-                    fontFamily: "PoppinsRegular",
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(fontFamily: "PoppinsRegular", fontSize: 14),
                 ),
               ],
             ),
           ),
-          Icon(Icons.arrow_forward_ios, size: 16),
+          const Icon(Icons.arrow_forward_ios, size: 16),
         ],
       ),
     );

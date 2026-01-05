@@ -34,7 +34,7 @@ class _ProductScreenState extends State<ProductScreen> {
   int currentImageIndex = 0;
 
   final String baseUrl = "https://probeauty-backend.onrender.com";
-  bool _cartUpdating = false; // to prevent spamming requests
+  bool _cartUpdating = false;
   bool _favUpdating = false;
   bool _isFavourited = false;
 
@@ -162,9 +162,6 @@ class _ProductScreenState extends State<ProductScreen> {
           "Content-Type": "application/json",
         },
       );
-
-      print("📥 GET CART status: ${resp.statusCode}");
-      print("📥 GET CART body: ${resp.body}");
 
       if (resp.statusCode == 200) {
         final jsonBody = jsonDecode(resp.body);
@@ -570,13 +567,11 @@ class _ProductScreenState extends State<ProductScreen> {
                   items:
                       (product.images.isNotEmpty ? product.images : [""]).map(
                     (imgUrl) {
-                      return Container(
-                        width: double.infinity,
-                        color: Colors.white,
+                      return SizedBox.expand(
                         child: imgUrl.isNotEmpty
                             ? Image.network(
                                 imgUrl,
-                                fit: BoxFit.contain,
+                                fit: BoxFit.cover, // 🔥 KEY FIX
                                 errorBuilder: (_, __, ___) =>
                                     const Icon(Icons.broken_image, size: 100),
                               )

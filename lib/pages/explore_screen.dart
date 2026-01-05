@@ -41,7 +41,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
   void initState() {
     super.initState();
     _fetchServices();
-    _getUserLocation();
   }
 
   Future<void> _getUserLocation() async {
@@ -484,6 +483,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   Widget _buildLocationField() {
     final l10n = AppLocalizations.of(context)!;
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
@@ -492,28 +492,153 @@ class _ExploreScreenState extends State<ExploreScreen> {
       ),
       child: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: SvgPicture.asset(
-              "assets/images/icons/location_icon.svg",
-              colorFilter:
-                  const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+          // 📍 ICON → auto-detect
+          InkWell(
+            onTap: _getUserLocation,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: SvgPicture.asset(
+                "assets/images/icons/location_icon.svg",
+                colorFilter:
+                    const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+              ),
             ),
           ),
+
+          // FIELD → search city
           Expanded(
-            child: Text(
-              currentCity?.isNotEmpty == true
-                  ? currentCity!
-                  : l10n.exploreDetectingLocation,
-              style: const TextStyle(
-                fontFamily: "PoppinsMedium",
-                fontSize: 15,
-                color: Colors.black,
+            child: InkWell(
+              onTap: _openCitySearchSheet,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Text(
+                  currentCity?.isNotEmpty == true
+                      ? currentCity!
+                      : l10n.exploreDetectingLocation,
+                  style: const TextStyle(
+                    fontFamily: "PoppinsMedium",
+                    fontSize: 15,
+                    color: Colors.black,
+                  ),
+                ),
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  void _openCitySearchSheet() {
+    TextEditingController cityController = TextEditingController();
+    List<String> cityResults = [];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.softIvory,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Search field
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Colors.black, width: 1.4),
+                    ),
+                    child: TextField(
+                      controller: cityController,
+                      decoration: const InputDecoration(
+                        hintText: "Search city",
+                        border: InputBorder.none,
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                      ),
+                      onChanged: (value) async {
+                        if (value.trim().length < 3) {
+                          setModalState(() => cityResults = []);
+                          return;
+                        }
+
+                        try {
+                          final locations = await locationFromAddress(value);
+
+                          final cities = <String>{};
+
+                          for (final loc in locations) {
+                            try {
+                              final placemarks = await placemarkFromCoordinates(
+                                loc.latitude,
+                                loc.longitude,
+                              );
+
+                              for (final p in placemarks) {
+                                if (p.locality != null &&
+                                    p.locality!.isNotEmpty) {
+                                  cities.add(p.locality!);
+                                }
+                              }
+                            } catch (_) {
+                              // ignore reverse-geocode failures
+                            }
+                          }
+
+                          setModalState(() {
+                            cityResults = cities.toList();
+                          });
+                        } on NoResultFoundException {
+                          // 🔥 THIS IS THE KEY FIX
+                          setModalState(() => cityResults = []);
+                        } catch (e) {
+                          setModalState(() => cityResults = []);
+                        }
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // Results
+                  Flexible(
+                    child: ListView.builder(
+                      itemCount: cityResults.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Text(
+                            cityResults[index],
+                            style: const TextStyle(
+                              fontFamily: "PoppinsMedium",
+                            ),
+                          ),
+                          onTap: () {
+                            setState(() {
+                              currentCity = cityResults[index];
+                            });
+                            Navigator.pop(context);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 

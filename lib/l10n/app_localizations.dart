@@ -507,7 +507,7 @@ abstract class AppLocalizations {
   /// No description provided for @exploreDetectingLocation.
   ///
   /// In en, this message translates to:
-  /// **'Detecting location...'**
+  /// **'Location'**
   String get exploreDetectingLocation;
 
   /// No description provided for @shopSearchHint.

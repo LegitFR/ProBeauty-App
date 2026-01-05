@@ -40,6 +40,7 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
     final size = MediaQuery.of(context).size;
     final width = size.width;
     final height = size.height;
+    final bool hasServices = widget.services.isNotEmpty;
 
     return SafeArea(
       bottom: true,
@@ -73,11 +74,15 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
               width: double.infinity,
               child: Stack(
                 children: [
-                  Image.asset(
-                    widget.image,
+                  Image(
+                    image: widget.image.startsWith('http')
+                        ? NetworkImage(widget.image)
+                        : AssetImage(widget.image) as ImageProvider,
                     width: double.infinity,
                     height: double.infinity,
                     fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) =>
+                        const Icon(Icons.broken_image),
                   ),
                   Positioned(
                     right: 16,
@@ -245,6 +250,7 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
         // ---------------------------
         // FIXED BOTTOM BAR
         // ---------------------------
+
         bottomNavigationBar: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           color: AppColors.softIvory,
@@ -261,33 +267,38 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                 ),
               ),
               ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => SelectServicesScreen(
-                        salonId: widget.id,
-                        salonName: widget.name,
-                        rating: widget.rating,
-                        services: widget.services,
-                        salonStaffList: widget.salonStaffList,
-                      ),
-                    ),
-                  );
-                },
+                onPressed: hasServices
+                    ? () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => SelectServicesScreen(
+                              salonId: widget.id,
+                              salonName: widget.name,
+                              rating: widget.rating,
+                              services: widget.services,
+                              salonStaffList: widget.salonStaffList,
+                            ),
+                          ),
+                        );
+                      }
+                    : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.rusticSunset,
+                  backgroundColor: hasServices
+                      ? AppColors.rusticSunset
+                      : Colors.grey.shade400,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
+                  elevation: hasServices ? 2 : 0,
                 ),
-                child: const Text(
+                child: Text(
                   "Book now",
                   style: TextStyle(
                     fontFamily: "PoppinsSemiBold",
-                    color: Colors.white,
+                    color: hasServices ? Colors.white : Colors.black45,
                     fontSize: 14,
                   ),
                 ),
