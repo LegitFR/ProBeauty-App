@@ -6,7 +6,7 @@ import 'package:probeauty_app/resources/AppColors.dart';
 class FirstVisitScreen extends StatelessWidget {
   final String salonId;
   final String salonName;
-  final Map<String, dynamic> staff;
+  final Map<String, dynamic>? staff;
   final double rating;
   final DateTime date;
   final String time;

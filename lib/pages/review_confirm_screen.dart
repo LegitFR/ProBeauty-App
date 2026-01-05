@@ -10,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ReviewConfirmScreen extends StatelessWidget {
   final String salonId;
-  final Map<String, dynamic> staff;
+  final Map<String, dynamic>? staff;
 
   final String salonName;
   final double rating;
@@ -74,24 +74,30 @@ class ReviewConfirmScreen extends StatelessWidget {
       "https://probeauty-backend.onrender.com/api/v1/bookings",
     );
 
+    final Map<String, dynamic> body = {
+      "salonId": salonId,
+      "serviceId": serviceId,
+      "startTime": startTime,
+    };
+
+    // 🔥 Add staffId ONLY if a specific staff was chosen
+    if (staff != null) {
+      body["staffId"] = staff!["id"];
+    }
+
     final response = await http.post(
       uri,
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer $accessToken",
       },
-      body: jsonEncode({
-        "salonId": salonId,
-        "serviceId": serviceId,
-        "staffId": staff["id"],
-        "startTime": startTime,
-      }),
+      body: jsonEncode(body),
     );
 
-    final body = jsonDecode(response.body);
+    final bodyJson = jsonDecode(response.body);
 
     if (response.statusCode != 201) {
-      final message = body["message"] ?? "Booking failed";
+      final message = bodyJson["message"] ?? "Booking failed";
       throw BookingException(message);
     }
   }

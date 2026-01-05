@@ -10,7 +10,7 @@ class BookAppointmentScreen extends StatefulWidget {
   final String salonId;
   final String salonName;
   final double rating;
-  final Map<String, dynamic> staff;
+  final Map<String, dynamic>? staff;
   final List<Map<String, dynamic>> selectedServices;
 
   const BookAppointmentScreen({
@@ -60,8 +60,11 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
   // STAFF WORKING DAY CHECK
   // --------------------------------------------------
   bool _isStaffAvailableOn(DateTime date) {
+    // 🔥 If Any staff selected → allow all days
+    if (widget.staff == null) return true;
+
     final dayKey = _weekdayKey(date);
-    final availability = widget.staff["availability"]?[dayKey];
+    final availability = widget.staff!["availability"]?[dayKey];
     return availability != null && availability["isAvailable"] == true;
   }
 
@@ -89,7 +92,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       "https://probeauty-backend.onrender.com/api/v1/bookings/availability"
       "?salonId=${widget.salonId}"
       "&serviceId=${service["id"]}"
-      "&staffId=${widget.staff["id"]}"
+      "${widget.staff != null ? "&staffId=${widget.staff!["id"]}" : ""}"
       "&date=$dateStr",
     );
 

@@ -127,6 +127,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: AppColors.rusticSunset,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
         backgroundColor: AppColors.softIvory,
         body: SingleChildScrollView(
           child: Column(

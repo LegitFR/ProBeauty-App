@@ -22,6 +22,7 @@ class SelectProfessionalScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
     return SafeArea(
       bottom: true,
       child: Scaffold(
@@ -44,11 +45,11 @@ class SelectProfessionalScreen extends StatelessWidget {
           ),
         ),
 
-        // ---------------- STAFF GRID ONLY ----------------
+        // ---------------- STAFF GRID ----------------
         body: Padding(
           padding: const EdgeInsets.all(16),
           child: GridView.builder(
-            itemCount: staffList.length,
+            itemCount: staffList.length + 1, // 🔥 +1 for Any staff
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               mainAxisSpacing: 18,
@@ -56,7 +57,29 @@ class SelectProfessionalScreen extends StatelessWidget {
               childAspectRatio: 0.85,
             ),
             itemBuilder: (context, index) {
-              final staff = staffList[index];
+              // 🟢 FIRST CARD → ANY STAFF
+              if (index == 0) {
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BookAppointmentScreen(
+                          salonId: salonId,
+                          salonName: salonName,
+                          rating: rating,
+                          staff: null, // 🔥 indicates any staff
+                          selectedServices: selectedServices,
+                        ),
+                      ),
+                    );
+                  },
+                  child: _anyStaffCard(context),
+                );
+              }
+
+              // 🔵 NORMAL STAFF CARDS
+              final staff = staffList[index - 1];
 
               return GestureDetector(
                 onTap: () {
@@ -82,7 +105,53 @@ class SelectProfessionalScreen extends StatelessWidget {
     );
   }
 
-  // ---------------- STAFF CARD UI ----------------
+  // ---------------- ANY STAFF CARD ----------------
+  Widget _anyStaffCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.rusticSunset.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.rusticSunset,
+          width: 2.5,
+        ),
+      ),
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.groups_2_outlined,
+            size: 34,
+            color: AppColors.rusticSunset,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            "Any Staff",
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontFamily: "PoppinsSemiBold",
+              fontSize: 15,
+              color: AppColors.rusticSunset,
+            ),
+          ),
+          // const SizedBox(height: 4),
+          // Text(
+          //   "Any Staff",
+          //   textAlign: TextAlign.center,
+          //   style: const TextStyle(
+          //     fontFamily: "PoppinsRegular",
+          //     fontSize: 12,
+          //     color: Colors.black54,
+          //   ),
+          // ),
+        ],
+      ),
+    );
+  }
+
+  // ---------------- NORMAL STAFF CARD ----------------
   Widget _professionalCard(Map<String, dynamic> staff, BuildContext context) {
     return Container(
       decoration: BoxDecoration(
