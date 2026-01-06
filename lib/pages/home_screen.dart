@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/salon_detail_screen.dart';
@@ -78,59 +79,65 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppColors.softIvory,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(width * 0.04),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // === Top bar ===
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Image.asset(
-                    'assets/images/logos/full_logo.png',
-                    height: height * 0.05,
-                  ),
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, "/notification");
-                        },
-                        child: Image.asset(
-                          'assets/images/icons/notification.png',
+              Padding(
+                padding: EdgeInsets.only(
+                    left: width * 0.04, right: width * 0.04, top: width * 0.04),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SvgPicture.asset(
+                      'assets/images/logos/probeauty_app_logo.svg',
+                      height: height * 0.04,
+                    ),
+                    Row(
+                      children: [
+                        GestureDetector(
+                            onTap: () {
+                              Navigator.pushNamed(context, "/notification");
+                            },
+                            child: SvgPicture.asset(
+                              'assets/images/icons/notification.svg',
+                              width: width * 0.05,
+                              height: width * 0.05,
+                            )),
+                        SizedBox(width: width * 0.04),
+                        SvgPicture.asset(
+                          'assets/images/icons/qr.svg',
                           width: width * 0.07,
                           height: width * 0.07,
-                        ),
-                      ),
-                      SizedBox(width: width * 0.04),
-                      Image.asset(
-                        'assets/images/icons/qr.png',
-                        width: width * 0.07,
-                        height: width * 0.07,
-                      ),
-                    ],
-                  ),
-                ],
+                        )
+                      ],
+                    ),
+                  ],
+                ),
               ),
               SizedBox(height: height * 0.03),
 
               // === Category scroll ===
-              SizedBox(
-                height: height * 0.13,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    categoryItem('assets/images/categories/haircut.png',
-                        l10n.categoryHaircut, width, height),
-                    categoryItem('assets/images/categories/spa.png',
-                        l10n.categorySpa, width, height),
-                    categoryItem('assets/images/categories/nail.png',
-                        l10n.categoryNails, width, height),
-                    categoryItem('assets/images/categories/facial.png',
-                        l10n.categoryFacial, width, height),
-                    categoryItem('assets/images/categories/haircut.png',
-                        l10n.categoryHaircut, width, height),
-                  ],
+              Padding(
+                padding:
+                    EdgeInsets.only(left: width * 0.04, right: width * 0.04),
+                child: SizedBox(
+                  height: height * 0.13,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      categoryItem('assets/images/categories/haircut.png',
+                          l10n.categoryHaircut, width, height),
+                      categoryItem('assets/images/categories/spa.png',
+                          l10n.categorySpa, width, height),
+                      categoryItem('assets/images/categories/nail.png',
+                          l10n.categoryNails, width, height),
+                      categoryItem('assets/images/categories/facial.png',
+                          l10n.categoryFacial, width, height),
+                      categoryItem('assets/images/categories/haircut.png',
+                          l10n.categoryHaircut, width, height),
+                    ],
+                  ),
                 ),
               ),
               SizedBox(height: height * 0.03),
@@ -141,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: height * 0.20,
                   autoPlay: true,
                   enlargeCenterPage: true,
-                  viewportFraction: 0.90,
+                  viewportFraction: 0.78,
                   aspectRatio: 16 / 9,
                   autoPlayInterval: const Duration(seconds: 3),
                 ),
@@ -165,11 +172,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
               SizedBox(height: height * 0.04),
 
-              Text(
-                l10n.homeSpecialOffers,
-                style: TextStyle(
-                  fontFamily: "PoppinsSemiBold",
-                  fontSize: width * 0.05,
+              Padding(
+                padding: EdgeInsets.only(
+                  left: width * 0.04,
+                  right: width * 0.04,
+                ),
+                child: Text(
+                  l10n.homeSpecialOffers,
+                  style: TextStyle(
+                    fontFamily: "PoppinsSemiBold",
+                    fontSize: width * 0.05,
+                  ),
                 ),
               ),
               SizedBox(height: height * 0.02),
@@ -180,18 +193,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
               SizedBox(height: height * 0.04),
 
-              Text(
-                l10n.homeRecommended,
-                style: TextStyle(
-                  fontFamily: "PoppinsSemiBold",
-                  fontSize: width * 0.05,
+              Padding(
+                padding: EdgeInsets.only(
+                  left: width * 0.04,
+                  right: width * 0.04,
+                ),
+                child: Text(
+                  l10n.homeRecommended,
+                  style: TextStyle(
+                    fontFamily: "PoppinsSemiBold",
+                    fontSize: width * 0.05,
+                  ),
                 ),
               ),
               SizedBox(height: height * 0.02),
 
               isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : buildSalonList(width, height, fallbackImages),
+                  : Padding(
+                      padding: const EdgeInsets.only(bottom: 25),
+                      child: buildSalonList(width, height, fallbackImages),
+                    ),
             ],
           ),
         ),
@@ -218,6 +240,10 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
           itemCount: salons.length,
+          padding: EdgeInsets.only(
+            left: width * 0.04,
+            right: width * 0.04,
+          ),
           itemBuilder: (context, index) {
             final salon = salons[index];
 
@@ -315,7 +341,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               SizedBox(height: height * 0.005),
 
                               Text(
+                                maxLines: 2,
+                                softWrap: true,
                                 address,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   fontFamily: "PoppinsRegular",
                                   fontSize: width * 0.032,
@@ -361,19 +390,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                             'assets/images/icons/discount_tag.png',
                                             width: width * 0.035,
                                           ),
-                                          SizedBox(width: width * 0.01),
+                                          SizedBox(width: width * 0.025),
 
                                           // 👇 text constrained properly
                                           Expanded(
-                                            child: Center(
-                                              child: Text(
-                                                l10n.homeSaveUpto("10"),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                  fontSize: width * 0.03,
-                                                  fontFamily: "PoppinsRegular",
-                                                ),
+                                            child: Text(
+                                              l10n.homeSaveUpto("10"),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontSize: width * 0.03,
+                                                fontFamily: "PoppinsRegular",
                                               ),
                                             ),
                                           ),

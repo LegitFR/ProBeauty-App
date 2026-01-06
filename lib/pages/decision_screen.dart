@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class DecisionScreen extends StatefulWidget {
   const DecisionScreen({super.key});
@@ -144,14 +145,23 @@ class _DecisionScreenState extends State<DecisionScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Image.asset("assets/images/icons/google.png",
-                              width: 40),
-                          const SizedBox(width: 30),
-                          Image.asset("assets/images/icons/facebook.png",
-                              width: 40),
-                          const SizedBox(width: 30),
-                          Image.asset("assets/images/icons/apple.png",
-                              width: 40),
+                          SvgPicture.asset(
+                            "assets/images/icons/google.svg",
+                            width: 25,
+                            height: 25,
+                          ),
+                          const SizedBox(width: 40),
+                          SvgPicture.asset(
+                            "assets/images/icons/facebook.svg",
+                            width: 25,
+                            height: 25,
+                          ),
+                          const SizedBox(width: 40),
+                          SvgPicture.asset(
+                            "assets/images/icons/apple.svg",
+                            width: 25,
+                            height: 25,
+                          ),
                         ],
                       ),
                       SizedBox(height: size.height * 0.03),

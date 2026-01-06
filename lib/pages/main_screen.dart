@@ -111,7 +111,7 @@ class _MainScreenState extends State<MainScreen> {
           clipBehavior: Clip.none,
           children: [
             CurvedNavigationBar(
-              backgroundColor: AppColors.softIvory2,
+              backgroundColor: AppColors.softIvory,
               color: AppColors.softIvory2,
               buttonBackgroundColor: AppColors.rusticSunset,
               height: 70,

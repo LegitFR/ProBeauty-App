@@ -101,13 +101,13 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Widget _buildDot(Color color) {
-    return Container(
-      width: 8,
-      height: 8,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-    );
-  }
+  // Widget _buildDot(Color color) {
+  //   return Container(
+  //     width: 8,
+  //     height: 8,
+  //     decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+  //   );
+  // }
 
   @override
   void dispose() {
@@ -234,16 +234,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         child: _isLoading
-                            ? Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  _buildDot(AppColors.greyTone),
-                                  const SizedBox(width: 8),
-                                  _buildDot(Colors.white),
-                                  const SizedBox(width: 8),
-                                  _buildDot(AppColors.greyTone),
-                                ],
-                              )
+                            ? const LoadingDots()
                             : Text(
                                 l10n.loginButton,
                                 style: TextStyle(
@@ -282,6 +273,78 @@ class _LoginScreenState extends State<LoginScreen> {
         borderRadius: BorderRadius.circular(15),
         borderSide: const BorderSide(color: AppColors.rusticSunset, width: 1.2),
       ),
+    );
+  }
+}
+
+class LoadingDots extends StatefulWidget {
+  const LoadingDots({super.key});
+
+  @override
+  State<LoadingDots> createState() => _LoadingDotsState();
+}
+
+class _LoadingDotsState extends State<LoadingDots>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Widget _dot(int index) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final double delay = index * 0.2;
+        final double value = (_controller.value + delay) % 1.0;
+
+        final double opacity = (1 - (value - 0.5).abs() * 2).clamp(0.3, 1.0);
+
+        final double translateY =
+            -6 * (1 - (value - 0.5).abs() * 2).clamp(0.0, 1.0);
+
+        return Opacity(
+          opacity: opacity,
+          child: Transform.translate(
+            offset: Offset(0, translateY),
+            child: child,
+          ),
+        );
+      },
+      child: Container(
+        width: 8,
+        height: 8,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _dot(0),
+        const SizedBox(width: 8),
+        _dot(1),
+        const SizedBox(width: 8),
+        _dot(2),
+      ],
     );
   }
 }

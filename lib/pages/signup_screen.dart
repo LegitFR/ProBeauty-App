@@ -129,61 +129,91 @@ class _SignupScreenState extends State<SignupScreen> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: AppColors.softIvory,
-        appBar: AppBar(
-          backgroundColor: AppColors.rusticSunset,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ),
-        body: SingleChildScrollView(
+        body: CustomScrollView(
           physics: const BouncingScrollPhysics(),
-          child: Column(
-            children: [
-              // 🟠 HEADER (SCROLLS WITH CONTENT)
-              Container(
-                width: double.infinity,
-                height: height * 0.25,
-                padding: EdgeInsets.symmetric(
-                  horizontal: width * 0.08,
-                  vertical: height * 0.05,
-                ),
-                decoration: const BoxDecoration(
-                  color: AppColors.rusticSunset,
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(40),
-                    bottomRight: Radius.circular(40),
-                  ),
-                ),
-                alignment: Alignment.bottomLeft,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.signupWelcome,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: width * 0.08,
-                        fontFamily: "PlayfairDisplayBold",
-                      ),
-                    ),
-                    SizedBox(height: height * 0.005),
-                    Text(
-                      l10n.signupSubtitle,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: width * 0.05,
-                        fontFamily: "PoppinsRegular",
-                      ),
-                    ),
-                  ],
-                ),
+          slivers: [
+            // 🟠 COLLAPSING HEADER
+            SliverAppBar(
+              pinned: true,
+              backgroundColor: Colors.transparent, // IMPORTANT
+              expandedHeight: height * 0.25,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
               ),
 
-              // 🔹 FORM SECTION
-              Padding(
+              flexibleSpace: LayoutBuilder(
+                builder: (context, constraints) {
+                  final bool isCollapsed =
+                      constraints.biggest.height <= kToolbarHeight + 10;
+
+                  return Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // 🟠 EXPANDED HEADER WITH CURVED BOTTOM
+                      if (!isCollapsed)
+                        ClipRRect(
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(45),
+                            bottomRight: Radius.circular(45),
+                          ),
+                          child: Container(
+                            color: AppColors.rusticSunset,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: width * 0.08,
+                              vertical: height * 0.05,
+                            ),
+                            alignment: Alignment.bottomLeft,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.signupWelcome,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: width * 0.08,
+                                    fontFamily: "PlayfairDisplayBold",
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  l10n.signupSubtitle,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: width * 0.05,
+                                    fontFamily: "PoppinsRegular",
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                      if (isCollapsed)
+                        Container(
+                          color: AppColors.rusticSunset,
+                          alignment: Alignment.bottomCenter,
+                          padding: const EdgeInsets.only(bottom: 14),
+                          child: const Text(
+                            "Sign up!",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontFamily: "PoppinsMedium",
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            ),
+
+            // 🔹 FORM CONTENT
+            SliverToBoxAdapter(
+              child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: width * 0.08,
                   vertical: height * 0.06,
@@ -243,7 +273,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                 : Icons.visibility,
                           ),
                           onPressed: () => setState(
-                              () => _obscurePassword = !_obscurePassword),
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
                         ),
                       ),
                     ),
@@ -269,12 +300,11 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: height * 0.04),
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
