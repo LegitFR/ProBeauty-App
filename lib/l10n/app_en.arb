@@ -669,6 +669,14 @@
 
   "reviewConfirmConfirmButton": "Confirm",
 
-  "reviewConfirmBookingFailed": "Booking failed"
+  "reviewConfirmBookingFailed": "Booking failed",
+
+  "reviewsAddYourReview": "Add your review",
+"reviewsWriteHere": "Write your experience...",
+"reviewsSubmit": "Submit review",
+"reviewsThankYou": "Thanks for your feedback!"
+,"appointmentsSeeAll": "See all",
+"appointmentsShowLess": "Show less"
+
 
 }

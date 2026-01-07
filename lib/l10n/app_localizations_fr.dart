@@ -876,4 +876,22 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reviewConfirmBookingFailed => 'Échec de la réservation';
+
+  @override
+  String get reviewsAddYourReview => 'Add your review';
+
+  @override
+  String get reviewsWriteHere => 'Write your experience...';
+
+  @override
+  String get reviewsSubmit => 'Submit review';
+
+  @override
+  String get reviewsThankYou => 'Thanks for your feedback!';
+
+  @override
+  String get appointmentsSeeAll => 'See all';
+
+  @override
+  String get appointmentsShowLess => 'Show less';
 }

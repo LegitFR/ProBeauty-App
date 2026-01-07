@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -31,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> fetchSalons({int page = 1}) async {
     if (isFetchingMore || !hasMoreData) return;
 
-    setState(() => isFetchingMore = true);
+    isFetchingMore = true; // ❌ no setState yet
 
     try {
       final url = Uri.parse(
@@ -39,6 +40,8 @@ class _HomeScreenState extends State<HomeScreen> {
       );
 
       final response = await http.get(url);
+
+      if (!mounted) return; // 🔥 IMPORTANT
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -55,8 +58,10 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
     } catch (e) {
+      if (!mounted) return;
       debugPrint(e.toString());
     } finally {
+      if (!mounted) return;
       setState(() => isFetchingMore = false);
     }
   }
@@ -126,15 +131,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     children: [
-                      categoryItem('assets/images/categories/haircut.png',
+                      categoryItem('assets/images/categories/haircut.svg',
                           l10n.categoryHaircut, width, height),
-                      categoryItem('assets/images/categories/spa.png',
+                      categoryItem('assets/images/categories/spa.svg',
                           l10n.categorySpa, width, height),
-                      categoryItem('assets/images/categories/nail.png',
+                      categoryItem('assets/images/categories/nail.svg',
                           l10n.categoryNails, width, height),
-                      categoryItem('assets/images/categories/facial.png',
+                      categoryItem('assets/images/categories/facial.svg',
                           l10n.categoryFacial, width, height),
-                      categoryItem('assets/images/categories/haircut.png',
+                      categoryItem('assets/images/categories/haircut.svg',
                           l10n.categoryHaircut, width, height),
                     ],
                   ),
@@ -153,17 +158,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   autoPlayInterval: const Duration(seconds: 3),
                 ),
                 items: [
-                  'assets/images/offers/offer1.png',
-                  'assets/images/offers/offer2.png',
-                  'assets/images/offers/offer3.png',
+                  'assets/images/offers/offer1.svg',
+                  'assets/images/offers/offer2.svg',
+                  'assets/images/offers/offer3.svg',
                 ].map((imagePath) {
                   return Container(
                     margin: const EdgeInsets.symmetric(horizontal: 6),
-                    decoration: BoxDecoration(
+                    child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
-                      image: DecorationImage(
-                        image: AssetImage(imagePath),
-                        fit: BoxFit.cover,
+                      child: SvgPicture.asset(
+                        imagePath,
+                        fit: BoxFit.cover, // 👈 important
+                        width: double.infinity,
                       ),
                     ),
                   );
@@ -188,7 +194,10 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(height: height * 0.02),
 
               isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                      color: AppColors.rusticSunset,
+                    ))
                   : buildSalonList(width, height, fallbackImages),
 
               SizedBox(height: height * 0.04),
@@ -209,7 +218,10 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(height: height * 0.02),
 
               isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                      color: AppColors.rusticSunset,
+                    ))
                   : Padding(
                       padding: const EdgeInsets.only(bottom: 25),
                       child: buildSalonList(width, height, fallbackImages),
@@ -255,9 +267,12 @@ class _HomeScreenState extends State<HomeScreen> {
             final List salonStaffList =
                 salon["staff"] is List ? salon["staff"] : [];
             final img = salon["thumbnail"] ?? images[index % images.length];
+            final hours = salon["hours"];
 
             return GestureDetector(
               onTap: () {
+                if (!mounted) return;
+
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -270,6 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       image: img,
                       services: services,
                       salonStaffList: salonStaffList,
+                      hours: hours,
                     ),
                   ),
                 );
@@ -391,8 +407,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                             width: width * 0.035,
                                           ),
                                           SizedBox(width: width * 0.025),
-
-                                          // 👇 text constrained properly
                                           Expanded(
                                             child: Text(
                                               l10n.homeSaveUpto("10"),
@@ -431,9 +445,18 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: EdgeInsets.symmetric(horizontal: width * 0.03),
       child: Column(
         children: [
-          CircleAvatar(
-            radius: width * 0.09,
-            backgroundImage: AssetImage(image),
+          SizedBox(
+            width: width * 0.18,
+            height: width * 0.18,
+            child: ClipOval(
+              child: SvgPicture.asset(
+                image,
+                fit: BoxFit.cover,
+                placeholderBuilder: (_) => Container(
+                  color: Colors.grey.shade200,
+                ),
+              ),
+            ),
           ),
           SizedBox(height: height * 0.012),
           Text(

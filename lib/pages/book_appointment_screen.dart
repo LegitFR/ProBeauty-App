@@ -68,11 +68,19 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     return availability != null && availability["isAvailable"] == true;
   }
 
+  bool _isSlotInFuture(String isoTime) {
+    final slotTime = DateTime.parse(isoTime).toLocal();
+    final now = DateTime.now();
+    return slotTime.isAfter(now);
+  }
+
   // --------------------------------------------------
   // FETCH SLOTS FROM BACKEND
   // --------------------------------------------------
   Future<void> _fetchSlotsForDate(DateTime date) async {
+    // ❌ Staff not available → no slots
     if (!_isStaffAvailableOn(date)) {
+      if (!mounted) return;
       setState(() {
         slots = [];
         selectedSlotIndex = null;
@@ -80,6 +88,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       return;
     }
 
+    if (!mounted) return;
     setState(() {
       loadingSlots = true;
       slots = [];
@@ -96,21 +105,44 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       "&date=$dateStr",
     );
 
-    final res = await http.get(uri);
+    try {
+      final res = await http.get(uri);
 
-    if (res.statusCode == 200) {
-      final body = jsonDecode(res.body);
-      setState(() {
-        slots = body["data"]["slots"]; // ✅ includes availability
-        loadingSlots = false;
-      });
-    } else {
+      if (!mounted) return;
+
+      if (res.statusCode == 200) {
+        final body = jsonDecode(res.body);
+        final List rawSlots = body["data"]["slots"] ?? [];
+
+        final now = DateTime.now();
+
+        final isToday = date.year == now.year &&
+            date.month == now.month &&
+            date.day == now.day;
+
+        // 🔥 FILTER PAST SLOTS ONLY FOR TODAY
+        final filteredSlots = isToday
+            ? rawSlots.where((slot) {
+                final slotTime = DateTime.parse(slot["startTime"]);
+                return slotTime.isAfter(now.toUtc());
+              }).toList()
+            : rawSlots;
+
+        setState(() {
+          slots = filteredSlots;
+          loadingSlots = false;
+        });
+      } else {
+        setState(() => loadingSlots = false);
+      }
+    } catch (_) {
+      if (!mounted) return;
       setState(() => loadingSlots = false);
     }
   }
 
   String displayTime(String iso) {
-    final dt = DateTime.parse(iso).toLocal();
+    final dt = DateTime.parse(iso); // UTC 그대로
     return DateFormat("hh:mm a").format(dt).toLowerCase();
   }
 
@@ -232,10 +264,23 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
             const Divider(),
 
             // ---------------- TIME SLOTS ----------------
+            // ---------------- TIME SLOTS ----------------
             if (loadingSlots)
               const Padding(
                 padding: EdgeInsets.all(20),
                 child: CircularProgressIndicator(),
+              )
+            else if (slots.isEmpty)
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: Text(
+                  "No slots available for today",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: "PoppinsMedium",
+                    color: Colors.black54,
+                  ),
+                ),
               )
             else
               SizedBox(
@@ -259,7 +304,8 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                               });
 
                               final startTime =
-                                  DateTime.parse(slot["startTime"]).toLocal();
+                                  DateTime.parse(slot["startTime"]); // UTC 그대로
+
                               final formattedTime =
                                   DateFormat("HH:mm").format(startTime);
 
@@ -285,8 +331,8 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(15),
                           border: Border.all(
-                              color:
-                                  isAvailable ? Colors.black : Colors.black26),
+                            color: isAvailable ? Colors.black : Colors.black26,
+                          ),
                           color: !isAvailable
                               ? Colors.grey.shade400
                               : isSelected

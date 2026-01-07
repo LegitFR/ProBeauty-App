@@ -3,13 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
+import 'package:probeauty_app/pages/team_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ReviewsScreen extends StatefulWidget {
   final String salonId;
   final String salonName;
   final double rating;
   final int totalReviews;
+  final List<dynamic> staffList;
 
   const ReviewsScreen({
     super.key,
@@ -17,6 +20,7 @@ class ReviewsScreen extends StatefulWidget {
     required this.salonName,
     required this.rating,
     required this.totalReviews,
+    required this.staffList,
   });
 
   @override
@@ -32,11 +36,28 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   List<dynamic> _reviews = [];
   double _avgRating = 0.0;
   int _totalReviews = 0;
+  int _selectedRating = 0;
+  final TextEditingController _reviewController = TextEditingController();
+  bool _submittingReview = false;
 
   @override
   void initState() {
     super.initState();
+    print(widget.staffList);
+
     _fetchReviews();
+
+    _reviewController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _reviewController.dispose();
+    super.dispose();
   }
 
   // ========================
@@ -44,26 +65,111 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   // ========================
   Future<void> _fetchReviews() async {
     try {
-      final url = Uri.parse(
-        "$baseUrl/api/v1/reviews/salon/${widget.salonId}?page=1&limit=20",
-      );
+      List<dynamic> allReviews = [];
+      int page = 1;
+      const int limit = 50;
+      bool hasMore = true;
 
-      final resp = await http.get(url);
+      while (hasMore) {
+        final url = Uri.parse(
+          "$baseUrl/api/v1/reviews/salon/${widget.salonId}?page=$page&limit=$limit",
+        );
 
-      if (resp.statusCode == 200) {
+        final resp = await http.get(url);
+        if (resp.statusCode != 200) break;
+
         final body = jsonDecode(resp.body);
-        setState(() {
-          _reviews = body["data"] ?? [];
-          _avgRating = (body["averageRating"] ?? widget.rating).toDouble();
-          _totalReviews = body["pagination"]?["total"] ?? widget.totalReviews;
-          _loading = false;
-        });
-      } else {
-        _fallback();
+        final List data = body["data"] ?? [];
+
+        allReviews.addAll(data);
+
+        if (data.length < limit) {
+          hasMore = false; // no more pages
+        } else {
+          page++;
+        }
       }
-    } catch (_) {
+
+      if (!mounted) return;
+
+      setState(() {
+        _reviews = allReviews;
+        _avgRating = widget.rating;
+        _totalReviews = allReviews.length;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
       _fallback();
     }
+  }
+
+  Future<void> _submitReview() async {
+    if (_selectedRating == 0 || _reviewController.text.trim().isEmpty) return;
+
+    setState(() {
+      _submittingReview = true;
+    });
+
+    try {
+      final url = Uri.parse(
+        "https://probeauty-backend.onrender.com/api/v1/reviews",
+      );
+
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("accessToken");
+
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode({
+          "salonId": widget.salonId,
+          "rating": _selectedRating,
+          "comment": _reviewController.text.trim(),
+        }),
+      );
+
+      if (!mounted) return;
+
+      if (response.statusCode == 201) {
+        final body = jsonDecode(response.body);
+
+        // Optional: prepend new review to UI instantly
+        setState(() {
+          _reviews.insert(0, body["data"]);
+          _selectedRating = 0;
+          _reviewController.clear();
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.reviewsThankYou,
+            ),
+          ),
+        );
+      } else {
+        final err = jsonDecode(response.body);
+        _showError(err["message"] ?? "Failed to submit review");
+      }
+    } catch (e) {
+      if (!mounted) return;
+      _showError("Something went wrong. Try again.");
+    } finally {
+      if (!mounted) return;
+      setState(() {
+        _submittingReview = false;
+      });
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   void _fallback() {
@@ -126,8 +232,18 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                       child: _TopTab(
                           title: l10n.reviewsTabServices, isActive: false)),
                   _TopTab(title: l10n.reviewsTabReviews, isActive: true),
-                  _TopTab(title: l10n.reviewsTabTeam, isActive: false),
-                  _TopTab(title: l10n.reviewsTabGiftCards, isActive: false),
+                  GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TeamScreen(
+                                  salonName: widget.salonName,
+                                  staffList: widget.staffList),
+                            ));
+                      },
+                      child:
+                          _TopTab(title: l10n.reviewsTabTeam, isActive: false)),
                   _TopTab(title: l10n.reviewsTabDetails, isActive: false),
                 ],
               ),
@@ -139,7 +255,10 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
           // ------------------------
           Expanded(
             child: _loading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(
+                    child: CircularProgressIndicator(
+                    color: AppColors.rusticSunset,
+                  ))
                 : SingleChildScrollView(
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -248,6 +367,127 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                             rating: r["rating"] ?? 0,
                           ),
 
+                        // ------------------------
+// ADD REVIEW SECTION
+// ------------------------
+                        Container(
+                          margin: const EdgeInsets.only(top: 24),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColors.softIvory,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: Colors.black12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.reviewsAddYourReview,
+                                style: const TextStyle(
+                                  fontFamily: "PoppinsSemiBold",
+                                  fontSize: 16,
+                                ),
+                              ),
+
+                              const SizedBox(height: 12),
+
+                              // ⭐ STAR SELECTOR
+                              Row(
+                                children: List.generate(5, (index) {
+                                  final starIndex = index + 1;
+                                  return GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedRating = starIndex;
+                                      });
+                                    },
+                                    child: Icon(
+                                      Icons.star,
+                                      size: 28,
+                                      color: starIndex <= _selectedRating
+                                          ? AppColors.rusticSunset
+                                          : AppColors.greyTone,
+                                    ),
+                                  );
+                                }),
+                              ),
+
+                              const SizedBox(height: 14),
+
+                              // 📝 REVIEW INPUT
+                              TextField(
+                                controller: _reviewController,
+                                maxLines: 4,
+                                decoration: InputDecoration(
+                                  hintText: l10n.reviewsWriteHere,
+                                  hintStyle: const TextStyle(
+                                    fontFamily: "PoppinsRegular",
+                                    color: Colors.black45,
+                                  ),
+                                  filled: true,
+                                  fillColor: AppColors.softIvory,
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide:
+                                        const BorderSide(color: Colors.black26),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                      color: AppColors.rusticSunset,
+                                      width: 1.2,
+                                    ),
+                                  ),
+                                ),
+                                style: const TextStyle(
+                                  fontFamily: "PoppinsRegular",
+                                ),
+                              ),
+
+                              const SizedBox(height: 14),
+
+                              // 📤 SUBMIT BUTTON
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: _submittingReview ||
+                                          _selectedRating == 0 ||
+                                          _reviewController.text.trim().isEmpty
+                                      ? null
+                                      : _submitReview,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.rusticSunset,
+                                    disabledBackgroundColor:
+                                        Colors.grey.shade400,
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 14),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: _submittingReview
+                                      ? const SizedBox(
+                                          height: 18,
+                                          width: 18,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : Text(
+                                          l10n.reviewsSubmit,
+                                          style: const TextStyle(
+                                            fontFamily: "PoppinsSemiBold",
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
                         const SizedBox(height: 80),
                       ],
                     ),
@@ -259,27 +499,27 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
       // ------------------------
       // BOTTOM BAR
       // ------------------------
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
-        child: ElevatedButton(
-          onPressed: () => Navigator.pop(context),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.rusticSunset,
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          child: Text(
-            AppLocalizations.of(context)!.reviewsBookNow,
-            style: const TextStyle(
-              fontFamily: "PoppinsSemiBold",
-              color: Colors.white,
-              fontSize: 14,
-            ),
-          ),
-        ),
-      ),
+      // bottomNavigationBar: Container(
+      //   padding: const EdgeInsets.all(16),
+      //   child: ElevatedButton(
+      //     onPressed: () => Navigator.pop(context),
+      //     style: ElevatedButton.styleFrom(
+      //       backgroundColor: AppColors.rusticSunset,
+      //       padding: const EdgeInsets.symmetric(vertical: 14),
+      //       shape: RoundedRectangleBorder(
+      //         borderRadius: BorderRadius.circular(12),
+      //       ),
+      //     ),
+      //     child: Text(
+      //       AppLocalizations.of(context)!.reviewsBookNow,
+      //       style: const TextStyle(
+      //         fontFamily: "PoppinsSemiBold",
+      //         color: Colors.white,
+      //         fontSize: 14,
+      //       ),
+      //     ),
+      //   ),
+      // ),
     );
   }
 
@@ -387,7 +627,8 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
             const Spacer(),
             Text(
               AppLocalizations.of(context)!.reviewsReport,
-              style: TextStyle(fontFamily: "PoppinsRegular", fontSize: 12),
+              style:
+                  const TextStyle(fontFamily: "PoppinsRegular", fontSize: 12),
             ),
             const SizedBox(width: 12),
             SvgPicture.asset(

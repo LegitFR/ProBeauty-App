@@ -185,7 +185,9 @@ class _CartScreenState extends State<CartScreen> {
                         const Center(
                           child: Padding(
                             padding: EdgeInsets.only(top: 40),
-                            child: CircularProgressIndicator(),
+                            child: CircularProgressIndicator(
+                              color: AppColors.rusticSunset,
+                            ),
                           ),
                         )
                       else if (cart.error != null)

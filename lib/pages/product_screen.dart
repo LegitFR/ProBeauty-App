@@ -534,12 +534,17 @@ class _ProductScreenState extends State<ProductScreen> {
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 25),
-              child: SvgPicture.asset(
-                'assets/images/icons/cart_icon.svg',
-                width: 24,
-                height: 24,
-                colorFilter:
-                    const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, "/cart");
+                },
+                child: SvgPicture.asset(
+                  'assets/images/icons/cart_icon.svg',
+                  width: 24,
+                  height: 24,
+                  colorFilter:
+                      const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+                ),
               ),
             ),
           ],

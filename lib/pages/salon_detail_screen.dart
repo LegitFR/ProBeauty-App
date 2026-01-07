@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
+import 'package:probeauty_app/pages/detail_screen.dart';
 import 'package:probeauty_app/pages/reviews_screen.dart';
 import 'package:probeauty_app/pages/select_services_screen.dart';
+import 'package:probeauty_app/pages/team_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
 class SalonDetailScreen extends StatefulWidget {
@@ -14,6 +16,7 @@ class SalonDetailScreen extends StatefulWidget {
 
   final List<dynamic> services;
   final List<dynamic> salonStaffList;
+  final Map<String, dynamic> hours;
 
   const SalonDetailScreen({
     super.key,
@@ -25,6 +28,7 @@ class SalonDetailScreen extends StatefulWidget {
     required this.image,
     required this.services,
     required this.salonStaffList,
+    required this.hours,
   });
 
   @override
@@ -64,187 +68,183 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
           ),
         ),
 
-        body: Column(
-          children: [
-            // -------------------------------
-            // TOP IMAGE
-            // -------------------------------
-            SizedBox(
-              height: height * 0.25,
-              width: double.infinity,
-              child: Stack(
-                children: [
-                  Image(
-                    image: widget.image.startsWith('http')
-                        ? NetworkImage(widget.image)
-                        : AssetImage(widget.image) as ImageProvider,
-                    width: double.infinity,
-                    height: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) =>
-                        const Icon(Icons.broken_image),
-                  ),
-                  Positioned(
-                    right: 16,
-                    top: 16,
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.black.withOpacity(0.4),
-                      ),
-                      child: const Icon(Icons.share, color: Colors.white),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              // -------------------------------
+              // TOP IMAGE
+              // -------------------------------
+              SizedBox(
+                height: height * 0.25,
+                width: double.infinity,
+                child: Stack(
+                  children: [
+                    Image(
+                      image: widget.image.startsWith('http')
+                          ? NetworkImage(widget.image)
+                          : AssetImage(widget.image) as ImageProvider,
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          const Icon(Icons.broken_image),
                     ),
-                  )
-                ],
-              ),
-            ),
-
-            // -------------------------------
-            // DETAILS
-            // -------------------------------
-            Expanded(
-              child: SingleChildScrollView(
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // TITLE + HEART
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              widget.name,
-                              style: const TextStyle(
-                                fontFamily: "PoppinsSemiBold",
-                                fontSize: 18,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.black26),
-                              color: AppColors.softIvory,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.15),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(Icons.favorite_border),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 6),
-
-                      // RATINGS
-                      Row(
-                        children: [
-                          Text(
-                            widget.rating.toString(),
-                            style: const TextStyle(
-                              fontFamily: "PoppinsSemiBold",
-                              fontSize: 15,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          ...List.generate(
-                            5,
-                            (i) => Icon(
-                              Icons.star,
-                              size: 18,
-                              color: i < widget.rating.floor()
-                                  ? AppColors.rusticSunset
-                                  : AppColors.greyTone,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            "(${widget.reviews})",
-                            style: const TextStyle(
-                              fontFamily: "PoppinsRegular",
-                              fontSize: 13,
-                              color: Colors.black54,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      Text(
-                        widget.address,
-                        style: const TextStyle(
-                          fontFamily: "PoppinsRegular",
-                          fontSize: 14,
-                          color: Colors.black87,
+                    Positioned(
+                      right: 16,
+                      top: 16,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.black.withOpacity(0.4),
                         ),
+                        child: const Icon(Icons.share, color: Colors.white),
                       ),
-
-                      const SizedBox(height: 4),
-                      Text(
-                        l10n.salonOpenUntil("10:00pm"),
-                        style: const TextStyle(
-                          fontFamily: "PoppinsRegular",
-                          fontSize: 14,
-                          color: Colors.black54,
-                        ),
-                      ),
-
-                      const SizedBox(height: 18),
-
-                      // ---------------------------
-                      // TAB BAR
-                      // ---------------------------
-                      SizedBox(
-                        height: 45,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: [
-                              _TabButton(
-                                  title: l10n.salonTabServices, index: 0),
-                              _TabButton(title: l10n.salonTabReviews, index: 1),
-                              _TabButton(title: l10n.salonTabTeam, index: 2),
-                              _TabButton(title: l10n.salonTabDetails, index: 3),
-                              _TabButton(
-                                  title: l10n.salonTabGiftCards, index: 4),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      const Divider(thickness: 1),
-                      const SizedBox(height: 14),
-
-                      // ---------------------------
-                      // SERVICES LIST
-                      // ---------------------------
-                      for (var s in widget.services) ...[
-                        _serviceTile(
-                          title: s["title"] ?? "",
-                          subtitle:
-                              l10n.salonServiceDuration(s["durationMinutes"]),
-                          price: "₹${s["price"]}",
-                        ),
-                        const SizedBox(height: 12),
-                      ],
-
-                      const SizedBox(height: 80),
-                    ],
-                  ),
+                    )
+                  ],
                 ),
               ),
-            ),
-          ],
+
+              // -------------------------------
+              // DETAILS
+              // -------------------------------
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // TITLE + HEART
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            widget.name,
+                            style: const TextStyle(
+                              fontFamily: "PoppinsSemiBold",
+                              fontSize: 18,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.black26),
+                            color: AppColors.softIvory,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(Icons.favorite_border),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    // RATINGS
+                    Row(
+                      children: [
+                        Text(
+                          widget.rating.toString(),
+                          style: const TextStyle(
+                            fontFamily: "PoppinsSemiBold",
+                            fontSize: 15,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        ...List.generate(
+                          5,
+                          (i) => Icon(
+                            Icons.star,
+                            size: 18,
+                            color: i < widget.rating.floor()
+                                ? AppColors.rusticSunset
+                                : AppColors.greyTone,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          "(${widget.reviews})",
+                          style: const TextStyle(
+                            fontFamily: "PoppinsRegular",
+                            fontSize: 13,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    Text(
+                      widget.address,
+                      style: const TextStyle(
+                        fontFamily: "PoppinsRegular",
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
+                    ),
+
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.salonOpenUntil("10:00pm"),
+                      style: const TextStyle(
+                        fontFamily: "PoppinsRegular",
+                        fontSize: 14,
+                        color: Colors.black54,
+                      ),
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    // ---------------------------
+                    // TAB BAR
+                    // ---------------------------
+                    SizedBox(
+                      height: 45,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _TabButton(title: l10n.salonTabServices, index: 0),
+                            _TabButton(title: l10n.salonTabReviews, index: 1),
+                            _TabButton(title: l10n.salonTabTeam, index: 2),
+                            _TabButton(title: l10n.salonTabDetails, index: 3),
+                            _TabButton(title: l10n.salonTabGiftCards, index: 4),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const Divider(thickness: 1),
+                    const SizedBox(height: 14),
+
+                    // ---------------------------
+                    // SERVICES LIST
+                    // ---------------------------
+                    for (var s in widget.services) ...[
+                      _serviceTile(
+                        title: s["title"] ?? "",
+                        subtitle:
+                            l10n.salonServiceDuration(s["durationMinutes"]),
+                        price: "₹${s["price"]}",
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+
+                    const SizedBox(height: 80),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
 
         // ---------------------------
@@ -405,6 +405,28 @@ class _TabButton extends StatelessWidget {
                 salonName: state.widget.name,
                 rating: state.widget.rating,
                 totalReviews: state.widget.reviews,
+                staffList: state.widget.salonStaffList,
+              ),
+            ),
+          );
+        } else if (index == 2) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => TeamScreen(
+                salonName: state!.widget.name,
+                staffList: state.widget.salonStaffList,
+              ),
+            ),
+          );
+        } else if (index == 3) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => DetailScreen(
+                salonName: state!.widget.name,
+                address: state.widget.address,
+                hours: state.widget.hours,
               ),
             ),
           );

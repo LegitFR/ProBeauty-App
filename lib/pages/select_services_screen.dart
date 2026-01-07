@@ -43,6 +43,126 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
     selectedCategory = categories.first;
   }
 
+  Future<bool> _onBackPressed() async {
+    if (selectedServices.isEmpty) {
+      Navigator.pop(context);
+      return false;
+    }
+
+    final shouldExit = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.softIvory,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        final height = MediaQuery.of(context).size.height;
+
+        return SafeArea(
+          child: SizedBox(
+            height: height * 0.92, // 🔥 slightly smaller than full screen
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 🔘 DRAG HANDLE (NOTCH)
+                  Center(
+                    child: Container(
+                      width: 44,
+                      height: 5,
+                      margin: const EdgeInsets.only(bottom: 24),
+                      decoration: BoxDecoration(
+                        color: Colors.black26,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+
+                  // ---- TITLE ----
+                  const Text(
+                    "Are you sure you want to\nleave this booking",
+                    style: TextStyle(
+                      fontFamily: "PoppinsSemiBold",
+                      fontSize: 24,
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  const Text(
+                    "All selections will be lost",
+                    style: TextStyle(
+                      fontFamily: "PoppinsRegular",
+                      fontSize: 15,
+                      color: Colors.black54,
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  // ---- BUTTONS ----
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.black),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: const Text(
+                            "Cancel",
+                            style: TextStyle(
+                              fontFamily: "PoppinsSemiBold",
+                              fontSize: 16,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: const Text(
+                            "yes, exit",
+                            style: TextStyle(
+                              fontFamily: "PoppinsSemiBold",
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    if (shouldExit == true) {
+      Navigator.pop(context); // ✅ exit page
+    }
+
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -53,103 +173,109 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
 
     return SafeArea(
       bottom: true,
-      child: Scaffold(
-        backgroundColor: AppColors.softIvory,
-        appBar: AppBar(
+      child: WillPopScope(
+        onWillPop: _onBackPressed,
+        child: Scaffold(
           backgroundColor: AppColors.softIvory,
-          elevation: 0,
-          leading: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-          ),
-          centerTitle: true,
-          title: Text(
-            l10n.selectServicesTitle,
-            style: const TextStyle(
-              fontFamily: "PoppinsSemiBold",
-              color: Colors.black,
+          appBar: AppBar(
+            backgroundColor: AppColors.softIvory,
+            elevation: 0,
+            leading: GestureDetector(
+              onTap: _onBackPressed,
+              child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+            ),
+            centerTitle: true,
+            title: Text(
+              l10n.selectServicesTitle,
+              style: const TextStyle(
+                fontFamily: "PoppinsSemiBold",
+                color: Colors.black,
+              ),
             ),
           ),
-        ),
-        body: Column(
-          children: [
-            Container(
-              height: 50,
-              padding: const EdgeInsets.only(left: 16, top: 6),
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: categories.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 16),
-                itemBuilder: (_, index) {
-                  final cat = categories[index];
-                  final isActive = selectedCategory == cat;
+          body: Column(
+            children: [
+              Container(
+                height: 50,
+                padding: const EdgeInsets.only(left: 16, top: 6),
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: categories.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 16),
+                  itemBuilder: (_, index) {
+                    final cat = categories[index];
+                    final isActive = selectedCategory == cat;
 
-                  return GestureDetector(
-                    onTap: () => setState(() => selectedCategory = cat),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: isActive ? Colors.black : Colors.transparent,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        cat,
-                        style: TextStyle(
-                          fontFamily: "PoppinsSemiBold",
-                          fontSize: 14,
-                          color:
-                              isActive ? AppColors.softIvory : Colors.black87,
+                    return GestureDetector(
+                      onTap: () => setState(() => selectedCategory = cat),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: isActive ? Colors.black : Colors.transparent,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Center(
+                          child: Text(
+                            cat,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: "PoppinsSemiBold",
+                              fontSize: 14,
+                              color: isActive
+                                  ? AppColors.softIvory
+                                  : Colors.black87,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const Divider(thickness: 1),
-            Expanded(
-              child: ListView.separated(
-                itemCount: filtered.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (_, index) {
-                  return _serviceTile(filtered[index]);
-                },
-              ),
-            ),
-          ],
-        ),
-        bottomNavigationBar: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          child: ElevatedButton(
-            onPressed: selectedServices.isEmpty
-                ? null
-                : () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => SelectProfessionalScreen(
-                                salonId: widget.salonId,
-                                salonName: widget.salonName,
-                                rating: widget.rating,
-                                staffList: widget.salonStaffList,
-                                selectedServices: selectedServices,
-                              )),
                     );
                   },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.rusticSunset,
-              disabledBackgroundColor: Colors.grey,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-            ),
-            child: Text(
-              l10n.selectServicesContinue,
-              style: const TextStyle(
-                  fontFamily: "PoppinsSemiBold",
-                  fontSize: 14,
-                  color: Colors.white),
+                ),
+              ),
+              const Divider(thickness: 1),
+              Expanded(
+                child: ListView.separated(
+                  itemCount: filtered.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (_, index) {
+                    return _serviceTile(filtered[index]);
+                  },
+                ),
+              ),
+            ],
+          ),
+          bottomNavigationBar: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            child: ElevatedButton(
+              onPressed: selectedServices.isEmpty
+                  ? null
+                  : () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => SelectProfessionalScreen(
+                                  salonId: widget.salonId,
+                                  salonName: widget.salonName,
+                                  rating: widget.rating,
+                                  staffList: widget.salonStaffList,
+                                  selectedServices: selectedServices,
+                                )),
+                      );
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.rusticSunset,
+                disabledBackgroundColor: Colors.grey,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+              child: Text(
+                l10n.selectServicesContinue,
+                style: const TextStyle(
+                    fontFamily: "PoppinsSemiBold",
+                    fontSize: 14,
+                    color: Colors.white),
+              ),
             ),
           ),
         ),

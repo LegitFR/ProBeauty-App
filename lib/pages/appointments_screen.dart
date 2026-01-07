@@ -18,6 +18,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
 
   bool loading = true;
   List<dynamic> allBookings = [];
+  bool showAllPrevious = false;
 
   @override
   void initState() {
@@ -29,6 +30,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("accessToken");
+
+      if (!mounted) return; // 🔐 critical
 
       if (token == null) {
         setState(() => loading = false);
@@ -43,11 +46,12 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         },
       );
 
+      if (!mounted) return; // 🔐 critical
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final bookings = data["data"] ?? [];
+        final List bookings = data["data"] ?? [];
 
-        // sort by startTime descending (latest first)
         bookings.sort((a, b) {
           return DateTime.parse(b["startTime"])
               .compareTo(DateTime.parse(a["startTime"]));
@@ -60,7 +64,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       } else {
         setState(() => loading = false);
       }
-    } catch (e) {
+    } catch (_) {
+      if (!mounted) return; // 🔐 critical
       setState(() => loading = false);
     }
   }
@@ -100,7 +105,10 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     if (loading) {
       return const Scaffold(
         backgroundColor: AppColors.softIvory,
-        body: Center(child: CircularProgressIndicator()),
+        body: Center(
+            child: CircularProgressIndicator(
+          color: AppColors.rusticSunset,
+        )),
       );
     }
 
@@ -121,7 +129,10 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     final confirmed = allBookings.isNotEmpty ? allBookings.first : null;
 
     // Remaining → Previous
-    final previous = allBookings.length > 1 ? allBookings.sublist(1) : [];
+    final allPrevious = allBookings.length > 1 ? allBookings.sublist(1) : [];
+
+    final previous =
+        showAllPrevious ? allPrevious : allPrevious.take(3).toList();
 
     return Scaffold(
       backgroundColor: AppColors.softIvory,
@@ -164,14 +175,41 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 SizedBox(height: screenHeight * 0.02),
 
                 /// ------------ PREVIOUS SECTION TITLE ------------
-                Text(
-                  l10n.appointmentsPreviousTitle,
-                  style: TextStyle(
-                    fontSize: screenWidth * 0.05,
-                    fontFamily: "PoppinsSemiBold",
-                    color: Colors.black87,
-                  ),
+                /// ------------ PREVIOUS SECTION HEADER ------------
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      l10n.appointmentsPreviousTitle,
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.05,
+                        fontFamily: "PoppinsSemiBold",
+                        color: Colors.black87,
+                      ),
+                    ),
+
+                    // 👇 SEE ALL / SHOW LESS
+                    if (allPrevious.length > 3)
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            showAllPrevious = !showAllPrevious;
+                          });
+                        },
+                        child: Text(
+                          showAllPrevious
+                              ? l10n.appointmentsShowLess
+                              : l10n.appointmentsSeeAll,
+                          style: const TextStyle(
+                            fontFamily: "PoppinsMedium",
+                            fontSize: 14,
+                            color: AppColors.rusticSunset,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
+
                 const SizedBox(height: 12),
 
                 /// ------------ PREVIOUS BOOKINGS LIST ------------

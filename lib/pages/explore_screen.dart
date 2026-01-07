@@ -43,6 +43,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
     _fetchServices();
   }
 
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _getUserLocation() async {
     try {
       LocationPermission permission = await Geolocator.requestPermission();
@@ -56,19 +62,23 @@ class _ExploreScreenState extends State<ExploreScreen> {
         desiredAccuracy: LocationAccuracy.high,
       );
 
+      if (!mounted) return;
+
       currentLat = position.latitude;
       currentLong = position.longitude;
 
       List<Placemark> placemarks =
           await placemarkFromCoordinates(currentLat!, currentLong!);
 
+      if (!mounted) return;
+
       if (placemarks.isNotEmpty) {
         currentCity = placemarks.first.locality ?? "Unknown";
       }
 
       setState(() {});
-    } catch (e) {
-      print("Location error: $e");
+    } catch (_) {
+      // silent fail
     }
   }
 
@@ -86,6 +96,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
       final response = await http.get(url);
 
+      if (!mounted) return;
+
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
         final List data = jsonResponse["data"];
@@ -98,7 +110,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
             return {
               "id": service["id"],
               "title": service["title"] ?? "Service",
-              // CYCLE BETWEEN 4 IMAGES
               "img": images[index % images.length],
             };
           }).toList();
@@ -108,7 +119,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
       } else {
         setState(() => _loadingServices = false);
       }
-    } catch (e) {
+    } catch (_) {
+      if (!mounted) return;
       setState(() => _loadingServices = false);
     }
   }
@@ -124,13 +136,18 @@ class _ExploreScreenState extends State<ExploreScreen> {
       builder: (context, child) {
         return Theme(
           data: ThemeData(
-            colorScheme:
-                const ColorScheme.light(primary: AppColors.rusticSunset),
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.rusticSunset,
+              surface: AppColors.softIvory,
+              onSurface: Colors.black,
+            ),
           ),
           child: child!,
         );
       },
     );
+
+    if (!mounted) return;
 
     if (picked != null) {
       setState(() {
@@ -560,30 +577,27 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       border: Border.all(color: Colors.black, width: 1.4),
                     ),
                     child: TextField(
-                      controller: cityController,
-                      decoration: const InputDecoration(
-                        hintText: "Search city",
-                        border: InputBorder.none,
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                      ),
-                      onChanged: (value) async {
-                        if (value.trim().length < 3) {
-                          setModalState(() => cityResults = []);
-                          return;
-                        }
+                        controller: cityController,
+                        decoration: const InputDecoration(
+                          hintText: "Search city",
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 14),
+                        ),
+                        onChanged: (value) async {
+                          if (value.trim().length < 3) {
+                            setModalState(() => cityResults = []);
+                            return;
+                          }
 
-                        try {
-                          final locations = await locationFromAddress(value);
+                          try {
+                            final locations = await locationFromAddress(value);
 
-                          final cities = <String>{};
+                            final cities = <String>{};
 
-                          for (final loc in locations) {
-                            try {
+                            for (final loc in locations) {
                               final placemarks = await placemarkFromCoordinates(
-                                loc.latitude,
-                                loc.longitude,
-                              );
+                                  loc.latitude, loc.longitude);
 
                               for (final p in placemarks) {
                                 if (p.locality != null &&
@@ -591,22 +605,17 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                   cities.add(p.locality!);
                                 }
                               }
-                            } catch (_) {
-                              // ignore reverse-geocode failures
                             }
-                          }
 
-                          setModalState(() {
-                            cityResults = cities.toList();
-                          });
-                        } on NoResultFoundException {
-                          // 🔥 THIS IS THE KEY FIX
-                          setModalState(() => cityResults = []);
-                        } catch (e) {
-                          setModalState(() => cityResults = []);
-                        }
-                      },
-                    ),
+                            if (!mounted) return;
+                            setModalState(() {
+                              cityResults = cities.toList();
+                            });
+                          } catch (_) {
+                            if (!mounted) return;
+                            setModalState(() => cityResults = []);
+                          }
+                        }),
                   ),
 
                   const SizedBox(height: 14),

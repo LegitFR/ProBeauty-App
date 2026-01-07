@@ -1686,6 +1686,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Booking failed'**
   String get reviewConfirmBookingFailed;
+
+  /// No description provided for @reviewsAddYourReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your review'**
+  String get reviewsAddYourReview;
+
+  /// No description provided for @reviewsWriteHere.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your experience...'**
+  String get reviewsWriteHere;
+
+  /// No description provided for @reviewsSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit review'**
+  String get reviewsSubmit;
+
+  /// No description provided for @reviewsThankYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for your feedback!'**
+  String get reviewsThankYou;
+
+  /// No description provided for @appointmentsSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get appointmentsSeeAll;
+
+  /// No description provided for @appointmentsShowLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get appointmentsShowLess;
 }
 
 class _AppLocalizationsDelegate

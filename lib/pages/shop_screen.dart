@@ -34,6 +34,8 @@ class _ShopScreenState extends State<ShopScreen> {
 
   // ---------------- Fetch Products ----------------
   Future<void> _fetchProducts() async {
+    if (!mounted) return;
+
     setState(() {
       _loading = true;
       _error = null;
@@ -45,25 +47,33 @@ class _ShopScreenState extends State<ShopScreen> {
         headers: {'Content-Type': 'application/json'},
       );
 
+      if (!mounted) return;
+
       if (res.statusCode == 200) {
         final Map<String, dynamic> body = json.decode(res.body);
         final data = body['data'];
 
         if (data is List) {
           _products = data.map((e) => Product.fromJson(e)).toList();
+
+          if (!mounted) return;
           setState(() {});
 
           // fetch salon names
-          _fetchAllSalonNames();
+          await _fetchAllSalonNames();
         } else {
+          if (!mounted) return;
           setState(() => _error = 'Unexpected response shape');
         }
       } else {
+        if (!mounted) return;
         setState(() => _error = 'Server responded with ${res.statusCode}');
       }
     } catch (e) {
-      setState(() => _error = 'Failed to fetch products: $e');
+      if (!mounted) return;
+      setState(() => _error = 'Failed to fetch products');
     } finally {
+      if (!mounted) return;
       setState(() => _loading = false);
     }
   }
@@ -75,13 +85,16 @@ class _ShopScreenState extends State<ShopScreen> {
         .where((id) => id != null && id.isNotEmpty)
         .toSet();
 
-    for (String? salonId in uniqueSalonIds) {
-      if (salonId != null && !salonNames.containsKey(salonId)) {
-        await _fetchSalonName(salonId);
+    for (final salonId in uniqueSalonIds) {
+      if (!mounted) return;
+
+      if (!salonNames.containsKey(salonId)) {
+        await _fetchSalonName(salonId!);
       }
     }
 
-    setState(() {}); // refresh UI with salon names
+    if (!mounted) return;
+    setState(() {}); // refresh UI
   }
 
   // ---------------- Fetch Single Salon Name ----------------
@@ -92,15 +105,17 @@ class _ShopScreenState extends State<ShopScreen> {
         headers: {'Content-Type': 'application/json'},
       );
 
+      if (!mounted) return;
+
       if (res.statusCode == 200) {
         final body = json.decode(res.body);
-        final name = body['data']?['name'] ?? 'Salon';
-        salonNames[salonId] = name;
+        salonNames[salonId] = body['data']?['name'] ?? 'Salon';
       } else {
-        salonNames[salonId] = "Salon";
+        salonNames[salonId] = 'Salon';
       }
-    } catch (e) {
-      salonNames[salonId] = "Salon";
+    } catch (_) {
+      if (!mounted) return;
+      salonNames[salonId] = 'Salon';
     }
   }
 
@@ -243,9 +258,15 @@ class _ShopScreenState extends State<ShopScreen> {
   // ---------------- Build Product List ----------------
   Widget _buildSpecialOffersList(double width) {
     final l10n = AppLocalizations.of(context)!;
-    if (_loading) return const Center(child: CircularProgressIndicator());
-    if (_error != null)
+    if (_loading) {
+      return const Center(
+          child: CircularProgressIndicator(
+        color: AppColors.rusticSunset,
+      ));
+    }
+    if (_error != null) {
       return Text(_error!, style: const TextStyle(color: Colors.red));
+    }
     if (_products.isEmpty) return Text(l10n.shopNoProducts);
 
     return ListView.builder(
@@ -313,63 +334,109 @@ class _ShopScreenState extends State<ShopScreen> {
     String? imageUrl,
   }) {
     final l10n = AppLocalizations.of(context)!;
+
     return Container(
-      width: width * 0.5,
-      margin: EdgeInsets.only(right: width * 0.035),
+      width: width * 0.55,
+      margin: EdgeInsets.only(right: width * 0.04),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: const [
-          BoxShadow(blurRadius: 8, color: Colors.black12),
-        ],
+        color: AppColors.softIvory,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.black, width: 2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // image
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(14),
-              topRight: Radius.circular(14),
-            ),
-            child: SizedBox(
-              height: width * 0.3,
+          // ---------------- IMAGE + HEART ----------------
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Container(
+              height: width * 0.32,
               width: double.infinity,
-              child: imageUrl != null
-                  ? Image.network(
-                      imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(Icons.error),
-                    )
-                  : const Icon(Icons.image, size: 50),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: imageUrl != null
+                    ? Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover, // 🔥 fills the container
+                        errorBuilder: (_, __, ___) =>
+                            const Icon(Icons.image_not_supported),
+                      )
+                    : const Icon(Icons.image, size: 60),
+              ),
             ),
           ),
 
-          // text info
+          // ---------------- TEXT CONTENT ----------------
           Padding(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.symmetric(horizontal: 14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(brand,
-                    style: const TextStyle(
+                Text(
+                  brand,
+                  style: const TextStyle(
+                    fontFamily: "PoppinsMedium",
+                    fontSize: 13,
+                    color: AppColors.rusticSunset,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  productName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: "PoppinsRegular",
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // ---------------- PRICE ROW ----------------
+                Row(
+                  children: [
+                    Text(
+                      price,
+                      style: const TextStyle(
+                        fontFamily: "PoppinsSemiBold",
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      oldPrice,
+                      style: const TextStyle(
+                        fontFamily: "PoppinsRegular",
+                        fontSize: 13,
+                        decoration: TextDecoration.lineThrough,
+                        color: Colors.black45,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      discount,
+                      style: const TextStyle(
+                        fontFamily: "PoppinsMedium",
+                        fontSize: 13,
                         color: AppColors.rusticSunset,
-                        fontWeight: FontWeight.w600)),
-                const SizedBox(height: 5),
-                Text(productName, maxLines: 2, overflow: TextOverflow.ellipsis),
-                const SizedBox(height: 5),
-                Text(price,
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
 
           const Spacer(),
 
-          // Button
+          // ---------------- SHOP BUTTON ----------------
           Container(
-            padding: const EdgeInsets.all(12),
+            height: 40,
+            width: double.infinity,
             decoration: const BoxDecoration(
               color: Colors.black,
               borderRadius: BorderRadius.only(
@@ -377,13 +444,17 @@ class _ShopScreenState extends State<ShopScreen> {
                 bottomRight: Radius.circular(14),
               ),
             ),
-            child: Center(
+            child: const Center(
               child: Text(
-                l10n.shopButton,
-                style: const TextStyle(color: Colors.white),
+                "Shop",
+                style: const TextStyle(
+                  fontFamily: "PoppinsSemiBold",
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
