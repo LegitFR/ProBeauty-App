@@ -20,6 +20,7 @@ import 'package:probeauty_app/pages/profile_details.dart';
 import 'package:probeauty_app/pages/saved_address_screen.dart';
 import 'package:probeauty_app/pages/signup_screen.dart';
 import 'package:probeauty_app/pages/splash_screen.dart';
+import 'package:probeauty_app/providers/appointment_provider.dart';
 import 'package:probeauty_app/providers/cart_provider.dart';
 import 'package:probeauty_app/providers/order_provider.dart';
 import 'package:probeauty_app/providers/product_provider.dart';
@@ -101,6 +102,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ProductProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => OrderProvider()),
+        ChangeNotifierProvider(create: (_) => AppointmentProvider()),
         ChangeNotifierProvider(create: (_) => AppLocale(code)),
       ],
       child: const MyApp(),

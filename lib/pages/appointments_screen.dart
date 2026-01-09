@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
+import 'package:probeauty_app/providers/appointment_provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppointmentsScreen extends StatefulWidget {
@@ -16,58 +18,14 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   final String baseUrl =
       "https://probeauty-backend.onrender.com/api/v1/bookings";
 
-  bool loading = true;
-  List<dynamic> allBookings = [];
   bool showAllPrevious = false;
 
   @override
   void initState() {
     super.initState();
-    _fetchBookings();
-  }
-
-  Future<void> _fetchBookings() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString("accessToken");
-
-      if (!mounted) return; // 🔐 critical
-
-      if (token == null) {
-        setState(() => loading = false);
-        return;
-      }
-
-      final response = await http.get(
-        Uri.parse(baseUrl),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token",
-        },
-      );
-
-      if (!mounted) return; // 🔐 critical
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final List bookings = data["data"] ?? [];
-
-        bookings.sort((a, b) {
-          return DateTime.parse(b["startTime"])
-              .compareTo(DateTime.parse(a["startTime"]));
-        });
-
-        setState(() {
-          allBookings = bookings;
-          loading = false;
-        });
-      } else {
-        setState(() => loading = false);
-      }
-    } catch (_) {
-      if (!mounted) return; // 🔐 critical
-      setState(() => loading = false);
-    }
+    Future.microtask(() {
+      context.read<AppointmentProvider>().fetchBookings();
+    });
   }
 
   String _formatDate(String iso) {
@@ -101,34 +59,38 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final appointmentProvider = context.watch<AppointmentProvider>();
 
-    if (loading) {
+    if (appointmentProvider.isLoading && appointmentProvider.bookings.isEmpty) {
       return const Scaffold(
         backgroundColor: AppColors.softIvory,
         body: Center(
-            child: CircularProgressIndicator(
-          color: AppColors.rusticSunset,
-        )),
+          child: CircularProgressIndicator(
+            color: AppColors.rusticSunset,
+          ),
+        ),
       );
     }
 
     // fallback when no bookings exist
+    final allBookings = appointmentProvider.bookings;
+
     if (allBookings.isEmpty) {
       return Scaffold(
         backgroundColor: AppColors.softIvory,
         body: Center(
           child: Text(
             l10n.appointmentsEmpty,
-            style: const TextStyle(fontSize: 18, fontFamily: "PoppinsMedium"),
+            style: const TextStyle(
+              fontSize: 18,
+              fontFamily: "PoppinsMedium",
+            ),
           ),
         ),
       );
     }
 
-    // FIRST booking → Confirmed
-    final confirmed = allBookings.isNotEmpty ? allBookings.first : null;
-
-    // Remaining → Previous
+    final confirmed = allBookings.first;
     final allPrevious = allBookings.length > 1 ? allBookings.sublist(1) : [];
 
     final previous =
