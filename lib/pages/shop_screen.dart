@@ -132,52 +132,59 @@ class _ShopScreenState extends State<ShopScreen> {
       child: Scaffold(
         backgroundColor: AppColors.softIvory,
         body: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.all(width * 0.035),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Search bar
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: width * 0.035, vertical: height * 0.01),
-                    decoration: BoxDecoration(
-                      color: AppColors.softIvory,
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
-                          blurRadius: 6,
-                          offset: const Offset(2, 3),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.search, color: Colors.grey[600], size: 22),
-                        SizedBox(width: width * 0.025),
-                        Expanded(
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: l10n.shopSearchHint,
-                              border: InputBorder.none,
-                            ),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Search bar
+                Container(
+                  margin: EdgeInsets.only(
+                      left: width * 0.035,
+                      right: width * 0.035,
+                      top: width * 0.035),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: width * 0.035, vertical: height * 0.01),
+                  decoration: BoxDecoration(
+                    color: AppColors.softIvory,
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 6,
+                        offset: const Offset(2, 3),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.search, color: Colors.grey[600], size: 22),
+                      SizedBox(width: width * 0.025),
+                      Expanded(
+                        child: TextField(
+                          decoration: InputDecoration(
+                            hintText: l10n.shopSearchHint,
+                            border: InputBorder.none,
                           ),
                         ),
-                        Image.asset(
-                          'assets/images/icons/mic.png',
-                          width: 20,
-                          height: 20,
-                        ),
-                      ],
-                    ),
+                      ),
+                      Image.asset(
+                        'assets/images/icons/mic.png',
+                        width: 20,
+                        height: 20,
+                      ),
+                    ],
                   ),
+                ),
 
-                  SizedBox(height: height * 0.025),
+                SizedBox(height: height * 0.025),
 
-                  // Categories
-                  SizedBox(
+                // Categories
+                Padding(
+                  padding: EdgeInsets.only(
+                    left: width * 0.035,
+                    right: width * 0.035,
+                  ),
+                  child: SizedBox(
                     height: height * 0.11,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
@@ -193,37 +200,41 @@ class _ShopScreenState extends State<ShopScreen> {
                       ],
                     ),
                   ),
+                ),
 
-                  SizedBox(height: height * 0.025),
+                SizedBox(height: height * 0.025),
 
-                  // Carousel banner
-                  CarouselSlider(
-                    options: CarouselOptions(
-                      viewportFraction: 0.9,
-                      height: height * 0.20,
-                      autoPlay: true,
-                      enlargeCenterPage: true,
-                    ),
-                    items: [
-                      'assets/images/shop/banner1.png',
-                      'assets/images/shop/banner2.png',
-                      'assets/images/shop/banner3.png',
-                    ].map((imagePath) {
-                      return ClipRRect(
-                        borderRadius: BorderRadius.circular(18),
-                        child: Image.asset(
-                          imagePath,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      );
-                    }).toList(),
+                // Carousel banner
+                CarouselSlider(
+                  options: CarouselOptions(
+                    viewportFraction: 0.78,
+                    height: height * 0.20,
+                    autoPlay: true,
+                    enlargeCenterPage: true,
                   ),
+                  items: [
+                    'assets/images/shop/banner1.png',
+                    'assets/images/shop/banner2.png',
+                    'assets/images/shop/banner3.png',
+                  ].map((imagePath) {
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(18),
+                      child: Image.asset(
+                        imagePath,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    );
+                  }).toList(),
+                ),
 
-                  SizedBox(height: height * 0.035),
+                SizedBox(height: height * 0.035),
 
-                  // Title
-                  Row(
+                // Title
+                Padding(
+                  padding:
+                      EdgeInsetsGeometry.symmetric(horizontal: width * 0.035),
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
@@ -239,15 +250,19 @@ class _ShopScreenState extends State<ShopScreen> {
                       ),
                     ],
                   ),
+                ),
 
-                  SizedBox(height: height * 0.015),
+                SizedBox(height: height * 0.015),
 
-                  SizedBox(
-                    height: height * 0.32,
-                    child: _buildSpecialOffersList(width),
-                  ),
-                ],
-              ),
+                SizedBox(
+                  height: height * 0.32,
+                  child: _buildSpecialOffersList(width),
+                ),
+
+                const SizedBox(
+                  height: 50,
+                )
+              ],
             ),
           ),
         ),
@@ -270,6 +285,7 @@ class _ShopScreenState extends State<ShopScreen> {
     if (_products.isEmpty) return Text(l10n.shopNoProducts);
 
     return ListView.builder(
+      padding: EdgeInsets.only(left: width * 0.035),
       scrollDirection: Axis.horizontal,
       itemCount: _products.length,
       itemBuilder: (context, index) {

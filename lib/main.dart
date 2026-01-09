@@ -22,6 +22,7 @@ import 'package:probeauty_app/pages/signup_screen.dart';
 import 'package:probeauty_app/pages/splash_screen.dart';
 import 'package:probeauty_app/providers/cart_provider.dart';
 import 'package:probeauty_app/providers/order_provider.dart';
+import 'package:probeauty_app/providers/salon_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'pages/appointments_screen.dart';
@@ -95,6 +96,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => SalonProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => OrderProvider()),
         ChangeNotifierProvider(create: (_) => AppLocale(code)),

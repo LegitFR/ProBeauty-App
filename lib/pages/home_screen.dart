@@ -6,7 +6,9 @@ import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/salon_detail_screen.dart';
+import 'package:probeauty_app/providers/salon_provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,55 +18,50 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<dynamic> salons = [];
-  bool isLoading = true;
-  int currentPage = 1;
-  bool isFetchingMore = false;
-  bool hasMoreData = true;
-
   @override
   void initState() {
     super.initState();
-
-    fetchSalons(page: 2);
+    Future.microtask(() {
+      context.read<SalonProvider>().fetchSalons();
+    });
   }
 
-  Future<void> fetchSalons({int page = 1}) async {
-    if (isFetchingMore || !hasMoreData) return;
+  // Future<void> fetchSalons({int page = 1}) async {
+  //   if (isFetchingMore || !hasMoreData) return;
 
-    isFetchingMore = true; // ❌ no setState yet
+  //   isFetchingMore = true; // ❌ no setState yet
 
-    try {
-      final url = Uri.parse(
-        "https://probeauty-backend.onrender.com/api/v1/salons?page=$page",
-      );
+  //   try {
+  //     final url = Uri.parse(
+  //       "https://probeauty-backend.onrender.com/api/v1/salons?page=$page",
+  //     );
 
-      final response = await http.get(url);
+  //     final response = await http.get(url);
 
-      if (!mounted) return; // 🔥 IMPORTANT
+  //     if (!mounted) return; // 🔥 IMPORTANT
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final List newSalons = data["data"] ?? [];
+  //     if (response.statusCode == 200) {
+  //       final data = jsonDecode(response.body);
+  //       final List newSalons = data["data"] ?? [];
 
-        setState(() {
-          if (newSalons.isEmpty) {
-            hasMoreData = false;
-          } else {
-            salons.addAll(newSalons);
-            currentPage = page;
-          }
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (!mounted) return;
-      debugPrint(e.toString());
-    } finally {
-      if (!mounted) return;
-      setState(() => isFetchingMore = false);
-    }
-  }
+  //       setState(() {
+  //         if (newSalons.isEmpty) {
+  //           hasMoreData = false;
+  //         } else {
+  //           salons.addAll(newSalons);
+  //           currentPage = page;
+  //         }
+  //         isLoading = false;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     if (!mounted) return;
+  //     debugPrint(e.toString());
+  //   } finally {
+  //     if (!mounted) return;
+  //     setState(() => isFetchingMore = false);
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -72,6 +69,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final size = MediaQuery.of(context).size;
     final width = size.width;
     final height = size.height;
+
+    final salonProvider = context.watch<SalonProvider>();
 
     // fallback images
     final fallbackImages = [
@@ -98,25 +97,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       'assets/images/logos/probeauty_app_logo.svg',
                       height: height * 0.04,
                     ),
-                    Row(
-                      children: [
-                        GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(context, "/notification");
-                            },
-                            child: SvgPicture.asset(
-                              'assets/images/icons/notification.svg',
-                              width: width * 0.05,
-                              height: width * 0.05,
-                            )),
-                        SizedBox(width: width * 0.04),
-                        SvgPicture.asset(
-                          'assets/images/icons/qr.svg',
-                          width: width * 0.07,
-                          height: width * 0.07,
-                        )
-                      ],
-                    ),
+                    GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, "/notification");
+                        },
+                        child: SvgPicture.asset(
+                          'assets/images/icons/notification.svg',
+                          width: width * 0.05,
+                          height: width * 0.05,
+                        )),
                   ],
                 ),
               ),
@@ -131,15 +120,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     children: [
-                      categoryItem('assets/images/categories/haircut.svg',
+                      categoryItem('assets/images/categories/haircut.png',
                           l10n.categoryHaircut, width, height),
-                      categoryItem('assets/images/categories/spa.svg',
+                      categoryItem('assets/images/categories/spa.png',
                           l10n.categorySpa, width, height),
-                      categoryItem('assets/images/categories/nail.svg',
+                      categoryItem('assets/images/categories/nail.png',
                           l10n.categoryNails, width, height),
-                      categoryItem('assets/images/categories/facial.svg',
+                      categoryItem('assets/images/categories/facial.png',
                           l10n.categoryFacial, width, height),
-                      categoryItem('assets/images/categories/haircut.svg',
+                      categoryItem('assets/images/categories/haircut.png',
                           l10n.categoryHaircut, width, height),
                     ],
                   ),
@@ -193,12 +182,18 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               SizedBox(height: height * 0.02),
 
-              isLoading
+              salonProvider.isLoading && salonProvider.salons.isEmpty
                   ? const Center(
                       child: CircularProgressIndicator(
-                      color: AppColors.rusticSunset,
-                    ))
-                  : buildSalonList(width, height, fallbackImages),
+                        color: AppColors.rusticSunset,
+                      ),
+                    )
+                  : buildSalonList(
+                      width,
+                      height,
+                      fallbackImages,
+                      salonProvider,
+                    ),
 
               SizedBox(height: height * 0.04),
 
@@ -217,14 +212,20 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               SizedBox(height: height * 0.02),
 
-              isLoading
+              salonProvider.isLoading && salonProvider.salons.isEmpty
                   ? const Center(
                       child: CircularProgressIndicator(
-                      color: AppColors.rusticSunset,
-                    ))
+                        color: AppColors.rusticSunset,
+                      ),
+                    )
                   : Padding(
                       padding: const EdgeInsets.only(bottom: 25),
-                      child: buildSalonList(width, height, fallbackImages),
+                      child: buildSalonList(
+                        width,
+                        height,
+                        fallbackImages,
+                        salonProvider,
+                      ),
                     ),
             ],
           ),
@@ -234,8 +235,22 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // === Salon Card List (Horizontal)
-  Widget buildSalonList(double width, double height, List images) {
+  Widget buildSalonList(
+    double width,
+    double height,
+    List images,
+    SalonProvider provider,
+  ) {
     final l10n = AppLocalizations.of(context)!;
+
+    const BorderRadius cardRadius = BorderRadius.all(
+      Radius.circular(16),
+    );
+
+    const BorderRadius imageRadius = BorderRadius.only(
+      topLeft: Radius.circular(11),
+      topRight: Radius.circular(11),
+    );
 
     return SizedBox(
       height: height * 0.3,
@@ -243,21 +258,18 @@ class _HomeScreenState extends State<HomeScreen> {
         onNotification: (notification) {
           if (notification.metrics.pixels >=
                   notification.metrics.maxScrollExtent - 100 &&
-              !isFetchingMore &&
-              hasMoreData) {
-            fetchSalons(page: currentPage + 1);
+              provider.hasMore) {
+            provider.fetchSalons();
           }
+
           return false;
         },
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          itemCount: salons.length,
-          padding: EdgeInsets.only(
-            left: width * 0.04,
-            right: width * 0.04,
-          ),
+          itemCount: provider.salons.length,
+          padding: EdgeInsets.symmetric(horizontal: width * 0.04),
           itemBuilder: (context, index) {
-            final salon = salons[index];
+            final salon = provider.salons[index];
 
             final String id = salon["id"] ?? "id";
             final String name = salon["name"] ?? "Salon";
@@ -296,12 +308,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: width * 0.65,
                   decoration: BoxDecoration(
                     color: AppColors.softIvory,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: cardRadius,
                     border: Border.all(color: Colors.black, width: 4),
                   ),
                   child: Column(
                     children: [
+                      // 🔥 IMAGE WITH MATCHING CURVED BORDER
                       ClipRRect(
+                        borderRadius: imageRadius,
                         child: Image(
                           image: img.startsWith('http')
                               ? NetworkImage(img)
@@ -313,6 +327,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               const Icon(Icons.image_not_supported),
                         ),
                       ),
+
                       Expanded(
                         child: Padding(
                           padding: EdgeInsets.symmetric(
@@ -330,16 +345,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                               SizedBox(height: height * 0.005),
-
-                              // Fake stars
                               Row(
                                 children: [
                                   ...List.generate(
                                     5,
-                                    (starIndex) => Icon(
+                                    (i) => Icon(
                                       Icons.star,
                                       size: width * 0.035,
-                                      color: starIndex < 4
+                                      color: i < 4
                                           ? AppColors.rusticSunset
                                           : AppColors.greyTone,
                                     ),
@@ -355,20 +368,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               ),
                               SizedBox(height: height * 0.005),
-
                               Text(
-                                maxLines: 2,
-                                softWrap: true,
                                 address,
+                                maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   fontFamily: "PoppinsRegular",
                                   fontSize: width * 0.032,
                                 ),
                               ),
-
                               SizedBox(height: height * 0.008),
-
                               Row(
                                 children: [
                                   Container(
@@ -427,7 +436,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -449,10 +458,12 @@ class _HomeScreenState extends State<HomeScreen> {
             width: width * 0.18,
             height: width * 0.18,
             child: ClipOval(
-              child: SvgPicture.asset(
+              child: Image.asset(
                 image,
                 fit: BoxFit.cover,
-                placeholderBuilder: (_) => Container(
+                width: double.infinity,
+                height: double.infinity,
+                errorBuilder: (_, __, ___) => Container(
                   color: Colors.grey.shade200,
                 ),
               ),

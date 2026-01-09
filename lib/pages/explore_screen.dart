@@ -397,6 +397,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
                               child: Image.asset(
                                 item['img']!,
                                 height: width * 0.22,
@@ -560,23 +561,26 @@ class _ExploreScreenState extends State<ExploreScreen> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                left: 20,
-                right: 20,
-                top: 20,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Search field
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.black, width: 1.4),
-                    ),
-                    child: TextField(
+            return SizedBox(
+              height: MediaQuery.of(context).size.height *
+                  0.8, // 👈 controls height
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: 20,
+                  right: 20,
+                  top: 5, // 👈 reduced
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Search field
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: Colors.black, width: 1.4),
+                      ),
+                      child: TextField(
                         controller: cityController,
                         decoration: const InputDecoration(
                           hintText: "Search city",
@@ -592,7 +596,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
                           try {
                             final locations = await locationFromAddress(value);
-
                             final cities = <String>{};
 
                             for (final loc in locations) {
@@ -615,34 +618,36 @@ class _ExploreScreenState extends State<ExploreScreen> {
                             if (!mounted) return;
                             setModalState(() => cityResults = []);
                           }
-                        }),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // Results
-                  Flexible(
-                    child: ListView.builder(
-                      itemCount: cityResults.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text(
-                            cityResults[index],
-                            style: const TextStyle(
-                              fontFamily: "PoppinsMedium",
-                            ),
-                          ),
-                          onTap: () {
-                            setState(() {
-                              currentCity = cityResults[index];
-                            });
-                            Navigator.pop(context);
-                          },
-                        );
-                      },
+                        },
+                      ),
                     ),
-                  ),
-                ],
+
+                    const SizedBox(height: 12),
+
+                    // Results
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: cityResults.length,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            title: Text(
+                              cityResults[index],
+                              style: const TextStyle(
+                                fontFamily: "PoppinsMedium",
+                              ),
+                            ),
+                            onTap: () {
+                              setState(() {
+                                currentCity = cityResults[index];
+                              });
+                              Navigator.pop(context);
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },

@@ -68,12 +68,6 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     return availability != null && availability["isAvailable"] == true;
   }
 
-  bool _isSlotInFuture(String isoTime) {
-    final slotTime = DateTime.parse(isoTime).toLocal();
-    final now = DateTime.now();
-    return slotTime.isAfter(now);
-  }
-
   // --------------------------------------------------
   // FETCH SLOTS FROM BACKEND
   // --------------------------------------------------
