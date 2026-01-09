@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/models/product.dart';
+import 'package:probeauty_app/providers/product_provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
+import 'package:provider/provider.dart';
 
 class ShopScreen extends StatefulWidget {
   const ShopScreen({super.key});
@@ -19,105 +21,100 @@ class _ShopScreenState extends State<ShopScreen> {
   static const String _baseUrl = 'https://probeauty-backend.onrender.com';
   static const String _productsEndpoint = '$_baseUrl/api/v1/products';
 
-  bool _loading = false;
-  String? _error;
-  List<Product> _products = [];
-
-  // salon ID -> salon name cache
-  Map<String, String> salonNames = {};
-
   @override
   void initState() {
     super.initState();
-    _fetchProducts();
+    Future.microtask(() {
+      context.read<ProductProvider>().fetchProducts();
+    });
   }
 
   // ---------------- Fetch Products ----------------
-  Future<void> _fetchProducts() async {
-    if (!mounted) return;
+  // Future<void> _fetchProducts() async {
+  //   if (!mounted) return;
 
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
+  //   setState(() {
+  //     _loading = true;
+  //     _error = null;
+  //   });
 
-    try {
-      final res = await http.get(
-        Uri.parse(_productsEndpoint),
-        headers: {'Content-Type': 'application/json'},
-      );
+  //   try {
+  //     final res = await http.get(
+  //       Uri.parse(_productsEndpoint),
+  //       headers: {'Content-Type': 'application/json'},
+  //     );
 
-      if (!mounted) return;
+  //     if (!mounted) return;
 
-      if (res.statusCode == 200) {
-        final Map<String, dynamic> body = json.decode(res.body);
-        final data = body['data'];
+  //     if (res.statusCode == 200) {
+  //       final Map<String, dynamic> body = json.decode(res.body);
+  //       final data = body['data'];
 
-        if (data is List) {
-          _products = data.map((e) => Product.fromJson(e)).toList();
+  //       if (data is List) {
+  //         _products = data.map((e) => Product.fromJson(e)).toList();
 
-          if (!mounted) return;
-          setState(() {});
+  //         if (!mounted) return;
+  //         setState(() {});
 
-          // fetch salon names
-          await _fetchAllSalonNames();
-        } else {
-          if (!mounted) return;
-          setState(() => _error = 'Unexpected response shape');
-        }
-      } else {
-        if (!mounted) return;
-        setState(() => _error = 'Server responded with ${res.statusCode}');
-      }
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _error = 'Failed to fetch products');
-    } finally {
-      if (!mounted) return;
-      setState(() => _loading = false);
-    }
-  }
+  //         // fetch salon names
+  //         await _fetchAllSalonNames();
+  //       } else {
+  //         if (!mounted) return;
+  //         setState(() => _error = 'Unexpected response shape');
+  //       }
+  //     } else {
+  //       if (!mounted) return;
+  //       setState(() => _error = 'Server responded with ${res.statusCode}');
+  //     }
+  //   } catch (e) {
+  //     if (!mounted) return;
+  //     setState(() => _error = 'Failed to fetch products');
+  //   } finally {
+  //     if (!mounted) return;
+  //     setState(() => _loading = false);
+  //   }
+  // }
 
   // ---------------- Fetch All Unique Salon Names ----------------
-  Future<void> _fetchAllSalonNames() async {
-    final uniqueSalonIds = _products
-        .map((p) => p.salonId)
-        .where((id) => id != null && id.isNotEmpty)
-        .toSet();
+  // Future<void> _fetchAllSalonNames() async {
+  //   final uniqueSalonIds = _products
+  //       .map((p) => p.salonId)
+  //       .where((id) => id != null && id.isNotEmpty)
+  //       .toSet();
 
-    for (final salonId in uniqueSalonIds) {
-      if (!mounted) return;
+  //   for (final salonId in uniqueSalonIds) {
+  //     if (!mounted) return;
 
-      if (!salonNames.containsKey(salonId)) {
-        await _fetchSalonName(salonId!);
-      }
-    }
+  //     if (!salonNames.containsKey(salonId)) {
+  //       await _fetchSalonName(salonId!);
+  //     }
+  //   }
 
-    if (!mounted) return;
-    setState(() {}); // refresh UI
-  }
+  //   if (!mounted) return;
+  //   setState(() {}); // refresh UI
+  // }
 
   // ---------------- Fetch Single Salon Name ----------------
-  Future<void> _fetchSalonName(String salonId) async {
-    try {
-      final res = await http.get(
-        Uri.parse('$_baseUrl/api/v1/salons/$salonId'),
-        headers: {'Content-Type': 'application/json'},
-      );
+  // Future<void> _fetchSalonName(String salonId) async {
+  //   try {
+  //     final res = await http.get(
+  //       Uri.parse('$_baseUrl/api/v1/salons/$salonId'),
+  //       headers: {'Content-Type': 'application/json'},
+  //     );
 
-      if (!mounted) return;
+  //     if (!mounted) return;
 
-      if (res.statusCode == 200) {
-        final body = json.decode(res.body);
-        salonNames[salonId] = body['data']?['name'] ?? 'Salon';
-      } else {
-        salonNames[salonId] = 'Salon';
-      }
-    } catch (_) {
-      if (!mounted) return;
-      salonNames[salonId] = 'Salon';
-    }
-  }
+  //     if (res.statusCode == 200) {
+  //       final body = json.decode(res.body);
+  //       salonNames[salonId] = body['data']?['name'] ?? 'Salon';
+  //     } else {
+  //       salonNames[salonId] = 'Salon';
+  //     }
+  //   } catch (_) {
+  //     if (!mounted) return;
+  //     salonNames[salonId] = 'Salon';
+  //   }
+  // }
 
   // ---------------------- UI ----------------------
   @override
@@ -126,6 +123,7 @@ class _ShopScreenState extends State<ShopScreen> {
     final size = MediaQuery.of(context).size;
     final width = size.width;
     final height = size.height;
+    final productProvider = context.watch<ProductProvider>();
 
     return SafeArea(
       bottom: true,
@@ -245,7 +243,7 @@ class _ShopScreenState extends State<ShopScreen> {
                         ),
                       ),
                       IconButton(
-                        onPressed: _fetchProducts,
+                        onPressed: productProvider.fetchProducts,
                         icon: const Icon(Icons.refresh),
                       ),
                     ],
@@ -273,25 +271,33 @@ class _ShopScreenState extends State<ShopScreen> {
   // ---------------- Build Product List ----------------
   Widget _buildSpecialOffersList(double width) {
     final l10n = AppLocalizations.of(context)!;
-    if (_loading) {
+    final provider = context.watch<ProductProvider>();
+
+    if (provider.isLoading && provider.products.isEmpty) {
       return const Center(
-          child: CircularProgressIndicator(
-        color: AppColors.rusticSunset,
-      ));
+        child: CircularProgressIndicator(
+          color: AppColors.rusticSunset,
+        ),
+      );
     }
-    if (_error != null) {
-      return Text(_error!, style: const TextStyle(color: Colors.red));
+
+    if (provider.error != null) {
+      return Text(provider.error!, style: const TextStyle(color: Colors.red));
     }
-    if (_products.isEmpty) return Text(l10n.shopNoProducts);
+
+    if (provider.products.isEmpty) {
+      return Text(l10n.shopNoProducts);
+    }
 
     return ListView.builder(
       padding: EdgeInsets.only(left: width * 0.035),
       scrollDirection: Axis.horizontal,
-      itemCount: _products.length,
+      itemCount: provider.products.length,
       itemBuilder: (context, index) {
-        final p = _products[index];
+        final p = provider.products[index];
         final image = p.images.isNotEmpty ? p.images[0] : null;
-        final salonName = salonNames[p.salonId] ?? l10n.shopLoadingSalon;
+        final salonName =
+            provider.salonNames[p.salonId] ?? l10n.shopLoadingSalon;
 
         return GestureDetector(
           onTap: () {
@@ -300,8 +306,7 @@ class _ShopScreenState extends State<ShopScreen> {
               '/product_screen',
               arguments: {
                 "product": p,
-                "salonName":
-                    salonName == l10n.shopLoadingSalon ? "Salon" : salonName,
+                "salonName": salonName,
               },
             );
           },
