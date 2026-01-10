@@ -343,6 +343,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               // NAME
                               Text(
                                 name,
+                                maxLines: 1,
                                 style: TextStyle(
                                   fontFamily: "PoppinsSemiBold",
                                   fontSize: width * 0.04,
@@ -379,7 +380,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                               // ADDRESS
                               Text(
-                                address,
+                                address.contains('\n') ? address : '$address\n',
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(

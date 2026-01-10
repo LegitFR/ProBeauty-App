@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/models/product.dart';
+import 'package:probeauty_app/pages/product_search_screen.dart';
 import 'package:probeauty_app/providers/product_provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:provider/provider.dart';
@@ -159,6 +160,20 @@ class _ShopScreenState extends State<ShopScreen> {
                       SizedBox(width: width * 0.025),
                       Expanded(
                         child: TextField(
+                          cursorColor: AppColors.rusticSunset,
+                          textInputAction: TextInputAction.search,
+                          onSubmitted: (value) {
+                            if (value.trim().isEmpty) return;
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ProductSearchScreen(
+                                  initialQuery: value,
+                                ),
+                              ),
+                            );
+                          },
                           decoration: InputDecoration(
                             hintText: l10n.shopSearchHint,
                             border: InputBorder.none,
@@ -177,26 +192,43 @@ class _ShopScreenState extends State<ShopScreen> {
                 SizedBox(height: height * 0.025),
 
                 // Categories
-                Padding(
-                  padding: EdgeInsets.only(
-                    left: width * 0.035,
-                    right: width * 0.035,
-                  ),
-                  child: SizedBox(
-                    height: height * 0.11,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        categoryItem('assets/images/shop/shampoo.png',
-                            l10n.shopCategoryShampoo, width),
-                        categoryItem('assets/images/shop/haircolor.png',
-                            l10n.shopCategoryConditioner, width),
-                        categoryItem('assets/images/shop/conditioner.png',
-                            l10n.shopCategoryHairColour, width),
-                        categoryItem('assets/images/shop/hairoil.png',
-                            l10n.shopCategoryHairOil, width),
-                      ],
-                    ),
+                SizedBox(
+                  height: height * 0.11,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: EdgeInsets.only(left: width * 0.035),
+                    itemCount: 4,
+                    separatorBuilder: (_, __) =>
+                        SizedBox(width: width * 0.04), // 👈 equal spacing
+                    itemBuilder: (context, index) {
+                      final categories = [
+                        {
+                          "img": 'assets/images/shop/shampoo.png',
+                          "title": l10n.shopCategoryShampoo,
+                        },
+                        {
+                          "img": 'assets/images/shop/haircolor.png',
+                          "title": l10n.shopCategoryConditioner,
+                        },
+                        {
+                          "img": 'assets/images/shop/conditioner.png',
+                          "title": l10n.shopCategoryHairColour,
+                        },
+                        {
+                          "img": 'assets/images/shop/hairoil.png',
+                          "title": l10n.shopCategoryHairOil,
+                        },
+                      ];
+
+                      final item = categories[index];
+
+                      return _categoryItem(
+                        context,
+                        item["img"]!,
+                        item["title"]!,
+                        width,
+                      );
+                    },
                   ),
                 ),
 
@@ -322,19 +354,41 @@ class _ShopScreenState extends State<ShopScreen> {
   }
 
   // ---------------- Category Item ----------------
-  Widget categoryItem(String image, String title, double width) {
-    return Padding(
-      padding: EdgeInsets.only(right: width * 0.04),
-      child: Column(
-        children: [
-          CircleAvatar(
-            radius: width * 0.085,
-            backgroundColor: Colors.white,
-            backgroundImage: AssetImage(image),
+  Widget _categoryItem(
+    BuildContext context,
+    String image,
+    String title,
+    double width,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ProductSearchScreen(
+              initialQuery: title, // 🔥 keyword-based search
+            ),
           ),
-          const SizedBox(height: 6),
-          Text(title),
-        ],
+        );
+      },
+      child: Padding(
+        padding: EdgeInsets.only(right: width * 0.04),
+        child: Column(
+          children: [
+            CircleAvatar(
+              radius: width * 0.085,
+              backgroundColor: Colors.white,
+              backgroundImage: AssetImage(image),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              title,
+              style: const TextStyle(
+                fontFamily: "PoppinsRegular",
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -395,6 +449,7 @@ class _ShopScreenState extends State<ShopScreen> {
               children: [
                 Text(
                   brand,
+                  maxLines: 1,
                   style: const TextStyle(
                     fontFamily: "PoppinsMedium",
                     fontSize: 13,

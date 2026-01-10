@@ -10,6 +10,9 @@ class ProductProvider with ChangeNotifier {
   List<Product> _products = [];
   bool _isLoading = false;
   String? _error;
+  List<Product> searchResults = [];
+  bool isSearching = false;
+  String? searchError;
 
   // salonId → salonName cache
   final Map<String, String> _salonNames = {};
@@ -70,5 +73,44 @@ class ProductProvider with ChangeNotifier {
         _salonNames[id!] = 'Salon';
       }
     }
+  }
+
+  Future<void> searchProducts({
+    required String query,
+    int page = 1,
+    int limit = 20,
+  }) async {
+    if (query.trim().isEmpty) return;
+
+    isSearching = true;
+    searchError = null;
+    notifyListeners();
+
+    try {
+      final uri = Uri.parse(
+        "$_baseUrl/api/v1/products/search"
+        "?q=${Uri.encodeQueryComponent(query)}"
+        "&page=$page&limit=$limit",
+      );
+
+      final res = await http.get(
+        uri,
+        headers: {"Content-Type": "application/json"},
+      );
+
+      if (res.statusCode == 200) {
+        final body = jsonDecode(res.body);
+        final List data = body["data"] ?? [];
+
+        searchResults = data.map<Product>((e) => Product.fromJson(e)).toList();
+      } else {
+        searchError = "Search failed";
+      }
+    } catch (e) {
+      searchError = "Something went wrong";
+    }
+
+    isSearching = false;
+    notifyListeners();
   }
 }

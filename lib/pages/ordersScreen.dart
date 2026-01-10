@@ -60,24 +60,25 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       BlendMode.srcIn,
                     ),
                   ),
-                  Positioned(
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(3),
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.rusticSunset,
-                      ),
-                      child: const Text(
-                        "5",
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.white,
-                          fontFamily: "PoppinsSemiBold",
+                  if (ordersProvider.orders.isNotEmpty)
+                    Positioned(
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.rusticSunset,
+                        ),
+                        child: Text(
+                          ordersProvider.orders.length.toString(),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.white,
+                            fontFamily: "PoppinsSemiBold",
+                          ),
                         ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),
