@@ -103,8 +103,6 @@ class SelectProfessionalScreen extends StatelessWidget {
 
   // ---------------- ANY STAFF CARD ----------------
   Widget _anyStaffCard(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     return Container(
       decoration: BoxDecoration(
         color: AppColors.rusticSunset.withOpacity(0.1),

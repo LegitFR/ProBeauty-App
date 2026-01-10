@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_protected_member
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -105,7 +107,6 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final size = MediaQuery.of(context).size;
-    final width = size.width;
     final height = size.height;
     final bool hasServices = widget.services.isNotEmpty;
 

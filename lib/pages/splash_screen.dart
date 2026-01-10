@@ -15,7 +15,7 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-  bool _moveUp = false; // ❌ no longer used (kept as requested)
+  // bool _moveUp = false; //
   late final AnimationController _lottieController;
 
   static const double startProgress = 0.0;

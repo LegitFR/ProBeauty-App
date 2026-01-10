@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
@@ -254,14 +252,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => ExploreResultsScreen(
-                                      serviceText: searchController
-                                          .text, // your search field text
-                                      dateText: selectedDate != null
-                                          ? _formatDate(selectedDate!)
-                                          : "",
-                                      timeText: selectedTimeSlot ?? "",
-                                      locationText: "Mumbai" ?? "",
-                                    ),
+                                        serviceText: searchController.text,
+                                        dateText: selectedDate != null
+                                            ? _formatDate(selectedDate!)
+                                            : "",
+                                        timeText: selectedTimeSlot ?? "",
+                                        locationText: currentCity),
                                   ),
                                 );
                               },

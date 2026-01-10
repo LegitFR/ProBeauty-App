@@ -159,8 +159,6 @@ Widget specialOfferCard(
   required String discount,
   String? imageUrl,
 }) {
-  final l10n = AppLocalizations.of(context)!;
-
   return Container(
     width: width * 0.55,
     margin: EdgeInsets.only(right: width * 0.04),

@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:flutter/cupertino.dart";
 import "package:probeauty_app/l10n/app_localizations.dart";
 import "package:probeauty_app/resources/AppColors.dart";
 

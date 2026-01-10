@@ -1,11 +1,11 @@
-import 'dart:convert';
-import 'dart:math';
+// ignore_for_file: use_build_context_synchronously
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_sound/flutter_sound.dart';
+import 'package:flutter_sound/public/flutter_sound_recorder.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
-import 'package:probeauty_app/models/product.dart';
 import 'package:probeauty_app/pages/product_search_screen.dart';
 import 'package:probeauty_app/providers/product_provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
@@ -19,9 +19,6 @@ class ShopScreen extends StatefulWidget {
 }
 
 class _ShopScreenState extends State<ShopScreen> {
-  static const String _baseUrl = 'https://probeauty-backend.onrender.com';
-  static const String _productsEndpoint = '$_baseUrl/api/v1/products';
-
   @override
   void initState() {
     super.initState();
@@ -118,6 +115,7 @@ class _ShopScreenState extends State<ShopScreen> {
   // }
 
   // ---------------------- UI ----------------------
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -180,10 +178,22 @@ class _ShopScreenState extends State<ShopScreen> {
                           ),
                         ),
                       ),
-                      Image.asset(
-                        'assets/images/icons/mic.png',
-                        width: 20,
-                        height: 20,
+                      GestureDetector(
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) {
+                              return const VoiceBottomSheet();
+                            },
+                          );
+                        },
+                        child: Image.asset(
+                          'assets/images/icons/mic.png',
+                          width: 20,
+                          height: 20,
+                        ),
                       ),
                     ],
                   ),
@@ -403,8 +413,6 @@ class _ShopScreenState extends State<ShopScreen> {
     required String discount,
     String? imageUrl,
   }) {
-    final l10n = AppLocalizations.of(context)!;
-
     return Container(
       width: width * 0.55,
       margin: EdgeInsets.only(right: width * 0.04),
@@ -532,4 +540,132 @@ class _ShopScreenState extends State<ShopScreen> {
   }
 }
 
-// ---------------- Product Model ----------------
+class VoiceBottomSheet extends StatelessWidget {
+  const VoiceBottomSheet({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+
+    return Container(
+      height: height * 0.45,
+      decoration: const BoxDecoration(
+        color: Color(0xFFF6EEE5), // your cream background
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(30),
+        ),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 16),
+
+          // Close icon
+          Align(
+            alignment: Alignment.topLeft,
+            child: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+
+          const Spacer(),
+
+          // Voice wave image
+          const VoiceWaveform(),
+
+          const SizedBox(height: 20),
+
+          // Mic button
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.orange, width: 2),
+            ),
+            child: const Icon(
+              Icons.mic,
+              color: Colors.orange,
+              size: 28,
+            ),
+          ),
+
+          const Spacer(),
+        ],
+      ),
+    );
+  }
+}
+
+class VoiceWaveform extends StatefulWidget {
+  const VoiceWaveform({super.key});
+
+  @override
+  State<VoiceWaveform> createState() => _VoiceWaveformState();
+}
+
+class _VoiceWaveformState extends State<VoiceWaveform> {
+  final FlutterSoundRecorder _recorder = FlutterSoundRecorder();
+  final List<double> _levels = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _initRecorder();
+  }
+
+  Future<void> _initRecorder() async {
+    await Permission.microphone.request();
+    await _recorder.openRecorder();
+
+    await _recorder.startRecorder(
+      toFile: 'temp.aac',
+      codec: Codec.aacMP4,
+      audioSource: AudioSource.microphone,
+    );
+
+    _recorder.onProgress!.listen((event) {
+      final double db = (event.decibels ?? -60).toDouble();
+
+      if (mounted) {
+        setState(() {
+          _levels.add(db);
+          if (_levels.length > 40) {
+            _levels.removeAt(0);
+          }
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _recorder.stopRecorder();
+    _recorder.closeRecorder();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 60,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: _levels.map((level) {
+          final double height = ((level + 60).clamp(5.0, 50.0)).toDouble();
+
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 100),
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            width: 4,
+            height: height,
+            decoration: BoxDecoration(
+              color: Colors.orange,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}

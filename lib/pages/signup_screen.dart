@@ -48,12 +48,6 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
-  Color _iconColor(TextEditingController controller, FocusNode focusNode) {
-    return (focusNode.hasFocus || controller.text.isNotEmpty)
-        ? AppColors.rusticSunset
-        : AppColors.greyTone;
-  }
-
   Future<void> _signupUser() async {
     final firstName = _firstNameController.text.trim();
     final lastName = _lastNameController.text.trim();

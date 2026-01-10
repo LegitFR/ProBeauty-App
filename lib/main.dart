@@ -8,7 +8,6 @@ import 'package:probeauty_app/firebase_options.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/favourites_screen.dart';
 import 'package:probeauty_app/pages/ordersScreen.dart';
-import 'package:probeauty_app/pages/appointment_info.dart';
 import 'package:probeauty_app/pages/cart_screen.dart';
 import 'package:probeauty_app/pages/main_screen.dart';
 import 'package:probeauty_app/pages/login_screen.dart';

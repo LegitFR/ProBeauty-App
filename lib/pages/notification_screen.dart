@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
@@ -129,46 +130,48 @@ class _NotificationScreenState extends State<NotificationScreen> {
             ? const Center(child: CircularProgressIndicator())
             : Padding(
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ---------- UNREAD HEADER ----------
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ---------- UNREAD HEADER ----------
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            l10n.notificationsUnreadCount(_unread.length),
+                            style: TextStyle(
+                              fontSize: screenWidth * 0.05,
+                              fontFamily: "PoppinsSemiBold",
+                            ),
+                          ),
+                          if (_unread.isNotEmpty)
+                            IconButton(
+                              icon: const Icon(Icons.done_all,
+                                  color: AppColors.rusticSunset),
+                              onPressed: _markAllAsRead,
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+
+                      ..._unread.map(_buildDismissibleTile),
+
+                      // ---------- READ SECTION ----------
+                      if (_read.isNotEmpty) ...[
+                        const SizedBox(height: 24),
                         Text(
-                          l10n.notificationsUnreadCount(_unread.length),
+                          "Read (${_read.length})",
                           style: TextStyle(
                             fontSize: screenWidth * 0.05,
                             fontFamily: "PoppinsSemiBold",
                           ),
                         ),
-                        if (_unread.isNotEmpty)
-                          IconButton(
-                            icon: const Icon(Icons.done_all,
-                                color: AppColors.rusticSunset),
-                            onPressed: _markAllAsRead,
-                          ),
+                        const SizedBox(height: 12),
+                        ..._read.map(_buildDismissibleTile),
                       ],
-                    ),
-                    const SizedBox(height: 12),
-
-                    ..._unread.map(_buildDismissibleTile),
-
-                    // ---------- READ SECTION ----------
-                    if (_read.isNotEmpty) ...[
-                      const SizedBox(height: 24),
-                      Text(
-                        "Read (${_read.length})",
-                        style: TextStyle(
-                          fontSize: screenWidth * 0.05,
-                          fontFamily: "PoppinsSemiBold",
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      ..._read.map(_buildDismissibleTile),
                     ],
-                  ],
+                  ),
                 ),
               ),
       ),
@@ -211,7 +214,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
   // ================= TILE =================
   Widget _buildTile(_NotificationItem n) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.symmetric(horizontal: 2),
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
       decoration: BoxDecoration(
         color: AppColors.softIvory,
         borderRadius: BorderRadius.circular(14),
@@ -224,15 +228,25 @@ class _NotificationScreenState extends State<NotificationScreen> {
         ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.asset(_iconForType(n.type), width: 24, height: 24),
+          SvgPicture.asset(
+            _iconForType(n.type),
+            width: 24,
+            height: 24,
+            color: AppColors.rusticSunset,
+          ),
           const SizedBox(width: 12),
+
+          /// TEXT CONTENT
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   n.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontFamily: "InterSemiBold",
                     fontSize: 14,
@@ -248,7 +262,21 @@ class _NotificationScreenState extends State<NotificationScreen> {
               ],
             ),
           ),
-          Text(_formatTime(n.createdAt)),
+
+          const SizedBox(width: 8),
+
+          /// TIME (FIXED WIDTH)
+          SizedBox(
+            width: 60,
+            child: Text(
+              _formatTime(n.createdAt),
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.black54,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -314,13 +342,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
   String _iconForType(String type) {
     switch (type) {
       case 'booking':
-        return 'assets/images/icons/appointment.png';
+        return 'assets/images/icons/appointment.svg';
       case 'order':
-        return 'assets/images/icons/cart.png';
+        return 'assets/images/icons/cart_icon.svg';
       case 'promotion':
-        return 'assets/images/icons/discount.png';
+        return 'assets/images/icons/discount.svg';
       default:
-        return 'assets/images/icons/notification.png';
+        return 'assets/images/icons/notification.svg';
     }
   }
 

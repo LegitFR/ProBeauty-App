@@ -168,17 +168,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Icons.shopping_bag_outlined, l10n.profileMenuOrders, () {
                 Navigator.pushNamed(context, "/orders");
               }),
-              _buildMenuItem(Icons.credit_card_outlined,
-                  l10n.profileMenuPaymentMethods, () {}),
-              _buildMenuItem(Icons.card_giftcard_outlined,
-                  l10n.profileMenuGiftCard, () {}),
+              // _buildMenuItem(Icons.credit_card_outlined,
+              //     l10n.profileMenuPaymentMethods, () {}),
+              // _buildMenuItem(Icons.card_giftcard_outlined,
+              //     l10n.profileMenuGiftCard, () {}),
               _buildMenuItem(
                   Icons.notifications_outlined, l10n.profileMenuNotifications,
                   () {
                 Navigator.pushNamed(context, "/notification");
               }),
-              _buildMenuItem(
-                  Icons.settings_outlined, l10n.profileMenuSettings, () {}),
+              // _buildMenuItem(
+              //     Icons.settings_outlined, l10n.profileMenuSettings, () {}),
 
               const SizedBox(height: 8),
 

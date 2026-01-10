@@ -215,21 +215,21 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
     return "$hours hr $minutes mins";
   }
 
-  Future<void> _initPaymentSheet(String clientSecret) async {
-    await Stripe.instance.initPaymentSheet(
-      paymentSheetParameters: SetupPaymentSheetParameters(
-        paymentIntentClientSecret: clientSecret,
-        merchantDisplayName: "ProBeauty",
-        style: ThemeMode.light,
-      ),
-    );
-  }
+  // Future<void> _initPaymentSheet(String clientSecret) async {
+  //   await Stripe.instance.initPaymentSheet(
+  //     paymentSheetParameters: SetupPaymentSheetParameters(
+  //       paymentIntentClientSecret: clientSecret,
+  //       merchantDisplayName: "ProBeauty",
+  //       style: ThemeMode.light,
+  //     ),
+  //   );
+  // }
 
-  Future<void> _presentPaymentSheet(BuildContext context) async {
-    await Stripe.instance.presentPaymentSheet();
+  // Future<void> _presentPaymentSheet(BuildContext context) async {
+  //   await Stripe.instance.presentPaymentSheet();
 
-    // If we reach here → payment SUCCESS
-  }
+  //   // If we reach here → payment SUCCESS
+  // }
 
   Future<void> _startStripeCheckout(BuildContext context) async {
     try {
