@@ -1,16 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:probeauty_app/pages/reviews_screen.dart';
+import 'package:probeauty_app/pages/salon_detail_screen.dart';
+import 'package:probeauty_app/pages/salon_tabs/salon_tab_bar.dart';
+import 'package:probeauty_app/pages/team_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
 class DetailScreen extends StatelessWidget {
+  final String salonId;
   final String salonName;
   final String address;
+  final List<dynamic> staffList;
   final Map<String, dynamic> hours;
+  final String image;
+  final List<dynamic> services;
 
   const DetailScreen({
     super.key,
+    required this.salonId,
     required this.salonName,
     required this.address,
+    required this.staffList,
     required this.hours,
+    required this.image,
+    required this.services,
   });
 
   @override
@@ -42,7 +54,73 @@ class DetailScreen extends StatelessWidget {
         // ---------------- BODY ----------------
         body: Column(
           children: [
-            // -------- SALON INFO CARD --------
+            SalonTabBar(
+              selectedIndex: 3, // DETAILS
+              onTabTap: (index) {
+                if (index == 3) return;
+
+                // SERVICES → replace Details with Services (root)
+                if (index == 0) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => SalonDetailScreen(
+                        id: salonId,
+                        name: salonName,
+                        address: address,
+                        image: image,
+                        services: services,
+                        salonStaffList: staffList,
+                        hours: hours,
+                      ),
+                    ),
+                    (route) => route.isFirst,
+                  );
+
+                  return;
+                }
+
+                // REVIEWS → replace Details with Reviews
+                if (index == 1) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ReviewsScreen(
+                        salonId: salonId,
+                        salonName: salonName,
+                        address: address,
+                        staffList: staffList,
+                        hours: hours,
+                        image: image,
+                        services: services,
+                      ),
+                    ),
+                  );
+                  return;
+                }
+
+                // TEAM → replace Details with Team
+                if (index == 2) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => TeamScreen(
+                        salonId: salonId,
+                        salonName: salonName,
+                        staffList: staffList,
+                        address: address,
+                        hours: hours,
+                        image: image,
+                        services: services,
+                      ),
+                    ),
+                  );
+                  return;
+                }
+              },
+            ),
+
+            const Divider(thickness: 1),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Container(

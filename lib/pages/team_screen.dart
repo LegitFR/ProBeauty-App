@@ -1,15 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
+import 'package:probeauty_app/pages/detail_screen.dart';
+import 'package:probeauty_app/pages/reviews_screen.dart';
+import 'package:probeauty_app/pages/salon_detail_screen.dart';
+import 'package:probeauty_app/pages/salon_tabs/salon_tab_bar.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
 class TeamScreen extends StatelessWidget {
+  final String salonId;
   final String salonName;
   final List<dynamic> staffList;
+  final String address;
+  final String image;
+  final List<dynamic> services;
+  final Map<String, dynamic> hours;
 
   const TeamScreen({
     super.key,
+    required this.salonId,
     required this.salonName,
     required this.staffList,
+    required this.address,
+    required this.hours,
+    required this.image,
+    required this.services,
   });
 
   @override
@@ -44,44 +58,68 @@ class TeamScreen extends StatelessWidget {
         body: Column(
           children: [
             // ---------------- TOP TAB BAR ----------------
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: Colors.black12)),
-              ),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context); // back to services
-                      },
-                      child: _TopTab(
-                        title: l10n.reviewsTabServices,
-                        isActive: false,
+            SalonTabBar(
+              selectedIndex: 2, // TEAM
+              onTabTap: (index) {
+                if (index == 2) return;
+
+                // SERVICES → replace Team with Services
+                if (index == 0) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => SalonDetailScreen(
+                        id: salonId,
+                        name: salonName,
+                        address: address,
+                        image: image,
+                        services: services,
+                        salonStaffList: staffList,
+                        hours: hours,
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context); // back to reviews screen
-                      },
-                      child: _TopTab(
-                        title: l10n.reviewsTabReviews,
-                        isActive: false,
+                  );
+                  return;
+                }
+
+                // REVIEWS → replace Team with Reviews
+                if (index == 1) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ReviewsScreen(
+                        salonId: salonId,
+                        salonName: salonName,
+                        staffList: staffList,
+                        address: address,
+                        hours: hours,
+                        image: image,
+                        services: services,
                       ),
                     ),
-                    _TopTab(
-                      title: l10n.reviewsTabTeam,
-                      isActive: true, // 👈 ACTIVE TAB
+                  );
+                  return;
+                }
+
+                // DETAILS → replace Team with Details
+                if (index == 3) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => DetailScreen(
+                        salonId: salonId,
+                        salonName: salonName,
+                        address: address,
+                        staffList: staffList,
+                        hours: hours,
+                        services: services,
+                        image: image,
+                      ),
                     ),
-                    _TopTab(
-                      title: l10n.reviewsTabDetails,
-                      isActive: false,
-                    ),
-                  ],
-                ),
-              ),
+                  );
+                  return;
+                }
+              },
             ),
 
             // ---------------- TEAM GRID ----------------
@@ -148,29 +186,6 @@ class TeamScreen extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ---------------- TOP TAB WIDGET ----------------
-class _TopTab extends StatelessWidget {
-  final String title;
-  final bool isActive;
-
-  const _TopTab({required this.title, required this.isActive});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontFamily: "PoppinsSemiBold",
-          fontSize: 13,
-          color: isActive ? AppColors.rusticSunset : Colors.black54,
-        ),
       ),
     );
   }

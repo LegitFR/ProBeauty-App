@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
+import 'package:probeauty_app/pages/detail_screen.dart';
+import 'package:probeauty_app/pages/salon_detail_screen.dart';
+import 'package:probeauty_app/pages/salon_tabs/salon_tab_bar.dart';
 import 'package:probeauty_app/pages/team_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,12 +14,20 @@ class ReviewsScreen extends StatefulWidget {
   final String salonId;
   final String salonName;
   final List<dynamic> staffList;
+  final String address;
+  final Map<String, dynamic> hours;
+  final String image;
+  final List<dynamic> services;
 
   const ReviewsScreen({
     super.key,
     required this.salonId,
     required this.salonName,
     required this.staffList,
+    required this.address,
+    required this.hours,
+    required this.image,
+    required this.services,
   });
 
   @override
@@ -248,38 +259,68 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
           // ------------------------
           // TOP TAB BAR
           // ------------------------
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            decoration: const BoxDecoration(
-              border: Border(bottom: BorderSide(color: Colors.black12)),
-            ),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      child: _TopTab(
-                          title: l10n.reviewsTabServices, isActive: false)),
-                  _TopTab(title: l10n.reviewsTabReviews, isActive: true),
-                  GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => TeamScreen(
-                                  salonName: widget.salonName,
-                                  staffList: widget.staffList),
-                            ));
-                      },
-                      child:
-                          _TopTab(title: l10n.reviewsTabTeam, isActive: false)),
-                  _TopTab(title: l10n.reviewsTabDetails, isActive: false),
-                ],
-              ),
-            ),
+          SalonTabBar(
+            selectedIndex: 1, // REVIEWS
+            onTabTap: (index) {
+              if (index == 1) return;
+
+              // SERVICES → replace Reviews with Services
+              if (index == 0) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => SalonDetailScreen(
+                      id: widget.salonId,
+                      name: widget.salonName,
+                      address: widget.address,
+                      image: widget.image,
+                      services: widget.services,
+                      salonStaffList: widget.staffList,
+                      hours: widget.hours,
+                    ),
+                  ),
+                );
+                return;
+              }
+
+              // TEAM → replace Reviews with Team
+              if (index == 2) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => TeamScreen(
+                      salonId: widget.salonId,
+                      salonName: widget.salonName,
+                      staffList: widget.staffList,
+                      address: widget.address,
+                      hours: widget.hours,
+                      image: widget.image,
+                      services: widget.services,
+                    ),
+                  ),
+                );
+                return;
+              }
+
+              // DETAILS → replace Reviews with Details
+              if (index == 3) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DetailScreen(
+                      salonId: widget.salonId,
+                      salonName: widget.salonName,
+                      address: widget.address,
+                      staffList: widget.staffList,
+                      hours: widget.hours,
+                      image: widget.image,
+                      services: widget.services,
+                    ),
+                  ),
+                );
+                return;
+              }
+            },
           ),
 
           // ------------------------

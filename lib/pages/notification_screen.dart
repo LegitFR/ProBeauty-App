@@ -127,7 +127,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
           child: _buildAppBar(l10n, screenWidth),
         ),
         body: _loading
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(
+                child: CircularProgressIndicator(
+                color: AppColors.rusticSunset,
+              ))
             : Padding(
                 padding: const EdgeInsets.all(16),
                 child: SingleChildScrollView(
@@ -214,8 +217,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   // ================= TILE =================
   Widget _buildTile(_NotificationItem n) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 2),
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.softIvory,
         borderRadius: BorderRadius.circular(14),
@@ -228,7 +230,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
         ],
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SvgPicture.asset(
             _iconForType(n.type),
@@ -237,16 +238,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
             color: AppColors.rusticSunset,
           ),
           const SizedBox(width: 12),
-
-          /// TEXT CONTENT
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   n.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontFamily: "InterSemiBold",
                     fontSize: 14,
@@ -262,21 +259,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
               ],
             ),
           ),
-
-          const SizedBox(width: 8),
-
-          /// TIME (FIXED WIDTH)
-          SizedBox(
-            width: 60,
-            child: Text(
-              _formatTime(n.createdAt),
-              textAlign: TextAlign.right,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.black54,
-              ),
-            ),
-          ),
+          Text(_formatTime(n.createdAt)),
         ],
       ),
     );

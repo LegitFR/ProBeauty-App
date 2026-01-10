@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/detail_screen.dart';
 import 'package:probeauty_app/pages/reviews_screen.dart';
+import 'package:probeauty_app/pages/salon_tabs/salon_tab_bar.dart';
 import 'package:probeauty_app/pages/select_services_screen.dart';
 import 'package:probeauty_app/pages/team_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
@@ -37,6 +38,7 @@ class SalonDetailScreen extends StatefulWidget {
 
 class _SalonDetailScreenState extends State<SalonDetailScreen> {
   int selectedTab = 0;
+
   double _avgRating = 0.0;
   int _totalReviews = 0;
   bool _ratingLoading = true;
@@ -277,23 +279,50 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
 
                     const SizedBox(height: 18),
 
-                    // ---------------------------
-                    // TAB BAR
-                    // ---------------------------
-                    SizedBox(
-                      height: 45,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            _TabButton(title: l10n.salonTabServices, index: 0),
-                            _TabButton(title: l10n.salonTabReviews, index: 1),
-                            _TabButton(title: l10n.salonTabTeam, index: 2),
-                            _TabButton(title: l10n.salonTabDetails, index: 3),
-                            _TabButton(title: l10n.salonTabGiftCards, index: 4),
-                          ],
-                        ),
-                      ),
+                    SalonTabBar(
+                      selectedIndex: 0, // SERVICES ACTIVE
+                      onTabTap: (index) {
+                        if (index == 0) return;
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) {
+                              if (index == 1) {
+                                return ReviewsScreen(
+                                  salonId: widget.id,
+                                  salonName: widget.name,
+                                  staffList: widget.salonStaffList,
+                                  address: widget.address,
+                                  hours: widget.hours,
+                                  image: widget.image,
+                                  services: widget.services,
+                                );
+                              }
+                              if (index == 2) {
+                                return TeamScreen(
+                                  salonId: widget.id,
+                                  salonName: widget.name,
+                                  staffList: widget.salonStaffList,
+                                  address: widget.address,
+                                  hours: widget.hours,
+                                  image: widget.image,
+                                  services: widget.services,
+                                );
+                              }
+                              return DetailScreen(
+                                salonId: widget.id,
+                                salonName: widget.name,
+                                address: widget.address,
+                                staffList: widget.salonStaffList,
+                                hours: widget.hours,
+                                image: widget.image,
+                                services: widget.services,
+                              );
+                            },
+                          ),
+                        );
+                      },
                     ),
 
                     const Divider(thickness: 1),
@@ -457,54 +486,22 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
 class _TabButton extends StatelessWidget {
   final String title;
   final int index;
+  final int selectedIndex;
+  final VoidCallback onTap;
 
-  const _TabButton({required this.title, required this.index});
+  const _TabButton({
+    required this.title,
+    required this.index,
+    required this.selectedIndex,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final state = context.findAncestorStateOfType<_SalonDetailScreenState>();
-    final bool isActive = state?.selectedTab == index;
+    final bool isActive = selectedIndex == index;
 
     return GestureDetector(
-      onTap: () {
-        if (index == 1) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ReviewsScreen(
-                salonId: state!.widget.id,
-                salonName: state.widget.name,
-                staffList: state.widget.salonStaffList,
-              ),
-            ),
-          );
-        } else if (index == 2) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => TeamScreen(
-                salonName: state!.widget.name,
-                staffList: state.widget.salonStaffList,
-              ),
-            ),
-          );
-        } else if (index == 3) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => DetailScreen(
-                salonName: state!.widget.name,
-                address: state.widget.address,
-                hours: state.widget.hours,
-              ),
-            ),
-          );
-        } else {
-          state?.setState(() {
-            state.selectedTab = index;
-          });
-        }
-      },
+      onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 18),
         child: Text(
