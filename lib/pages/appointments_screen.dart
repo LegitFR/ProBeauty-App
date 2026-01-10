@@ -100,7 +100,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       backgroundColor: AppColors.softIvory,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 16),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 18.0,
+          ),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

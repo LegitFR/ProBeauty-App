@@ -13,6 +13,7 @@ class OrderModel {
   final double price;
   final int quantity;
   final String status;
+  final String image;
 
   OrderModel({
     required this.id,
@@ -22,6 +23,7 @@ class OrderModel {
     required this.price,
     required this.quantity,
     required this.status,
+    required this.image,
   });
 }
 
@@ -77,9 +79,10 @@ class OrderProvider with ChangeNotifier {
                 ? product["title"].toString().split(" ").first
                 : "Salon",
             title: product["title"] ?? "Product",
-            price: double.tryParse(product["price"] ?? "0") ?? 0,
+            price: double.tryParse(product["price"]?.toString() ?? "0") ?? 0,
             quantity: firstItem?["quantity"] ?? 1,
             status: o["status"] ?? "",
+            image: product["images"][0] ?? "",
           );
         }).toList();
       } else {

@@ -240,8 +240,6 @@ class _ProductScreenState extends State<ProductScreen> {
           "quantity": newQty,
         };
 
-        print("📤 POST CART ITEM body: $body");
-
         resp = await http.post(
           url,
           headers: {
@@ -257,8 +255,6 @@ class _ProductScreenState extends State<ProductScreen> {
           "quantity": newQty,
         };
 
-        print("📤 PATCH CART ITEM body: $body");
-
         resp = await http.patch(
           url,
           headers: {
@@ -268,9 +264,6 @@ class _ProductScreenState extends State<ProductScreen> {
           body: jsonEncode(body),
         );
       }
-
-      print("📥 CART + STATUS: ${resp.statusCode}");
-      print("📥 CART + BODY: ${resp.body}");
 
       if (resp.statusCode == 201 || resp.statusCode == 200) {
         if (mounted) {
@@ -294,7 +287,6 @@ class _ProductScreenState extends State<ProductScreen> {
         );
       }
     } catch (e) {
-      print("❌ CART + ERROR: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Error updating cart: $e"),
@@ -356,8 +348,6 @@ class _ProductScreenState extends State<ProductScreen> {
           "quantity": newQty,
         };
 
-        print("📤 PATCH CART ITEM (decrement) body: $body");
-
         resp = await http.patch(
           url,
           headers: {
@@ -370,8 +360,6 @@ class _ProductScreenState extends State<ProductScreen> {
         // Quantity becomes 0 → DELETE
         final url = Uri.parse("$baseUrl/api/v1/cart/items/$productId");
 
-        print("📤 DELETE CART ITEM productId: $productId");
-
         resp = await http.delete(
           url,
           headers: {
@@ -380,9 +368,6 @@ class _ProductScreenState extends State<ProductScreen> {
           },
         );
       }
-
-      print("📥 CART - STATUS: ${resp.statusCode}");
-      print("📥 CART - BODY: ${resp.body}");
 
       if (resp.statusCode == 200) {
         if (mounted) {
@@ -406,7 +391,6 @@ class _ProductScreenState extends State<ProductScreen> {
         );
       }
     } catch (e) {
-      print("❌ CART - ERROR: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Error updating cart: $e"),

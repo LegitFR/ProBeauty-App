@@ -103,7 +103,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 const Center(
                   child: Padding(
                     padding: EdgeInsets.only(top: 40),
-                    child: CircularProgressIndicator(),
+                    child: CircularProgressIndicator(
+                      color: AppColors.rusticSunset,
+                    ),
                   ),
                 )
               else if (ordersProvider.error != null)
@@ -155,11 +157,27 @@ class _OrdersScreenState extends State<OrdersScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.asset(
-            "assets/images/appointments/saloon_thumb_1.png",
-            width: 85,
-            height: 120,
-            fit: BoxFit.cover,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: order.image.isNotEmpty
+                ? Image.network(
+                    order.image,
+                    width: 85,
+                    height: 120,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Image.asset(
+                      "assets/images/appointments/saloon_thumb_1.png",
+                      width: 85,
+                      height: 120,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : Image.asset(
+                    "assets/images/appointments/saloon_thumb_1.png",
+                    width: 85,
+                    height: 120,
+                    fit: BoxFit.cover,
+                  ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -229,19 +247,23 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: Container(
+                      child: SizedBox(
                         height: 42,
-                        decoration: BoxDecoration(
-                          color: AppColors.rusticSunset,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Center(
+                        child: ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.rusticSunset,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding: EdgeInsets.zero,
+                          ),
                           child: Text(
                             AppLocalizations.of(context)!.ordersTrackButton,
                             style: const TextStyle(
-                              color: Colors.white,
                               fontFamily: "PoppinsSemiBold",
                               fontSize: 12,
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -249,19 +271,24 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: Container(
+                      child: SizedBox(
                         height: 42,
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Center(
+                        child: OutlinedButton(
+                          onPressed: () {},
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            side: BorderSide.none,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding: EdgeInsets.zero,
+                          ),
                           child: Text(
                             AppLocalizations.of(context)!.ordersCancelButton,
                             style: const TextStyle(
-                              color: Colors.white,
                               fontFamily: "PoppinsSemiBold",
                               fontSize: 12,
+                              color: Colors.white,
                             ),
                           ),
                         ),
