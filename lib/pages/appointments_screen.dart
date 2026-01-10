@@ -1,11 +1,14 @@
-import 'dart:convert';
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
+import 'package:probeauty_app/models/booking.dart';
+import 'package:probeauty_app/pages/appointment_info.dart';
+import 'package:probeauty_app/pages/salon_detail_screen.dart';
 import 'package:probeauty_app/providers/appointment_provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
-import 'package:http/http.dart' as http;
+import 'package:probeauty_app/services/salon_service.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AppointmentsScreen extends StatefulWidget {
   const AppointmentsScreen({super.key});
@@ -28,10 +31,10 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     });
   }
 
-  String _formatDate(String iso) {
-    final dt = DateTime.parse(iso).toLocal();
+  String formatBookingDate(DateTime dateTime) {
+    final dt = dateTime.toLocal();
 
-    final months = [
+    const months = [
       "Jan",
       "Feb",
       "Mar",
@@ -46,12 +49,23 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       "Dec"
     ];
 
-    String weekday =
-        ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][dt.weekday - 1];
-    String ampm = dt.hour >= 12 ? "pm" : "am";
-    int hour = dt.hour > 12 ? dt.hour - 12 : dt.hour;
+    const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-    return "$weekday, ${dt.day} ${months[dt.month - 1]} ${dt.year} at $hour:${dt.minute.toString().padLeft(2, '0')} $ampm";
+    final weekday = weekdays[dt.weekday - 1];
+    final hour = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
+    final ampm = dt.hour >= 12 ? "pm" : "am";
+
+    return "$weekday, ${dt.day} ${months[dt.month - 1]} "
+        "${dt.year} at $hour:${dt.minute.toString().padLeft(2, '0')} $ampm";
+  }
+
+  String _staticMapUrl(double lat, double lng) {
+    return "https://maps.googleapis.com/maps/api/staticmap"
+        "?center=$lat,$lng"
+        "&zoom=15"
+        "&size=800x400"
+        "&markers=color:red%7C$lat,$lng"
+        "&key=YOUR_GOOGLE_MAPS_API_KEY";
   }
 
   @override
@@ -133,8 +147,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 SizedBox(height: screenHeight * 0.03),
 
                 /// ------------ CONFIRMED APPOINTMENT CARD ------------
-                if (confirmed != null)
-                  _buildConfirmedCard(confirmed, screenWidth, screenHeight),
+                _buildConfirmedCard(confirmed, screenWidth, screenHeight),
 
                 SizedBox(height: screenHeight * 0.02),
 
@@ -194,10 +207,17 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   /// CONFIRMED CARD (UI untouched)
   /// ----------------------------------------------------
   Widget _buildConfirmedCard(
-      dynamic b, double screenWidth, double screenHeight) {
+    Booking booking,
+    double screenWidth,
+    double screenHeight,
+  ) {
     final l10n = AppLocalizations.of(context)!;
-    final salon = b["salon"];
-    final service = b["service"];
+    final salon = booking.salon;
+    final service = booking.service;
+
+    final geo = salon.geo;
+    final double? lat = geo?.latitude;
+    final double? lng = geo?.longitude;
 
     return Container(
       width: double.infinity,
@@ -216,17 +236,44 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
             ),
-            child: Image.asset(
-              "assets/images/appointments/map.png",
-              width: double.infinity,
-              height: screenHeight * 0.25,
-              fit: BoxFit.cover,
-            ),
+            child: lat != null && lng != null
+                ? Image.network(
+                    _staticMapUrl(lat, lng),
+                    width: double.infinity,
+                    height: screenHeight * 0.25,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return const SizedBox(
+                        height: 200,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.rusticSunset,
+                          ),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        "assets/images/appointments/map.png",
+                        fit: BoxFit.cover,
+                      );
+                    },
+                  )
+                : Image.asset(
+                    "assets/images/appointments/map.png",
+                    fit: BoxFit.cover,
+                  ),
           ),
 
           GestureDetector(
             onTap: () {
-              Navigator.pushNamed(context, '/appointment_info');
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AppointmentInfo(booking: booking),
+                ),
+              );
             },
             child: Padding(
               padding: const EdgeInsets.all(14.0),
@@ -234,7 +281,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    salon?["name"] ?? l10n.appointmentsUnknownSalon,
+                    salon.name,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     style: TextStyle(
@@ -245,7 +292,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   ),
                   SizedBox(height: screenHeight * 0.02),
                   Text(
-                    _formatDate(b["startTime"]),
+                    formatBookingDate(booking.startTime),
                     maxLines: 1,
                     style: TextStyle(
                       fontSize: screenWidth * 0.035,
@@ -256,9 +303,10 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   SizedBox(height: screenHeight * 0.02),
                   Text(
                     l10n.appointmentsDurationPriceService(
-                        service?["durationMinutes"] ?? 60,
-                        service?["price"] ?? "0",
-                        service?["title"] ?? ""),
+                      service.durationMinutes,
+                      service.price,
+                      service.title,
+                    ),
                     maxLines: 1,
                     style: TextStyle(
                       fontSize: screenWidth * 0.035,
@@ -291,27 +339,27 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                               horizontal: 18, vertical: 10),
                         ),
                       ),
-                      Container(
-                        decoration: const BoxDecoration(
-                          color: AppColors.lighterGreyTone,
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 3,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: IconButton(
-                          onPressed: () {},
-                          icon: const Icon(
-                            Icons.calendar_month_sharp,
-                            color: Colors.black,
-                            size: 22,
-                          ),
-                        ),
-                      ),
+                      // Container(
+                      //   decoration: const BoxDecoration(
+                      //     color: AppColors.lighterGreyTone,
+                      //     borderRadius: BorderRadius.all(Radius.circular(10)),
+                      //     boxShadow: [
+                      //       BoxShadow(
+                      //         color: Colors.black26,
+                      //         blurRadius: 3,
+                      //         offset: Offset(0, 3),
+                      //       ),
+                      //     ],
+                      //   ),
+                      //   child: IconButton(
+                      //     onPressed: () {},
+                      //     icon: const Icon(
+                      //       Icons.calendar_month_sharp,
+                      //       color: Colors.black,
+                      //       size: 22,
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                 ],
@@ -326,34 +374,59 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   /// ----------------------------------------------------
   /// PREVIOUS BOOKING CARD (Same UI)
   /// ----------------------------------------------------
-  Widget _buildPreviousCard(dynamic b, double screenWidth) {
+  Widget _buildPreviousCard(Booking booking, double screenWidth) {
     final l10n = AppLocalizations.of(context)!;
-    final salon = b["salon"];
-    final service = b["service"];
+    final salon = booking.salon;
+    final service = booking.service;
+
+    final String? imageUrl = salon.image;
 
     return Container(
       margin: const EdgeInsets.only(top: 15),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Thumbnail fixed static image
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Image.asset(
-              "assets/images/appointments/saloon_thumb_1.png",
-              width: screenWidth * 0.22,
-              height: screenWidth * 0.22,
-              fit: BoxFit.cover,
-            ),
+            child: imageUrl != null && imageUrl.isNotEmpty
+                ? Image.network(
+                    imageUrl,
+                    width: screenWidth * 0.22,
+                    height: screenWidth * 0.22,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return SizedBox(
+                        width: screenWidth * 0.22,
+                        height: screenWidth * 0.22,
+                        child: const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        "assets/images/appointments/saloon_thumb_1.png",
+                        width: screenWidth * 0.22,
+                        height: screenWidth * 0.22,
+                        fit: BoxFit.cover,
+                      );
+                    },
+                  )
+                : Image.asset(
+                    "assets/images/appointments/saloon_thumb_1.png",
+                    width: screenWidth * 0.22,
+                    height: screenWidth * 0.22,
+                    fit: BoxFit.cover,
+                  ),
           ),
           const SizedBox(width: 12),
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  salon?["name"] ?? l10n.appointmentsUnknownSalon,
+                  salon.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -364,7 +437,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _formatDate(b["startTime"]),
+                  formatBookingDate(booking.startTime),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -376,9 +449,10 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 const SizedBox(height: 4),
                 Text(
                   l10n.appointmentsDurationPriceService(
-                      service?["durationMinutes"] ?? 60,
-                      service?["price"] ?? "0",
-                      service?["title"] ?? ""),
+                    service.durationMinutes,
+                    service.price,
+                    service.title,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -390,9 +464,46 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               ],
             ),
           ),
-
           OutlinedButton(
-            onPressed: () {},
+            onPressed: () async {
+              try {
+                // Optional loading indicator
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (_) => const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.rusticSunset,
+                    ),
+                  ),
+                );
+
+                final salonData = await SalonService.fetchSalonById(salon.id);
+
+                Navigator.pop(context);
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => SalonDetailScreen(
+                      id: salonData["id"],
+                      name: salonData["name"],
+                      address: salonData["address"],
+                      image: salonData["image"] ??
+                          "assets/images/appointments/saloon_thumb_1.png",
+                      services: salonData["services"] ?? [],
+                      salonStaffList: salonData["staff"] ?? [],
+                      hours: salonData["hours"] ?? {},
+                    ),
+                  ),
+                );
+              } catch (e) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Failed to load salon details")),
+                );
+              }
+            },
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Colors.black, width: 1),
               shape: RoundedRectangleBorder(

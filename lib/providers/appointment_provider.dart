@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:probeauty_app/models/booking.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppointmentProvider with ChangeNotifier {
@@ -8,11 +9,12 @@ class AppointmentProvider with ChangeNotifier {
       "https://probeauty-backend.onrender.com/api/v1/bookings";
 
   bool _isLoading = false;
-  List<dynamic> _bookings = [];
   bool _hasFetchedOnce = false;
 
+  List<Booking> _bookings = [];
+
   bool get isLoading => _isLoading;
-  List<dynamic> get bookings => _bookings;
+  List<Booking> get bookings => _bookings;
 
   Future<void> fetchBookings({bool forceRefresh = false}) async {
     if (_hasFetchedOnce && !forceRefresh) return;
@@ -25,7 +27,10 @@ class AppointmentProvider with ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("accessToken");
 
+      debugPrint("ACCESS TOKEN: $token");
+
       if (token == null) {
+        debugPrint("NO TOKEN FOUND");
         _bookings = [];
         _isLoading = false;
         notifyListeners();
@@ -35,25 +40,32 @@ class AppointmentProvider with ChangeNotifier {
       final res = await http.get(
         Uri.parse(_baseUrl),
         headers: {
-          "Content-Type": "application/json",
           "Authorization": "Bearer $token",
         },
       );
 
+      debugPrint("STATUS CODE: ${res.statusCode}");
+      debugPrint("RESPONSE BODY: ${res.body}");
+
       if (res.statusCode == 200) {
-        final data = jsonDecode(res.body);
-        final List list = data["data"] ?? [];
+        final decoded = jsonDecode(res.body);
+        final List data = decoded["data"] ?? [];
 
-        list.sort((a, b) {
-          return DateTime.parse(b["startTime"])
-              .compareTo(DateTime.parse(a["startTime"]));
-        });
+        debugPrint("RAW LIST LENGTH: ${data.length}");
 
-        _bookings = list;
+        final bookings = data.map((e) {
+          debugPrint("PARSING BOOKING: $e");
+          return Booking.fromJson(e);
+        }).toList();
+
+        bookings.sort((a, b) => b.startTime.compareTo(a.startTime));
+
+        _bookings = bookings;
         _hasFetchedOnce = true;
       }
-    } catch (_) {
-      // silently fail or expose error later
+    } catch (e, st) {
+      debugPrint("Fetch bookings error: $e");
+      debugPrintStack(stackTrace: st);
     }
 
     _isLoading = false;

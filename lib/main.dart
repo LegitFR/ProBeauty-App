@@ -178,8 +178,7 @@ class _MyAppState extends State<MyApp> {
           case '/appointments':
             return MaterialPageRoute(
                 builder: (_) => const AppointmentsScreen());
-          case '/appointment_info':
-            return MaterialPageRoute(builder: (_) => const AppointmentInfo());
+
           case '/profile_details':
             return MaterialPageRoute(builder: (_) => const ProfileDetails());
           case '/saved_address':
