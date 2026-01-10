@@ -259,7 +259,6 @@ class _HomeScreenState extends State<HomeScreen> {
               provider.hasMore) {
             provider.fetchSalons();
           }
-
           return false;
         },
         child: ListView.builder(
@@ -269,7 +268,7 @@ class _HomeScreenState extends State<HomeScreen> {
           itemBuilder: (context, index) {
             final salon = provider.salons[index];
 
-            final String id = salon["id"] ?? "id";
+            final String id = salon["id"] ?? "";
             final String name = salon["name"] ?? "Salon";
             final String address = salon["address"] ?? "Unknown location";
             final List services =
@@ -278,6 +277,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 salon["staff"] is List ? salon["staff"] : [];
             final img = salon["thumbnail"] ?? images[index % images.length];
             final hours = salon["hours"];
+
+            // 🔥 Trigger rating fetch (cached → safe)
+            provider.fetchSalonRating(id);
+
+            // 🔥 Read cached rating
+            final ratingData = provider.getSalonRating(id);
+            final double avgRating = ratingData?["avgRating"] ?? 0.0;
+            final int totalReviews = ratingData?["totalReviews"] ?? 0;
 
             return GestureDetector(
               onTap: () {
@@ -309,7 +316,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: Column(
                     children: [
-                      // 🔥 IMAGE WITH MATCHING CURVED BORDER
+                      // IMAGE
                       ClipRRect(
                         borderRadius: imageRadius,
                         child: Image(
@@ -333,6 +340,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // NAME
                               Text(
                                 name,
                                 style: TextStyle(
@@ -340,7 +348,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   fontSize: width * 0.04,
                                 ),
                               ),
+
                               SizedBox(height: height * 0.005),
+
+                              // ⭐ RATING + COUNT
                               Row(
                                 children: [
                                   ...List.generate(
@@ -348,14 +359,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                     (i) => Icon(
                                       Icons.star,
                                       size: width * 0.035,
-                                      color: i < 4
+                                      color: i < avgRating.floor()
                                           ? AppColors.rusticSunset
                                           : AppColors.greyTone,
                                     ),
                                   ),
                                   SizedBox(width: width * 0.01),
                                   Text(
-                                    "(1200)",
+                                    "($totalReviews)",
                                     style: TextStyle(
                                       fontSize: width * 0.03,
                                       fontFamily: "PoppinsRegular",
@@ -363,7 +374,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ],
                               ),
+
                               SizedBox(height: height * 0.005),
+
+                              // ADDRESS
                               Text(
                                 address,
                                 maxLines: 2,
@@ -373,7 +387,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   fontSize: width * 0.032,
                                 ),
                               ),
+
                               SizedBox(height: height * 0.008),
+
+                              // TAGS
                               Row(
                                 children: [
                                   Container(

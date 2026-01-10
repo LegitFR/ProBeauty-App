@@ -20,10 +20,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
   TextEditingController searchController = TextEditingController();
   DateTime? selectedDate;
   String? selectedTimeSlot;
-
   bool _loadingServices = true;
-
   List<Map<String, String>> _services = [];
+  final ScrollController _filterScrollController = ScrollController();
+  double _leftPadding = 16;
 
   String _formatDate(DateTime date) {
     return DateFormat("d MMM yy").format(date);
@@ -41,11 +41,19 @@ class _ExploreScreenState extends State<ExploreScreen> {
   void initState() {
     super.initState();
     _fetchServices();
+    _filterScrollController.addListener(() {
+      final offset = _filterScrollController.offset;
+
+      setState(() {
+        _leftPadding = offset <= 0 ? 16 : 0;
+      });
+    });
   }
 
   @override
   void dispose() {
     searchController.dispose();
+    _filterScrollController.dispose();
     super.dispose();
   }
 
@@ -207,18 +215,20 @@ class _ExploreScreenState extends State<ExploreScreen> {
         backgroundColor: AppColors.softIvory,
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: width * 0.045),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: height * 0.03),
 
-                Text(
-                  l10n.exploreTitle,
-                  style: TextStyle(
-                    fontFamily: "PlayfairDisplayBold",
-                    fontSize: width * 0.08,
-                    color: Colors.black,
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: width * 0.045),
+                  child: Text(
+                    l10n.exploreTitle,
+                    style: TextStyle(
+                      fontFamily: "PlayfairDisplayBold",
+                      fontSize: width * 0.08,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
 
@@ -226,6 +236,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
                 // ----------------------- SEARCH BOX -----------------------
                 Container(
+                  margin: EdgeInsets.symmetric(horizontal: width * 0.045),
                   padding: EdgeInsets.all(width * 0.05),
                   decoration: BoxDecoration(
                     color: AppColors.softIvory,
@@ -323,19 +334,30 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
                 // ----------------------- FILTERS ROW -----------------------
                 SingleChildScrollView(
+                  controller: _filterScrollController,
                   scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildFilterIcon(onTap: _openCombinedFilterSheet),
-                      SizedBox(width: width * 0.03),
-                      _buildFilterChip(l10n.exploreSort, onTap: _openSortSheet),
-                      SizedBox(width: width * 0.03),
-                      _buildFilterChip(l10n.exploreMaxPrice,
-                          onTap: _openMaxPriceSheet),
-                      SizedBox(width: width * 0.03),
-                      _buildFilterChip(l10n.exploreVenueType,
-                          onTap: _openVenueTypeSheet),
-                    ],
+                  child: AnimatedPadding(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOut,
+                    padding: EdgeInsets.only(left: _leftPadding),
+                    child: Row(
+                      children: [
+                        _buildFilterIcon(onTap: _openCombinedFilterSheet),
+                        SizedBox(width: width * 0.03),
+                        _buildFilterChip(l10n.exploreSort,
+                            onTap: _openSortSheet),
+                        SizedBox(width: width * 0.03),
+                        _buildFilterChip(
+                          l10n.exploreMaxPrice,
+                          onTap: _openMaxPriceSheet,
+                        ),
+                        SizedBox(width: width * 0.03),
+                        _buildFilterChip(
+                          l10n.exploreVenueType,
+                          onTap: _openVenueTypeSheet,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
@@ -355,74 +377,81 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 SizedBox(height: height * 0.02),
 
                 // ----------------------- SERVICES SECTION -----------------------
-                Text(
-                  l10n.exploreServices,
-                  style: TextStyle(
-                    fontFamily: "PoppinsSemiBold",
-                    fontSize: width * 0.055,
-                    color: Colors.black,
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: width * 0.045),
+                  child: Text(
+                    l10n.exploreServices,
+                    style: TextStyle(
+                      fontFamily: "PoppinsSemiBold",
+                      fontSize: width * 0.055,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
 
                 SizedBox(height: height * 0.02),
 
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  // itemCount: _loadingServices ? 4 : _services.length,
-                  itemCount: 4,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 14,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 1.25,
-                  ),
-                  itemBuilder: (context, index) {
-                    if (_loadingServices) {
-                      return _buildServiceShimmer(width);
-                    }
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: width * 0.045),
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    // itemCount: _loadingServices ? 4 : _services.length,
+                    itemCount: 4,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 14,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: 1.25,
+                    ),
+                    itemBuilder: (context, index) {
+                      if (_loadingServices) {
+                        return _buildServiceShimmer(width);
+                      }
 
-                    final item = _services[index];
+                      final item = _services[index];
 
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.softIvory,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.black, width: 2.87),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: Image.asset(
-                                item['img']!,
-                                height: width * 0.22,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            const SizedBox(height: 5),
-                            Flexible(
-                              child: Text(
-                                item['title']!,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontFamily: "PoppinsMedium",
-                                  fontSize: 13,
-                                  color: Colors.black,
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.softIvory,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.black, width: 2.87),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.asset(
+                                  item['img']!,
+                                  height: width * 0.22,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
                                 ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 5),
+                              Flexible(
+                                child: Text(
+                                  item['title']!,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontFamily: "PoppinsMedium",
+                                    fontSize: 13,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
 
                 SizedBox(height: height * 0.04),

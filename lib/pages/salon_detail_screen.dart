@@ -14,7 +14,6 @@ class SalonDetailScreen extends StatefulWidget {
   final String name;
   final String address;
   final String image;
-
   final List<dynamic> services;
   final List<dynamic> salonStaffList;
   final Map<String, dynamic> hours;

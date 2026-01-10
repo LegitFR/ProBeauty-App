@@ -11,6 +11,37 @@ class SalonProvider with ChangeNotifier {
   List<dynamic> get salons => _salons;
   bool get isLoading => _isLoading;
   bool get hasMore => _hasMore;
+  final Map<String, Map<String, dynamic>> _ratingCache = {};
+
+  Map<String, dynamic>? getSalonRating(String salonId) {
+    return _ratingCache[salonId];
+  }
+
+  Future<void> fetchSalonRating(String salonId) async {
+    // Already cached → skip
+    if (_ratingCache.containsKey(salonId)) return;
+
+    try {
+      final uri = Uri.parse(
+        "https://probeauty-backend.onrender.com/api/v1/reviews/salon/$salonId?page=1&limit=1",
+      );
+
+      final res = await http.get(uri);
+
+      if (res.statusCode == 200) {
+        final body = jsonDecode(res.body);
+
+        _ratingCache[salonId] = {
+          "avgRating": (body["averageRating"] ?? 0).toDouble(),
+          "totalReviews": body["pagination"]?["total"] ?? 0,
+        };
+
+        notifyListeners();
+      }
+    } catch (_) {
+      // silent fail → no UI crash
+    }
+  }
 
   Future<void> fetchSalons({bool refresh = false}) async {
     if (_isLoading) return;
