@@ -10,16 +10,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ReviewsScreen extends StatefulWidget {
   final String salonId;
   final String salonName;
-  final double rating;
-  final int totalReviews;
   final List<dynamic> staffList;
 
   const ReviewsScreen({
     super.key,
     required this.salonId,
     required this.salonName,
-    required this.rating,
-    required this.totalReviews,
     required this.staffList,
   });
 
@@ -36,6 +32,16 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   List<dynamic> _reviews = [];
   double _avgRating = 0.0;
   int _totalReviews = 0;
+
+// NEW: star-wise count
+  Map<int, int> _ratingCount = {
+    5: 0,
+    4: 0,
+    3: 0,
+    2: 0,
+    1: 0,
+  };
+
   int _selectedRating = 0;
   final TextEditingController _reviewController = TextEditingController();
   bool _submittingReview = false;
@@ -43,7 +49,6 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   @override
   void initState() {
     super.initState();
-    print(widget.staffList);
 
     _fetchReviews();
 
@@ -70,6 +75,15 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
       const int limit = 50;
       bool hasMore = true;
 
+      // reset counts
+      _ratingCount = {
+        5: 0,
+        4: 0,
+        3: 0,
+        2: 0,
+        1: 0,
+      };
+
       while (hasMore) {
         final url = Uri.parse(
           "$baseUrl/api/v1/reviews/salon/${widget.salonId}?page=$page&limit=$limit",
@@ -79,12 +93,25 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
         if (resp.statusCode != 200) break;
 
         final body = jsonDecode(resp.body);
+
         final List data = body["data"] ?? [];
+
+        // API values
+        _avgRating = (body["averageRating"] ?? 0).toDouble();
+        _totalReviews = body["pagination"]?["total"] ?? data.length;
 
         allReviews.addAll(data);
 
+        // ⭐ Count rating distribution
+        for (final r in data) {
+          final int rating = r["rating"] ?? 0;
+          if (_ratingCount.containsKey(rating)) {
+            _ratingCount[rating] = _ratingCount[rating]! + 1;
+          }
+        }
+
         if (data.length < limit) {
-          hasMore = false; // no more pages
+          hasMore = false;
         } else {
           page++;
         }
@@ -94,8 +121,6 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
 
       setState(() {
         _reviews = allReviews;
-        _avgRating = widget.rating;
-        _totalReviews = allReviews.length;
         _loading = false;
       });
     } catch (e) {
@@ -174,8 +199,15 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
 
   void _fallback() {
     setState(() {
-      _avgRating = widget.rating;
-      _totalReviews = widget.totalReviews;
+      _avgRating = 0.0;
+      _totalReviews = 0;
+      _ratingCount = {
+        5: 0,
+        4: 0,
+        3: 0,
+        2: 0,
+        1: 0,
+      };
       _loading = false;
       _error = "Unable to load reviews";
     });
@@ -307,15 +339,16 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                             const SizedBox(width: 24),
 
                             // RIGHT
-                            const Expanded(
+                            Expanded(
                               child: Column(
-                                children: const [
-                                  _RatingDistribution(star: 5, count: 1190),
-                                  _RatingDistribution(star: 4, count: 15),
-                                  _RatingDistribution(star: 3, count: 15),
-                                  _RatingDistribution(star: 2, count: 10),
-                                  _RatingDistribution(star: 1, count: 0),
-                                ],
+                                children: List.generate(5, (index) {
+                                  final star = 5 - index;
+                                  return _RatingDistribution(
+                                    star: star,
+                                    count: _ratingCount[star] ?? 0,
+                                    total: _totalReviews,
+                                  );
+                                }),
                               ),
                             ),
                           ],
@@ -358,14 +391,29 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                         // ------------------------
                         // REVIEWS LIST
                         // ------------------------
-                        for (final r in _reviews)
-                          _reviewTile(
-                            name: r["user"]?["name"] ?? "User",
-                            date: _formatDate(r["createdAt"]),
-                            service: r["service"]?["title"] ?? "Service",
-                            review: r["comment"] ?? "",
-                            rating: r["rating"] ?? 0,
-                          ),
+                        if (_reviews.isEmpty)
+                          const Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 32),
+                            child: Center(
+                              child: Text(
+                                "No reviews",
+                                style: const TextStyle(
+                                  fontFamily: "PoppinsMedium",
+                                  fontSize: 14,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ),
+                          )
+                        else
+                          for (final r in _reviews)
+                            _reviewTile(
+                              name: r["user"]?["name"] ?? "User",
+                              date: _formatDate(r["createdAt"]),
+                              service: r["service"]?["title"] ?? "Service",
+                              review: r["comment"] ?? "",
+                              rating: r["rating"] ?? 0,
+                            ),
 
                         // ------------------------
 // ADD REVIEW SECTION
@@ -678,8 +726,13 @@ class _TopTab extends StatelessWidget {
 class _RatingDistribution extends StatelessWidget {
   final int star;
   final int count;
+  final int total;
 
-  const _RatingDistribution({required this.star, required this.count});
+  const _RatingDistribution({
+    required this.star,
+    required this.count,
+    required this.total,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -692,7 +745,7 @@ class _RatingDistribution extends StatelessWidget {
           const SizedBox(width: 6),
           Expanded(
             child: LinearProgressIndicator(
-              value: count / 1200,
+              value: total == 0 ? 0 : count / total,
               minHeight: 6,
               backgroundColor: Colors.grey.shade300,
               valueColor: const AlwaysStoppedAnimation(AppColors.rusticSunset),

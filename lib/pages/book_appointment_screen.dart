@@ -9,7 +9,6 @@ import 'package:probeauty_app/resources/AppColors.dart';
 class BookAppointmentScreen extends StatefulWidget {
   final String salonId;
   final String salonName;
-  final double rating;
   final Map<String, dynamic>? staff;
   final List<Map<String, dynamic>> selectedServices;
 
@@ -17,7 +16,6 @@ class BookAppointmentScreen extends StatefulWidget {
     super.key,
     required this.salonId,
     required this.salonName,
-    required this.rating,
     required this.staff,
     required this.selectedServices,
   });
@@ -310,7 +308,6 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                                     salonId: widget.salonId,
                                     salonName: widget.salonName,
                                     staff: widget.staff,
-                                    rating: widget.rating,
                                     date: selectedDate,
                                     time: formattedTime,
                                     selectedServices: widget.selectedServices,

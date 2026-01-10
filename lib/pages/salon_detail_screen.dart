@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/detail_screen.dart';
 import 'package:probeauty_app/pages/reviews_screen.dart';
@@ -10,8 +13,6 @@ class SalonDetailScreen extends StatefulWidget {
   final String id;
   final String name;
   final String address;
-  final double rating;
-  final int reviews;
   final String image;
 
   final List<dynamic> services;
@@ -23,8 +24,6 @@ class SalonDetailScreen extends StatefulWidget {
     required this.id,
     required this.name,
     required this.address,
-    required this.rating,
-    required this.reviews,
     required this.image,
     required this.services,
     required this.salonStaffList,
@@ -37,6 +36,71 @@ class SalonDetailScreen extends StatefulWidget {
 
 class _SalonDetailScreenState extends State<SalonDetailScreen> {
   int selectedTab = 0;
+  double _avgRating = 0.0;
+  int _totalReviews = 0;
+  bool _ratingLoading = true;
+  static final Map<String, Map<String, dynamic>> _ratingCache = {};
+
+  void _setRatingFallback() {
+    if (!_ratingCache.containsKey(widget.id)) {
+      setState(() {
+        _avgRating = 0.0;
+        _totalReviews = 0;
+        _ratingLoading = false;
+      });
+    }
+  }
+
+  Future<void> _fetchSalonRating() async {
+    // ✅ 1. Check cache first
+    if (_ratingCache.containsKey(widget.id)) {
+      final cached = _ratingCache[widget.id]!;
+      setState(() {
+        _avgRating = cached["avgRating"];
+        _totalReviews = cached["totalReviews"];
+        _ratingLoading = false;
+      });
+      return;
+    }
+
+    // ✅ 2. Fetch only if not cached
+    try {
+      final url = Uri.parse(
+        "https://probeauty-backend.onrender.com/api/v1/reviews/salon/${widget.id}?page=1&limit=1",
+      );
+
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+
+        final avg = (body["averageRating"] ?? 0).toDouble();
+        final total = body["pagination"]?["total"] ?? 0;
+
+        // ✅ Save to cache
+        _ratingCache[widget.id] = {
+          "avgRating": avg,
+          "totalReviews": total,
+        };
+
+        setState(() {
+          _avgRating = avg;
+          _totalReviews = total;
+          _ratingLoading = false;
+        });
+      } else {
+        _setRatingFallback();
+      }
+    } catch (_) {
+      _setRatingFallback();
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchSalonRating();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -149,37 +213,46 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                     const SizedBox(height: 6),
 
                     // RATINGS
-                    Row(
-                      children: [
-                        Text(
-                          widget.rating.toString(),
-                          style: const TextStyle(
-                            fontFamily: "PoppinsSemiBold",
-                            fontSize: 15,
+                    _ratingLoading
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.rusticSunset,
+                            ),
+                          )
+                        : Row(
+                            children: [
+                              Text(
+                                _avgRating.toStringAsFixed(1),
+                                style: const TextStyle(
+                                  fontFamily: "PoppinsSemiBold",
+                                  fontSize: 15,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              ...List.generate(
+                                5,
+                                (i) => Icon(
+                                  Icons.star,
+                                  size: 18,
+                                  color: i < _avgRating.floor()
+                                      ? AppColors.rusticSunset
+                                      : AppColors.greyTone,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                "($_totalReviews)",
+                                style: const TextStyle(
+                                  fontFamily: "PoppinsRegular",
+                                  fontSize: 13,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(width: 4),
-                        ...List.generate(
-                          5,
-                          (i) => Icon(
-                            Icons.star,
-                            size: 18,
-                            color: i < widget.rating.floor()
-                                ? AppColors.rusticSunset
-                                : AppColors.greyTone,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          "(${widget.reviews})",
-                          style: const TextStyle(
-                            fontFamily: "PoppinsRegular",
-                            fontSize: 13,
-                            color: Colors.black54,
-                          ),
-                        ),
-                      ],
-                    ),
 
                     const SizedBox(height: 8),
 
@@ -275,7 +348,6 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                             builder: (_) => SelectServicesScreen(
                               salonId: widget.id,
                               salonName: widget.name,
-                              rating: widget.rating,
                               services: widget.services,
                               salonStaffList: widget.salonStaffList,
                             ),
@@ -352,7 +424,6 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                   builder: (_) => SelectServicesScreen(
                     salonId: widget.id,
                     salonName: widget.name,
-                    rating: widget.rating,
                     services: widget.services,
                     salonStaffList: widget.salonStaffList,
                   ),
@@ -403,8 +474,6 @@ class _TabButton extends StatelessWidget {
               builder: (_) => ReviewsScreen(
                 salonId: state!.widget.id,
                 salonName: state.widget.name,
-                rating: state.widget.rating,
-                totalReviews: state.widget.reviews,
                 staffList: state.widget.salonStaffList,
               ),
             ),

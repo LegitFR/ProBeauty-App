@@ -1,9 +1,7 @@
-import 'dart:convert';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/salon_detail_screen.dart';
 import 'package:probeauty_app/providers/salon_provider.dart';
@@ -292,8 +290,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       id: id,
                       name: name,
                       address: address,
-                      rating: 4.5,
-                      reviews: 1200,
                       image: img,
                       services: services,
                       salonStaffList: salonStaffList,

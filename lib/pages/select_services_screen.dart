@@ -7,7 +7,6 @@ import 'package:probeauty_app/resources/AppColors.dart';
 class SelectServicesScreen extends StatefulWidget {
   final String salonId;
   final String salonName;
-  final double rating;
   final List<dynamic> services;
   final List<dynamic> salonStaffList;
 
@@ -15,7 +14,6 @@ class SelectServicesScreen extends StatefulWidget {
     super.key,
     required this.salonId,
     required this.salonName,
-    required this.rating,
     required this.services,
     required this.salonStaffList,
   });
@@ -256,7 +254,6 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
                             builder: (_) => SelectProfessionalScreen(
                                   salonId: widget.salonId,
                                   salonName: widget.salonName,
-                                  rating: widget.rating,
                                   staffList: widget.salonStaffList,
                                   selectedServices: selectedServices,
                                 )),

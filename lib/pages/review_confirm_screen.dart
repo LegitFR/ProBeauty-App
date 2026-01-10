@@ -15,8 +15,6 @@ class ReviewConfirmScreen extends StatefulWidget {
   final Map<String, dynamic>? staff;
 
   final String salonName;
-  final double rating;
-  final int reviewCount;
   final DateTime selectedDate;
   final String selectedTime;
   final List<Map<String, dynamic>> selectedServices;
@@ -27,8 +25,6 @@ class ReviewConfirmScreen extends StatefulWidget {
     required this.salonId,
     required this.staff,
     required this.salonName,
-    required this.rating,
-    required this.reviewCount,
     required this.selectedDate,
     required this.selectedTime,
     required this.selectedServices,
@@ -42,6 +38,71 @@ class ReviewConfirmScreen extends StatefulWidget {
 class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
   bool payAtVenue = true;
   bool _isProcessing = false;
+  double _avgRating = 0.0;
+  int _totalReviews = 0;
+  bool _ratingLoading = true;
+  static final Map<String, Map<String, dynamic>> _ratingCache = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchSalonRating();
+  }
+
+  Future<void> _fetchSalonRating() async {
+    // ✅ 1. Check cache first
+    if (_ratingCache.containsKey(widget.salonId)) {
+      final cached = _ratingCache[widget.salonId]!;
+      setState(() {
+        _avgRating = cached["avgRating"];
+        _totalReviews = cached["totalReviews"];
+        _ratingLoading = false;
+      });
+      return;
+    }
+
+    // ✅ 2. Fetch from API only if not cached
+    try {
+      final uri = Uri.parse(
+        "https://probeauty-backend.onrender.com/api/v1/reviews/salon/${widget.salonId}?page=1&limit=1",
+      );
+
+      final res = await http.get(uri);
+
+      if (res.statusCode == 200) {
+        final body = jsonDecode(res.body);
+
+        final avg = (body["averageRating"] ?? 0).toDouble();
+        final total = body["pagination"]?["total"] ?? 0;
+
+        // ✅ Save to cache
+        _ratingCache[widget.salonId] = {
+          "avgRating": avg,
+          "totalReviews": total,
+        };
+
+        setState(() {
+          _avgRating = avg;
+          _totalReviews = total;
+          _ratingLoading = false;
+        });
+      } else {
+        _ratingFallback();
+      }
+    } catch (_) {
+      _ratingFallback();
+    }
+  }
+
+  void _ratingFallback() {
+    if (!_ratingCache.containsKey(widget.salonId)) {
+      setState(() {
+        _avgRating = 0.0;
+        _totalReviews = 0;
+        _ratingLoading = false;
+      });
+    }
+  }
 
   // --------------------------------------------------
   int _parsePrice(dynamic price) {
@@ -398,14 +459,25 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
                           style: const TextStyle(
                               fontFamily: "PoppinsSemiBold", fontSize: 15),
                         ),
-                        Row(
-                          children: [
-                            _buildStars(widget.rating),
-                            const SizedBox(width: 6),
-                            Text("(${widget.reviewCount})",
-                                style: const TextStyle(fontSize: 12)),
-                          ],
-                        ),
+                        _ratingLoading
+                            ? const SizedBox(
+                                height: 16,
+                                width: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.rusticSunset,
+                                ),
+                              )
+                            : Row(
+                                children: [
+                                  _buildStars(_avgRating),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    "($_totalReviews)",
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
                         const Text("Anna Nagar, Chennai",
                             style: TextStyle(color: Colors.black54)),
                       ],
