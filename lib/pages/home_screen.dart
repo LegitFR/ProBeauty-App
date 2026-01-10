@@ -3,6 +3,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
+import 'package:probeauty_app/pages/explore_results_screen.dart';
 import 'package:probeauty_app/pages/salon_detail_screen.dart';
 import 'package:probeauty_app/providers/salon_provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
@@ -23,43 +24,6 @@ class _HomeScreenState extends State<HomeScreen> {
       context.read<SalonProvider>().fetchSalons();
     });
   }
-
-  // Future<void> fetchSalons({int page = 1}) async {
-  //   if (isFetchingMore || !hasMoreData) return;
-
-  //   isFetchingMore = true; // ❌ no setState yet
-
-  //   try {
-  //     final url = Uri.parse(
-  //       "https://probeauty-backend.onrender.com/api/v1/salons?page=$page",
-  //     );
-
-  //     final response = await http.get(url);
-
-  //     if (!mounted) return; // 🔥 IMPORTANT
-
-  //     if (response.statusCode == 200) {
-  //       final data = jsonDecode(response.body);
-  //       final List newSalons = data["data"] ?? [];
-
-  //       setState(() {
-  //         if (newSalons.isEmpty) {
-  //           hasMoreData = false;
-  //         } else {
-  //           salons.addAll(newSalons);
-  //           currentPage = page;
-  //         }
-  //         isLoading = false;
-  //       });
-  //     }
-  //   } catch (e) {
-  //     if (!mounted) return;
-  //     debugPrint(e.toString());
-  //   } finally {
-  //     if (!mounted) return;
-  //     setState(() => isFetchingMore = false);
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -110,28 +74,46 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(height: height * 0.03),
 
               // === Category scroll ===
-              Padding(
-                padding:
-                    EdgeInsets.only(left: width * 0.04, right: width * 0.04),
-                child: SizedBox(
-                  height: height * 0.13,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      categoryItem('assets/images/categories/haircut.png',
-                          l10n.categoryHaircut, width, height),
-                      categoryItem('assets/images/categories/spa.png',
-                          l10n.categorySpa, width, height),
-                      categoryItem('assets/images/categories/nail.png',
-                          l10n.categoryNails, width, height),
-                      categoryItem('assets/images/categories/facial.png',
-                          l10n.categoryFacial, width, height),
-                      categoryItem('assets/images/categories/haircut.png',
-                          l10n.categoryHaircut, width, height),
-                    ],
-                  ),
+              SizedBox(
+                height: height * 0.13,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: EdgeInsets.only(left: width * 0.02),
+                  itemCount: 4,
+                  separatorBuilder: (_, __) => SizedBox(width: width * 0.02),
+                  itemBuilder: (context, index) {
+                    final categories = [
+                      {
+                        "img": 'assets/images/categories/haircut.png',
+                        "title": l10n.categoryHaircut,
+                      },
+                      {
+                        "img": 'assets/images/categories/spa.png',
+                        "title": l10n.categorySpa,
+                      },
+                      {
+                        "img": 'assets/images/categories/nail.png',
+                        "title": l10n.categoryNails,
+                      },
+                      {
+                        "img": 'assets/images/categories/facial.png',
+                        "title": l10n.categoryFacial,
+                      },
+                    ];
+
+                    final item = categories[index];
+
+                    return categoryItem(
+                      context,
+                      item["img"]!,
+                      item["title"]!,
+                      width,
+                      height,
+                    );
+                  },
                 ),
               ),
+
               SizedBox(height: height * 0.03),
 
               // === Offers carousel ===
@@ -463,35 +445,56 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // === Category item widget ===
-  Widget categoryItem(String image, String title, double width, double height) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: width * 0.03),
-      child: Column(
-        children: [
-          SizedBox(
-            width: width * 0.18,
-            height: width * 0.18,
-            child: ClipOval(
-              child: Image.asset(
-                image,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-                errorBuilder: (_, __, ___) => Container(
-                  color: Colors.grey.shade200,
+  Widget categoryItem(
+    BuildContext context,
+    String image,
+    String title,
+    double width,
+    double height,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ExploreResultsScreen(
+              serviceText: title,
+            ),
+          ),
+        );
+      },
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: width * 0.03),
+        child: Column(
+          children: [
+            SizedBox(
+              width: width * 0.18,
+              height: width * 0.18,
+              child: ClipOval(
+                child: Image.asset(
+                  image,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: Colors.grey.shade200,
+                  ),
                 ),
               ),
             ),
-          ),
-          SizedBox(height: height * 0.012),
-          Text(
-            title,
-            style: TextStyle(
-              fontFamily: "PoppinsRegular",
-              fontSize: width * 0.03,
+            SizedBox(height: height * 0.012),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: "PoppinsRegular",
+                fontSize: width * 0.03,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

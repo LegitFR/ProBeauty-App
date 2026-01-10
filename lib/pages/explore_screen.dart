@@ -8,6 +8,9 @@ import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/explore_results_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/explore_provider.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -20,8 +23,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
   TextEditingController searchController = TextEditingController();
   DateTime? selectedDate;
   String? selectedTimeSlot;
-  bool _loadingServices = true;
-  List<Map<String, String>> _services = [];
   final ScrollController _filterScrollController = ScrollController();
   double _leftPadding = 16;
 
@@ -40,13 +41,14 @@ class _ExploreScreenState extends State<ExploreScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchServices();
+
+    Future.microtask(() {
+      context.read<ExploreProvider>().fetchServices();
+    });
+
     _filterScrollController.addListener(() {
       final offset = _filterScrollController.offset;
-
-      setState(() {
-        _leftPadding = offset <= 0 ? 16 : 0;
-      });
+      setState(() => _leftPadding = offset <= 0 ? 16 : 0);
     });
   }
 
@@ -87,49 +89,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
       setState(() {});
     } catch (_) {
       // silent fail
-    }
-  }
-
-  Future<void> _fetchServices() async {
-    final images = [
-      "assets/images/services/hair_styling.png",
-      "assets/images/services/ayurvedic.png",
-      "assets/images/services/eyebrow.png",
-      "assets/images/services/makeup.png",
-    ];
-
-    try {
-      final url =
-          Uri.parse("https://probeauty-backend.onrender.com/api/v1/services");
-
-      final response = await http.get(url);
-
-      if (!mounted) return;
-
-      if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
-        final List data = jsonResponse["data"];
-
-        setState(() {
-          _services = data.asMap().entries.map<Map<String, String>>((entry) {
-            final index = entry.key;
-            final service = entry.value;
-
-            return {
-              "id": service["id"],
-              "title": service["title"] ?? "Service",
-              "img": images[index % images.length],
-            };
-          }).toList();
-
-          _loadingServices = false;
-        });
-      } else {
-        setState(() => _loadingServices = false);
-      }
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => _loadingServices = false);
     }
   }
 
@@ -208,6 +167,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
     final l10n = AppLocalizations.of(context)!;
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
+    final provider = context.watch<ExploreProvider>();
 
     return SafeArea(
       bottom: true,
@@ -396,8 +356,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   child: GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    // itemCount: _loadingServices ? 4 : _services.length,
-                    itemCount: 4,
+                    itemCount: provider.isLoadingServices
+                        ? 4
+                        : provider.services.length,
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
@@ -406,47 +367,74 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       childAspectRatio: 1.25,
                     ),
                     itemBuilder: (context, index) {
-                      if (_loadingServices) {
+                      if (provider.isLoadingServices) {
                         return _buildServiceShimmer(width);
                       }
 
-                      final item = _services[index];
+                      final item = provider.services[index];
 
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.softIvory,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.black, width: 2.87),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 8),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: Image.asset(
-                                  item['img']!,
-                                  height: width * 0.22,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                ),
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ExploreResultsScreen(
+                                serviceText: item["title"],
                               ),
-                              const SizedBox(height: 5),
-                              Flexible(
-                                child: Text(
-                                  item['title']!,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontFamily: "PoppinsMedium",
-                                    fontSize: 13,
-                                    color: Colors.black,
+                            ),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.softIvory,
+                            borderRadius: BorderRadius.circular(10),
+                            border:
+                                Border.all(color: Colors.black, width: 2.87),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: item['img']!.startsWith('http')
+                                      ? Image.network(
+                                          item['img']!,
+                                          height: width * 0.22,
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) =>
+                                              Image.asset(
+                                            "assets/images/services/hair_styling.png",
+                                            height: width * 0.22,
+                                            width: double.infinity,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        )
+                                      : Image.asset(
+                                          item['img']!,
+                                          height: width * 0.22,
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                        ),
+                                ),
+                                const SizedBox(height: 5),
+                                Flexible(
+                                  child: Text(
+                                    item['title']!,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontFamily: "PoppinsMedium",
+                                      fontSize: 13,
+                                      color: Colors.black,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       );

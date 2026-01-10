@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
-import 'package:probeauty_app/pages/book_appointment_screen.dart'; // ✅ CHANGED
 import 'package:probeauty_app/pages/select_professional_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 

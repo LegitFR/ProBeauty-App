@@ -115,8 +115,8 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
         // 🔥 FILTER PAST SLOTS ONLY FOR TODAY
         final filteredSlots = isToday
             ? rawSlots.where((slot) {
-                final slotTime = DateTime.parse(slot["startTime"]);
-                return slotTime.isAfter(now.toUtc());
+                final slotLocal = _utcToLocal(slot["startTime"]);
+                return slotLocal.isAfter(DateTime.now());
               }).toList()
             : rawSlots;
 
@@ -133,9 +133,13 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     }
   }
 
+  DateTime _utcToLocal(String iso) {
+    return DateTime.parse(iso).toLocal();
+  }
+
   String displayTime(String iso) {
-    final dt = DateTime.parse(iso); // UTC 그대로
-    return DateFormat("hh:mm a").format(dt).toLowerCase();
+    final local = DateTime.parse(iso).toLocal();
+    return DateFormat("hh:mm a").format(local).toLowerCase();
   }
 
   // --------------------------------------------------
@@ -254,13 +258,12 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
             ),
             _buildCalendar(),
             const Divider(),
-
-            // ---------------- TIME SLOTS ----------------
-            // ---------------- TIME SLOTS ----------------
             if (loadingSlots)
               const Padding(
                 padding: EdgeInsets.all(20),
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  color: AppColors.rusticSunset,
+                ),
               )
             else if (slots.isEmpty)
               const Padding(

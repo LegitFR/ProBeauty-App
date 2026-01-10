@@ -198,8 +198,7 @@ class _ShopScreenState extends State<ShopScreen> {
                     scrollDirection: Axis.horizontal,
                     padding: EdgeInsets.only(left: width * 0.035),
                     itemCount: 4,
-                    separatorBuilder: (_, __) =>
-                        SizedBox(width: width * 0.04), // 👈 equal spacing
+                    separatorBuilder: (_, __) => SizedBox(width: width * 0.035),
                     itemBuilder: (context, index) {
                       final categories = [
                         {

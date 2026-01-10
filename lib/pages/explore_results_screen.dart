@@ -1,10 +1,13 @@
 // pages/explore_results_screen.dart
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
+import 'package:probeauty_app/pages/select_services_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
@@ -233,7 +236,14 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                "${widget.dateText ?? ''} | ${widget.timeText ?? ''} | ${widget.locationText ?? ''}",
+                                [
+                                  widget.dateText,
+                                  widget.timeText,
+                                  widget.locationText,
+                                ]
+                                    .where(
+                                        (e) => e != null && e.trim().isNotEmpty)
+                                    .join(" | "),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
@@ -255,23 +265,23 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
                   ),
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: width * 0.045),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _filterIcon(),
-                      const SizedBox(width: 10),
-                      _filterChip("Sort"),
-                      const SizedBox(width: 10),
-                      _filterChip("Max price"),
-                      const SizedBox(width: 10),
-                      _filterChip("Venue type"),
-                    ],
-                  ),
-                ),
-              ),
+              // Padding(
+              //   padding: EdgeInsets.symmetric(horizontal: width * 0.045),
+              //   child: SingleChildScrollView(
+              //     scrollDirection: Axis.horizontal,
+              //     child: Row(
+              //       children: [
+              //         _filterIcon(),
+              //         const SizedBox(width: 10),
+              //         _filterChip("Sort"),
+              //         const SizedBox(width: 10),
+              //         _filterChip("Max price"),
+              //         const SizedBox(width: 10),
+              //         _filterChip("Venue type"),
+              //       ],
+              //     ),
+              //   ),
+              // ),
               const SizedBox(height: 12),
               Expanded(
                 child: _initialLoading
@@ -302,7 +312,9 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
                                       child: SizedBox(
                                         width: 24,
                                         height: 24,
-                                        child: CircularProgressIndicator(),
+                                        child: CircularProgressIndicator(
+                                          color: AppColors.rusticSunset,
+                                        ),
                                       ),
                                     ),
                                   );
@@ -342,42 +354,36 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
     );
   }
 
-  Widget _filterIcon() {
-    return Container(
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        border: Border.all(),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: SvgPicture.asset(
-        "assets/images/icons/filter_icon.svg",
-        height: 20,
-      ),
-    );
-  }
+  // Widget _filterIcon() {
+  //   return Container(
+  //     padding: const EdgeInsets.all(6),
+  //     decoration: BoxDecoration(
+  //       border: Border.all(),
+  //       borderRadius: BorderRadius.circular(8),
+  //     ),
+  //     child: SvgPicture.asset(
+  //       "assets/images/icons/filter_icon.svg",
+  //       height: 20,
+  //     ),
+  //   );
+  // }
 
-  Widget _filterChip(String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        border: Border.all(),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Text(label),
-          const Icon(Icons.arrow_drop_down),
-        ],
-      ),
-    );
-  }
+  // Widget _filterChip(String label) {
+  //   return Container(
+  //     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+  //     decoration: BoxDecoration(
+  //       border: Border.all(),
+  //       borderRadius: BorderRadius.circular(8),
+  //     ),
+  //     child: Row(
+  //       children: [
+  //         Text(label),
+  //         const Icon(Icons.arrow_drop_down),
+  //       ],
+  //     ),
+  //   );
+  // }
 }
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-/// MODELS
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 
 class SalonModel {
   final String id;
@@ -462,17 +468,25 @@ class StaffModel {
   }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-/// SALON CARD — NOW FIXED: ONLY ONE CARD/SERVICE BOOKS AT A TIME
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+class SalonRatingCache {
+  static final Map<String, SalonRating> _cache = {};
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-/// SALON CARD — NOW WITH GREEN TICK AFTER BOOKING
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+  static SalonRating? get(String salonId) => _cache[salonId];
+
+  static void set(String salonId, SalonRating rating) {
+    _cache[salonId] = rating;
+  }
+}
+
+class SalonRating {
+  final double avgRating;
+  final int totalReviews;
+
+  SalonRating({
+    required this.avgRating,
+    required this.totalReviews,
+  });
+}
 
 class SalonCard extends StatefulWidget {
   final SalonModel salon;
@@ -491,155 +505,138 @@ class SalonCard extends StatefulWidget {
 }
 
 class _SalonCardState extends State<SalonCard> {
-  /// loading PER service
-  Map<String, bool> _serviceLoading = {};
+  double? _avgRating;
+  int _totalReviews = 0;
+  bool _loadingRating = true;
+  final Map<String, bool> _openingServices = {};
 
-  /// ✔ booked PER service
-  Map<String, bool> _serviceBooked = {};
-
-  /// Parse "10 Dec 25"
-  DateTime? _parseDate(String? dateStr) {
-    if (dateStr == null || dateStr.trim().isEmpty) return null;
-
-    try {
-      final fmt = DateFormat("d MMM yy");
-      final d = fmt.parse(dateStr);
-      return DateTime(d.year, d.month, d.day);
-    } catch (e) {
-      print("❌ DATE PARSE ERROR: $e");
-      return null;
-    }
+  @override
+  void initState() {
+    super.initState();
+    _fetchSalonRating();
   }
 
-  /// Time slot → hour
-  int _slotToHour(String? slot) {
-    slot = "Evening";
-    final s = (slot ?? "").toLowerCase();
-    switch (s) {
-      case "morning":
-        return 5;
-      case "afternoon":
-        return 12;
-      case "evening":
-        return 17;
-      case "night":
-        return 21;
-      default:
-        return 12;
-    }
-  }
+  Future<void> openSelectServices(
+    BuildContext context,
+    String serviceId,
+  ) async {
+    if (_openingServices[serviceId] == true) return;
 
-  Future<void> _createBooking(ServiceModel service) async {
-    final salonId = widget.salon.id;
-    final serviceId = service.id;
-    final staffId = service.staff.isNotEmpty ? service.staff.first.id : null;
-
-    if (staffId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("No staff available for this service"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    final parsedDate = _parseDate(widget.dateText);
-    if (parsedDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Invalid date format (expected: d MMM yy)"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    final hour = _slotToHour(widget.timeText);
-    final localStart =
-        DateTime(parsedDate.year, parsedDate.month, parsedDate.day, hour, 0);
-
-    final isoUtc = localStart.toUtc().toIso8601String();
-
-    /// mark loading only for this service
     setState(() {
-      _serviceLoading[serviceId] = true;
+      _openingServices[serviceId] = true;
     });
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString("accessToken");
+      final url = Uri.parse(
+        "https://probeauty-backend.onrender.com/api/v1/salons/${widget.salon.id}",
+      );
 
-      if (token == null) {
+      final response = await http.get(url);
+
+      if (!mounted) return;
+
+      if (response.statusCode != 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("⚠ No token found"),
-            backgroundColor: Colors.red,
-          ),
+          const SnackBar(content: Text("Failed to load salon details")),
         );
-        setState(() {
-          _serviceLoading[serviceId] = false;
-        });
         return;
       }
 
-      final url =
-          Uri.parse("https://probeauty-backend.onrender.com/api/v1/bookings");
+      final json = jsonDecode(response.body);
+      final data = json["data"];
 
-      final body = {
-        "salonId": salonId,
-        "serviceId": serviceId,
-        "staffId": staffId,
-        "startTime": isoUtc,
-      };
-
-      print("📤 BOOKING BODY: $body");
-
-      final resp = await http.post(
-        url,
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token",
-        },
-        body: jsonEncode(body),
-      );
-
-      print("📥 STATUS: ${resp.statusCode}");
-      print("📥 BODY: ${resp.body}");
-
-      if (resp.statusCode == 201 || resp.statusCode == 200) {
-        setState(() {
-          _serviceBooked[serviceId] = true; // ✔ mark as booked
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Booking successful!"),
-            backgroundColor: Colors.green,
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SelectServicesScreen(
+            salonId: data["id"],
+            salonName: data["name"],
+            services: data["services"],
+            salonStaffList: data["staff"],
           ),
-        );
-      } else {
-        final msg = jsonDecode(resp.body)['message'] ?? 'Booking failed';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg), backgroundColor: Colors.red),
-        );
-      }
-    } catch (e) {
-      print("❌ BOOKING ERROR: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error: $e"),
-          backgroundColor: Colors.red,
         ),
       );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _openingServices[serviceId] = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _fetchSalonRating() async {
+    final cached = SalonRatingCache.get(widget.salon.id);
+
+    if (cached != null) {
+      setState(() {
+        _avgRating = cached.avgRating;
+        _totalReviews = cached.totalReviews;
+        _loadingRating = false;
+      });
+      return;
     }
 
-    /// stop loading for this service
-    if (mounted) {
-      setState(() {
-        _serviceLoading[serviceId] = false;
-      });
+    try {
+      final url = Uri.parse(
+        "https://probeauty-backend.onrender.com/api/v1/reviews/salon/${widget.salon.id}",
+      );
+
+      final response = await http.get(url).timeout(
+            const Duration(seconds: 10),
+          );
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+
+        final rating = SalonRating(
+          avgRating: (json["averageRating"] ?? 0).toDouble(),
+          totalReviews: json["pagination"]?["total"] ?? 0,
+        );
+
+        // ✅ store in cache
+        SalonRatingCache.set(widget.salon.id, rating);
+
+        setState(() {
+          _avgRating = rating.avgRating;
+          _totalReviews = rating.totalReviews;
+          _loadingRating = false;
+        });
+      } else {
+        setState(() => _loadingRating = false);
+      }
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loadingRating = false);
     }
+  }
+
+  List<Widget> _ratingSkeleton() {
+    return [
+      _skeletonBox(width: 24, height: 14),
+      const SizedBox(width: 8),
+      _skeletonBox(width: 80, height: 14),
+      const SizedBox(width: 8),
+      _skeletonBox(width: 28, height: 14),
+    ];
+  }
+
+  Widget _skeletonBox({required double width, required double height}) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade300,
+        borderRadius: BorderRadius.circular(4),
+      ),
+    );
   }
 
   @override
@@ -679,25 +676,27 @@ class _SalonCardState extends State<SalonCard> {
                 ),
                 const SizedBox(height: 6),
                 Row(
-                  children: [
-                    Text(
-                      salon.averageRating?.toStringAsFixed(1) ?? "0.0",
-                      style: const TextStyle(
-                        fontFamily: "PoppinsSemiBold",
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    _buildStars(salon.averageRating ?? 0),
-                    const SizedBox(width: 8),
-                    const Text(
-                      "(450)",
-                      style: TextStyle(
-                        fontFamily: "PoppinsRegular",
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
+                  children: _loadingRating
+                      ? _ratingSkeleton()
+                      : [
+                          Text(
+                            (_avgRating ?? 0).toStringAsFixed(1),
+                            style: const TextStyle(
+                              fontFamily: "PoppinsSemiBold",
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          _buildStars(_avgRating ?? 0),
+                          const SizedBox(width: 8),
+                          Text(
+                            "($_totalReviews)",
+                            style: const TextStyle(
+                              fontFamily: "PoppinsRegular",
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -723,16 +722,15 @@ class _SalonCardState extends State<SalonCard> {
   }
 
   Widget _serviceTile(ServiceModel s) {
-    final isLoading = _serviceLoading[s.id] == true;
-    final isBooked = _serviceBooked[s.id] == true;
+    final isLoading = _openingServices[s.id] == true;
 
     return Column(
       children: [
         Container(
           height: 8,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: AppColors.softIvory,
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
                 color: Colors.black12,
                 blurRadius: 6,
@@ -746,7 +744,6 @@ class _SalonCardState extends State<SalonCard> {
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Row(
             children: [
-              /// SERVICE DETAILS
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -781,41 +778,34 @@ class _SalonCardState extends State<SalonCard> {
                 ),
               ),
 
-              /// BOOK / LOADING / ✔ TICK
+              /// ✅ BOOK BUTTON
               GestureDetector(
-                onTap: (isLoading || isBooked) ? null : () => _createBooking(s),
+                onTap:
+                    isLoading ? null : () => openSelectServices(context, s.id),
                 child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
                   decoration: BoxDecoration(
                     color: AppColors.softIvory,
                     borderRadius: BorderRadius.circular(15),
-                    border: Border.all(
-                      color: Colors.black,
-                      width: 1.5,
-                    ),
+                    border: Border.all(color: Colors.black, width: 1.5),
                   ),
-
-                  /// -------- THE BUTTON CONTENT --------
                   child: isLoading
                       ? const SizedBox(
                           height: 16,
                           width: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.rusticSunset,
+                          ),
                         )
-                      : isBooked
-                          ? const Icon(
-                              Icons.check_circle,
-                              color: Colors.green,
-                              size: 20,
-                            )
-                          : const Text(
-                              "BOOK",
-                              style: TextStyle(
-                                fontFamily: "PoppinsSemiBold",
-                                fontSize: 14,
-                              ),
-                            ),
+                      : const Text(
+                          "BOOK",
+                          style: TextStyle(
+                            fontFamily: "PoppinsSemiBold",
+                            fontSize: 14,
+                          ),
+                        ),
                 ),
               ),
             ],
