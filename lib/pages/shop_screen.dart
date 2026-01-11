@@ -280,7 +280,7 @@ class _ShopScreenState extends State<ShopScreen> {
                         l10n.shopSpecialOffers,
                         style: TextStyle(
                           fontFamily: "PoppinsSemiBold",
-                          fontSize: width * 0.045,
+                          fontSize: width * 0.048,
                         ),
                       ),
                       IconButton(

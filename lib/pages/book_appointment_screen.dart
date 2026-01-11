@@ -115,8 +115,8 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
         // 🔥 FILTER PAST SLOTS ONLY FOR TODAY
         final filteredSlots = isToday
             ? rawSlots.where((slot) {
-                final slotLocal = _utcToLocal(slot["startTime"]);
-                return slotLocal.isAfter(DateTime.now());
+                final slotUtc = DateTime.parse(slot["startTime"]).toUtc();
+                return slotUtc.isAfter(DateTime.now().toUtc());
               }).toList()
             : rawSlots;
 
@@ -133,13 +133,9 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     }
   }
 
-  DateTime _utcToLocal(String iso) {
-    return DateTime.parse(iso).toLocal();
-  }
-
   String displayTime(String iso) {
-    final local = DateTime.parse(iso).toLocal();
-    return DateFormat("hh:mm a").format(local).toLowerCase();
+    final utc = DateTime.parse(iso).toUtc();
+    return DateFormat("hh:mm a").format(utc).toLowerCase();
   }
 
   // --------------------------------------------------

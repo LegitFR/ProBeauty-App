@@ -213,7 +213,8 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
 
   Widget _buildBody() {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+          child: CircularProgressIndicator(color: AppColors.rusticSunset));
     }
 
     if (_error != null) {

@@ -286,43 +286,102 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
                     ? _buildSkeletonList()
                     : _error != null
                         ? _buildError()
-                        : RefreshIndicator(
-                            onRefresh: _refreshSearch,
-                            child: ListView.builder(
-                              controller: _scrollController,
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: width * 0.045, vertical: 8),
-                              itemCount: salons.length + (_hasMore ? 1 : 0),
-                              itemBuilder: (context, index) {
-                                if (index < salons.length) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(bottom: 18),
-                                    child: SalonCard(
-                                      salon: salons[index],
-                                      dateText: widget.dateText,
-                                      timeText: widget.timeText,
-                                    ),
-                                  );
-                                } else {
-                                  return const Center(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(12),
-                                      child: SizedBox(
-                                        width: 24,
-                                        height: 24,
-                                        child: CircularProgressIndicator(
-                                          color: AppColors.rusticSunset,
+                        : salons.isEmpty
+                            ? _buildEmptyState()
+                            : RefreshIndicator(
+                                color: AppColors.rusticSunset,
+                                onRefresh: _refreshSearch,
+                                child: ListView.builder(
+                                  controller: _scrollController,
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: width * 0.045, vertical: 8),
+                                  itemCount: salons.length + (_hasMore ? 1 : 0),
+                                  itemBuilder: (context, index) {
+                                    if (index < salons.length) {
+                                      return Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 18),
+                                        child: SalonCard(
+                                          salon: salons[index],
+                                          dateText: widget.dateText,
+                                          timeText: widget.timeText,
                                         ),
-                                      ),
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
-                          ),
+                                      );
+                                    } else {
+                                      return const Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.all(12),
+                                          child: SizedBox(
+                                            width: 24,
+                                            height: 24,
+                                            child: CircularProgressIndicator(
+                                              color: AppColors.rusticSunset,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.search_off,
+              size: 64,
+              color: Colors.black45,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              "No results found",
+              style: TextStyle(
+                fontFamily: "PoppinsSemiBold",
+                fontSize: 18,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              "Try changing your filters, date, or location",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: "PoppinsRegular",
+                fontSize: 14,
+                color: Colors.black54,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _refreshSearch,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.rusticSunset,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                "Reset search",
+                style: TextStyle(
+                  fontFamily: "PoppinsSemiBold",
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -410,7 +469,7 @@ class SalonModel {
       name: json['name'] ?? "Salon",
       address: json['address'],
       venueType: json['venueType'],
-      thumbnail: json['thumbnail'],
+      thumbnail: json['image'],
       averageRating: json['averageRating'] != null
           ? (json['averageRating'] as num).toDouble()
           : 0.0,
@@ -652,12 +711,25 @@ class _SalonCardState extends State<SalonCard> {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-            child: Image.asset(
-              "assets/images/saloons/saloon1.png",
-              width: double.infinity,
-              height: width * 0.45,
-              fit: BoxFit.cover,
-            ),
+            child: salon.thumbnail != null && salon.thumbnail!.isNotEmpty
+                ? Image.network(
+                    salon.thumbnail!,
+                    width: double.infinity,
+                    height: width * 0.45,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Image.asset(
+                      "assets/images/saloons/saloon1.png",
+                      width: double.infinity,
+                      height: width * 0.45,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : Image.asset(
+                    "assets/images/saloons/saloon1.png",
+                    width: double.infinity,
+                    height: width * 0.45,
+                    fit: BoxFit.cover,
+                  ),
           ),
           const SizedBox(height: 10),
           Padding(

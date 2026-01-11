@@ -64,7 +64,7 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
     // ✅ 2. Fetch from API only if not cached
     try {
       final uri = Uri.parse(
-        "https://9b81391f2fd7.ngrok-free.app/api/v1/reviews/salon/${widget.salonId}?page=1&limit=1",
+        "https://probeauty-backend.onrender.com/api/v1/reviews/salon/${widget.salonId}?page=1&limit=1",
       );
 
       final res = await http.get(uri);

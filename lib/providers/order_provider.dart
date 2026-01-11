@@ -25,6 +25,22 @@ class OrderModel {
     required this.status,
     required this.image,
   });
+
+  // ✅ ADD THIS
+  OrderModel copyWith({
+    String? status,
+  }) {
+    return OrderModel(
+      id: id,
+      salonId: salonId,
+      salonName: salonName,
+      title: title,
+      price: price,
+      quantity: quantity,
+      status: status ?? this.status,
+      image: image,
+    );
+  }
 }
 
 class OrderProvider with ChangeNotifier {
@@ -94,5 +110,44 @@ class OrderProvider with ChangeNotifier {
 
     isLoading = false;
     notifyListeners();
+  }
+
+  Future<void> cancelOrder(String orderId) async {
+    try {
+      final token = await _getToken();
+      if (token == null) {
+        throw Exception("Not authenticated");
+      }
+
+      final url = Uri.parse(
+        "$_baseUrl/api/v1/orders/$orderId/cancel",
+      );
+
+      final response = await http.post(
+        url,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+
+      final body = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        // ✅ Update local order status
+        final index = orders.indexWhere((o) => o.id == orderId);
+        if (index != -1) {
+          orders[index] = orders[index].copyWith(
+            status: "CANCELLED",
+          );
+        }
+
+        notifyListeners();
+      } else {
+        throw Exception(body["message"] ?? "Failed to cancel order");
+      }
+    } catch (e) {
+      rethrow;
+    }
   }
 }

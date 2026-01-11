@@ -13,6 +13,7 @@ class OrdersScreen extends StatefulWidget {
 }
 
 class _OrdersScreenState extends State<OrdersScreen> {
+  String? _cancellingOrderId;
   @override
   void initState() {
     super.initState();
@@ -148,6 +149,51 @@ class _OrdersScreenState extends State<OrdersScreen> {
   }
 
   Widget _orderCard(OrderModel order) {
+    final bool canCancel = order.status != "SHIPPED" &&
+        order.status != "DELIVERED" &&
+        order.status != "CANCELLED";
+
+    Widget _orderStatusChip(String status) {
+      Color color;
+      String label;
+
+      switch (status) {
+        case "SHIPPED":
+          color = Colors.orange;
+          label = "Shipped";
+          break;
+        case "DELIVERED":
+          color = Colors.green;
+          label = "Delivered";
+          break;
+        case "CANCELLED":
+          color = Colors.red;
+          label = "Cancelled";
+          break;
+        default:
+          color = Colors.grey;
+          label = status;
+      }
+
+      return Container(
+        height: 42, // ✅ same height as button
+        alignment: Alignment.center, // ✅ perfect centering
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: "PoppinsSemiBold",
+            fontSize: 12,
+            color: color,
+          ),
+        ),
+      );
+    }
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
       padding: const EdgeInsets.all(16),
@@ -274,25 +320,81 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     Expanded(
                       child: SizedBox(
                         height: 42,
-                        child: OutlinedButton(
-                          onPressed: () {},
-                          style: OutlinedButton.styleFrom(
-                            backgroundColor: Colors.black,
-                            side: BorderSide.none,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            padding: EdgeInsets.zero,
-                          ),
-                          child: Text(
-                            AppLocalizations.of(context)!.ordersCancelButton,
-                            style: const TextStyle(
-                              fontFamily: "PoppinsSemiBold",
-                              fontSize: 12,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
+                        child: canCancel
+                            ? OutlinedButton(
+                                onPressed: _cancellingOrderId == order.id
+                                    ? null
+                                    : () async {
+                                        setState(() {
+                                          _cancellingOrderId = order.id;
+                                        });
+
+                                        try {
+                                          await context
+                                              .read<OrderProvider>()
+                                              .cancelOrder(order.id);
+
+                                          await context
+                                              .read<OrderProvider>()
+                                              .fetchOrders();
+
+                                          if (!mounted) return;
+
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                  "Order cancelled successfully"),
+                                            ),
+                                          );
+                                        } catch (e) {
+                                          if (!mounted) return;
+
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(e.toString()),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                        } finally {
+                                          if (mounted) {
+                                            setState(() {
+                                              _cancellingOrderId = null;
+                                            });
+                                          }
+                                        }
+                                      },
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor: Colors.black,
+                                  side: BorderSide.none,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                child: _cancellingOrderId == order.id
+                                    ? const SizedBox(
+                                        height: 18,
+                                        width: 18,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : FittedBox(
+                                        fit: BoxFit.scaleDown, // ✅ KEY LINE
+                                        child: Text(
+                                          AppLocalizations.of(context)!
+                                              .ordersCancelButton,
+                                          style: const TextStyle(
+                                            fontFamily: "PoppinsSemiBold",
+                                            fontSize: 12,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                              )
+                            : _orderStatusChip(order.status),
                       ),
                     ),
                   ],
