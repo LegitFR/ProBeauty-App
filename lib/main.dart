@@ -25,6 +25,7 @@ import 'package:probeauty_app/providers/explore_provider.dart';
 import 'package:probeauty_app/providers/order_provider.dart';
 import 'package:probeauty_app/providers/product_provider.dart';
 import 'package:probeauty_app/providers/salon_provider.dart';
+import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'pages/appointments_screen.dart';
@@ -122,6 +123,20 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     final appLocale = context.watch<AppLocale>();
     return MaterialApp(
+      theme: ThemeData(
+        useMaterial3: true,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: AppColors.softIvory,
+          surfaceTintColor: Colors.transparent,
+          scrolledUnderElevation: 0,
+          elevation: 0,
+          titleTextStyle: TextStyle(
+            color: Colors.black,
+            fontFamily: "PoppinsSemiBold",
+            fontSize: 18,
+          ),
+        ),
+      ),
       debugShowCheckedModeBanner: false,
       locale: appLocale.locale,
       supportedLocales: const [
