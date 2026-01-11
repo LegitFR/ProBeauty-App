@@ -75,11 +75,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               // Profile card
               GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(
+                onTap: () async {
+                  final updated = await Navigator.pushNamed(
                     context,
                     "/profile_details",
                   );
+
+                  if (updated == true) {
+                    _loadUserData();
+                  }
                 },
                 child: Container(
                   padding:

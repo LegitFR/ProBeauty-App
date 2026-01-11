@@ -395,19 +395,111 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
 
   Widget _buildSkeletonList() {
     return ListView.separated(
-      itemBuilder: (c, i) => _skeletonCard(),
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: 4,
+      separatorBuilder: (_, __) => const SizedBox(height: 18),
+      itemBuilder: (_, __) => _skeletonSalonCard(),
     );
   }
 
-  Widget _skeletonCard() {
+  Widget _skeletonSalonCard() {
+    final width = MediaQuery.of(context).size.width;
+
     return Container(
-      height: 200,
       decoration: BoxDecoration(
-        color: Colors.grey.shade300,
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.softIvory,
+        borderRadius: BorderRadius.circular(14),
       ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // IMAGE
+          Container(
+            width: double.infinity,
+            height: width * 0.45,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade400,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(14),
+              ),
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // TITLE
+                _skeletonLine(width: width * 0.6, height: 18),
+                const SizedBox(height: 10),
+
+                // RATING ROW
+                Row(
+                  children: [
+                    _skeletonLine(width: 30, height: 14),
+                    const SizedBox(width: 8),
+                    _skeletonLine(width: 90, height: 14),
+                    const SizedBox(width: 8),
+                    _skeletonLine(width: 40, height: 14),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
+                // ADDRESS
+                _skeletonLine(width: width * 0.75, height: 14),
+
+                const SizedBox(height: 18),
+
+                // SERVICE SKELETONS
+                _skeletonServiceRow(),
+                const SizedBox(height: 12),
+                _skeletonServiceRow(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _skeletonLine({required double width, required double height}) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade400,
+        borderRadius: BorderRadius.circular(6),
+      ),
+    );
+  }
+
+  Widget _skeletonServiceRow() {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _skeletonLine(width: double.infinity, height: 14),
+              const SizedBox(height: 6),
+              _skeletonLine(width: 80, height: 12),
+              const SizedBox(height: 6),
+              _skeletonLine(width: 60, height: 14),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        Container(
+          width: 70,
+          height: 32,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade300,
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+      ],
     );
   }
 
@@ -705,6 +797,13 @@ class _SalonCardState extends State<SalonCard> {
       decoration: BoxDecoration(
         color: AppColors.softIvory,
         borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 1,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -803,7 +902,7 @@ class _SalonCardState extends State<SalonCard> {
             boxShadow: [
               BoxShadow(
                 color: Colors.black12,
-                blurRadius: 6,
+                blurRadius: 1,
                 spreadRadius: -2,
                 offset: Offset(0, 4),
               )

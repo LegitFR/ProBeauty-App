@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -6,7 +8,7 @@ import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileDetails extends StatefulWidget {
-  const ProfileDetails({Key? key}) : super(key: key);
+  const ProfileDetails({super.key});
 
   @override
   State<ProfileDetails> createState() => _ProfileDetailsState();
@@ -22,7 +24,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   final TextEditingController _yearController = TextEditingController();
 
   String _selectedCountryCode = '+91';
-  String? _selectedEmailOption;
+  // String? _selectedEmailOption;
 
   bool _saving = false;
 
@@ -112,7 +114,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         await prefs.setString("userPhone", phone);
 
         _showMessage(l10n.profileUpdateSuccess);
-        Navigator.pop(context);
+        Navigator.pop(context, true);
       } else {
         _showMessage(data["message"] ?? l10n.profileUpdateFailed);
       }
@@ -134,7 +136,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
           backgroundColor: AppColors.softIvory,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(context, true),
           ),
           title: Text(
             l10n.profileEditTitle,
@@ -170,10 +172,10 @@ class _ProfileDetailsState extends State<ProfileDetails> {
               const SizedBox(height: 8),
               _buildDateFields(),
               const SizedBox(height: 20),
-              _buildLabel(l10n.profileEmailLabel),
-              const SizedBox(height: 8),
-              _buildDropdownField(),
-              const SizedBox(height: 40),
+              // _buildLabel(l10n.profileEmailLabel),
+              // const SizedBox(height: 8),
+              // _buildDropdownField(),
+              // const SizedBox(height: 40),
               _buildSaveButton(),
             ],
           ),
@@ -201,6 +203,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         border: Border.all(color: Colors.black, width: 1.5),
       ),
       child: TextField(
+        cursorColor: AppColors.rusticSunset,
         controller: controller,
         style: const TextStyle(
             fontFamily: "PoppinsRegular", fontSize: 14, color: Colors.black),
@@ -270,6 +273,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         border: Border.all(color: Colors.black87, width: 1.5),
       ),
       child: TextField(
+        cursorColor: AppColors.rusticSunset,
         controller: controller,
         decoration: InputDecoration(
           hintText: hint,
@@ -305,39 +309,39 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     );
   }
 
-  Widget _buildDropdownField() {
-    final l10n = AppLocalizations.of(context)!;
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.softIvory,
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: Colors.black87, width: 1.5),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedEmailOption,
-          hint: Padding(
-            padding: EdgeInsets.only(left: 15),
-            child: Text(
-              l10n.profileEmailOptionLabel,
-              style: const TextStyle(color: Colors.grey),
-            ),
-          ),
-          icon: const Icon(Icons.keyboard_arrow_down, size: 20),
-          isExpanded: true,
-          items: ['Option 1', 'Option 2', 'Option 3']
-              .map((opt) => DropdownMenuItem(
-                    value: opt,
-                    child: Text(opt),
-                  ))
-              .toList(),
-          onChanged: (value) => setState(() {
-            _selectedEmailOption = value;
-          }),
-        ),
-      ),
-    );
-  }
+  // Widget _buildDropdownField() {
+  //   final l10n = AppLocalizations.of(context)!;
+  //   return Container(
+  //     decoration: BoxDecoration(
+  //       color: AppColors.softIvory,
+  //       borderRadius: BorderRadius.circular(25),
+  //       border: Border.all(color: Colors.black87, width: 1.5),
+  //     ),
+  //     child: DropdownButtonHideUnderline(
+  //       child: DropdownButton<String>(
+  //         value: _selectedEmailOption,
+  //         hint: Padding(
+  //           padding: EdgeInsets.only(left: 15),
+  //           child: Text(
+  //             l10n.profileEmailOptionLabel,
+  //             style: const TextStyle(color: Colors.grey),
+  //           ),
+  //         ),
+  //         icon: const Icon(Icons.keyboard_arrow_down, size: 20),
+  //         isExpanded: true,
+  //         items: ['Option 1', 'Option 2', 'Option 3']
+  //             .map((opt) => DropdownMenuItem(
+  //                   value: opt,
+  //                   child: Text(opt),
+  //                 ))
+  //             .toList(),
+  //         onChanged: (value) => setState(() {
+  //           _selectedEmailOption = value;
+  //         }),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildSaveButton() {
     final l10n = AppLocalizations.of(context)!;

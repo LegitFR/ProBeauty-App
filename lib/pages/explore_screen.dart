@@ -486,6 +486,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
         border: Border.all(color: Colors.black, width: 1.4),
       ),
       child: TextField(
+        cursorColor: AppColors.rusticSunset,
         controller: searchController,
         decoration: InputDecoration(
           prefixIcon: Padding(
