@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lottie/lottie.dart';
 import '../resources/AppColors.dart';
@@ -67,41 +68,48 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return SafeArea(
-      bottom: true,
-      child: Scaffold(
-        backgroundColor: AppColors.rusticSunset,
-        body: AnimatedAlign(
-          duration: const Duration(milliseconds: 700),
-          curve: Curves.easeInOutCubic,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+      child: SafeArea(
+        bottom: true,
+        child: Scaffold(
+          backgroundColor: AppColors.rusticSunset,
+          body: AnimatedAlign(
+            duration: const Duration(milliseconds: 700),
+            curve: Curves.easeInOutCubic,
 
-          // ❌ Fixed at center, no movement
-          // alignment: _moveUp ? const Alignment(0, -0.70) : Alignment.center,
-          alignment: Alignment.center,
+            // ❌ Fixed at center, no movement
+            // alignment: _moveUp ? const Alignment(0, -0.70) : Alignment.center,
+            alignment: Alignment.center,
 
-          child: SizedBox(
-            width: size.width * 0.9,
-            height: size.width * 0.9,
-            child: Lottie.asset(
-              'assets/lottie/probeauty_logo.json',
-              controller: _lottieController,
-              repeat: false,
-              onLoaded: (composition) {
-                _lottieController.duration = composition.duration;
+            child: SizedBox(
+              width: size.width * 0.9,
+              height: size.width * 0.9,
+              child: Lottie.asset(
+                'assets/lottie/probeauty_logo.json',
+                controller: _lottieController,
+                repeat: false,
+                onLoaded: (composition) {
+                  _lottieController.duration = composition.duration;
 
-                /// jump to start
-                _lottieController.value = startProgress;
+                  /// jump to start
+                  _lottieController.value = startProgress;
 
-                /// play only the required segment
-                _lottieController
-                    .animateTo(
-                      endProgress,
-                      duration:
-                          composition.duration * (endProgress - startProgress),
-                      curve: Curves.linear,
-                    )
-                    .then((_) => _afterPartialAnimation());
-              },
+                  /// play only the required segment
+                  _lottieController
+                      .animateTo(
+                        endProgress,
+                        duration: composition.duration *
+                            (endProgress - startProgress),
+                        curve: Curves.linear,
+                      )
+                      .then((_) => _afterPartialAnimation());
+                },
+              ),
             ),
           ),
         ),

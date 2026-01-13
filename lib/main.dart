@@ -22,6 +22,7 @@ import 'package:probeauty_app/pages/splash_screen.dart';
 import 'package:probeauty_app/providers/appointment_provider.dart';
 import 'package:probeauty_app/providers/cart_provider.dart';
 import 'package:probeauty_app/providers/explore_provider.dart';
+import 'package:probeauty_app/providers/offers_provider.dart';
 import 'package:probeauty_app/providers/order_provider.dart';
 import 'package:probeauty_app/providers/product_provider.dart';
 import 'package:probeauty_app/providers/salon_provider.dart';
@@ -34,6 +35,7 @@ import 'pages/notification_screen.dart';
 import 'models/product.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter/services.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -104,6 +106,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => OrderProvider()),
         ChangeNotifierProvider(create: (_) => AppointmentProvider()),
         ChangeNotifierProvider(create: (_) => ExploreProvider()),
+        ChangeNotifierProvider(create: (_) => OfferProvider()),
         ChangeNotifierProvider(create: (_) => AppLocale(code)),
       ],
       child: const MyApp(),

@@ -279,7 +279,7 @@ abstract class AppLocalizations {
   /// No description provided for @bottomNavHome.
   ///
   /// In en, this message translates to:
-  /// **'My Precut'**
+  /// **'Home'**
   String get bottomNavHome;
 
   /// No description provided for @bottomNavExplore.

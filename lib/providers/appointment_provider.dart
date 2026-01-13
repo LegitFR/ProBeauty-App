@@ -8,7 +8,7 @@ class AppointmentProvider with ChangeNotifier {
   static const String _baseUrl =
       "https://probeauty-backend.onrender.com/api/v1/bookings";
 
-  bool _isLoading = false;
+  bool _isLoading = true; // 🔥 MUST start true
   bool _hasFetchedOnce = false;
 
   List<Booking> _bookings = [];
@@ -18,7 +18,6 @@ class AppointmentProvider with ChangeNotifier {
 
   Future<void> fetchBookings({bool forceRefresh = false}) async {
     if (_hasFetchedOnce && !forceRefresh) return;
-    if (_isLoading) return;
 
     _isLoading = true;
     notifyListeners();
@@ -27,13 +26,9 @@ class AppointmentProvider with ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("accessToken");
 
-      debugPrint("ACCESS TOKEN: $token");
-
       if (token == null) {
-        debugPrint("NO TOKEN FOUND");
         _bookings = [];
-        _isLoading = false;
-        notifyListeners();
+        _hasFetchedOnce = true;
         return;
       }
 
@@ -44,31 +39,34 @@ class AppointmentProvider with ChangeNotifier {
         },
       );
 
-      debugPrint("STATUS CODE: ${res.statusCode}");
-      debugPrint("RESPONSE BODY: ${res.body}");
-
       if (res.statusCode == 200) {
         final decoded = jsonDecode(res.body);
         final List data = decoded["data"] ?? [];
 
-        debugPrint("RAW LIST LENGTH: ${data.length}");
-
-        final bookings = data.map((e) {
-          debugPrint("PARSING BOOKING: $e");
-          return Booking.fromJson(e);
-        }).toList();
+        final bookings = data.map((e) => Booking.fromJson(e)).toList();
 
         bookings.sort((a, b) => b.startTime.compareTo(a.startTime));
 
         _bookings = bookings;
-        _hasFetchedOnce = true;
+      } else {
+        _bookings = [];
       }
+
+      _hasFetchedOnce = true;
     } catch (e, st) {
       debugPrint("Fetch bookings error: $e");
       debugPrintStack(stackTrace: st);
+      _bookings = [];
+      _hasFetchedOnce = true;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
+  }
 
-    _isLoading = false;
-    notifyListeners();
+  /// Optional: manual refresh
+  Future<void> refresh() async {
+    _hasFetchedOnce = false;
+    await fetchBookings(forceRefresh: true);
   }
 }

@@ -28,6 +28,45 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
     _fetchFavourites();
   }
 
+  Widget _buildSkeletonList() {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      itemCount: 4,
+      itemBuilder: (_, __) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.softIvory,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SkeletonBox(
+                width: double.infinity,
+                height: 160,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              const SizedBox(height: 12),
+              SkeletonBox(width: 220, height: 16),
+              const SizedBox(height: 6),
+              SkeletonBox(width: 140, height: 14),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SkeletonBox(width: 80, height: 18),
+                  SkeletonBox(width: 90, height: 34),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   // ==========================
   // FETCH FAVOURITES
   // ==========================
@@ -212,23 +251,32 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
   }
 
   Widget _buildBody() {
+    // 1️⃣ LOADING → SKELETON
     if (_loading) {
-      return const Center(
-          child: CircularProgressIndicator(color: AppColors.rusticSunset));
+      return _buildSkeletonList();
     }
 
+    // 2️⃣ ERROR
     if (_error != null) {
       return Center(
-          child: Text(_error!, style: const TextStyle(color: Colors.red)));
-    }
-
-    if (_favourites.isEmpty) {
-      return Center(
-        child: Text(AppLocalizations.of(context)!.favouritesEmpty,
-            style: const TextStyle(fontFamily: "PoppinsRegular")),
+        child: Text(
+          _error!,
+          style: const TextStyle(color: Colors.red),
+        ),
       );
     }
 
+    // 3️⃣ EMPTY (ONLY AFTER LOAD)
+    if (_favourites.isEmpty) {
+      return Center(
+        child: Text(
+          AppLocalizations.of(context)!.favouritesEmpty,
+          style: const TextStyle(fontFamily: "PoppinsRegular"),
+        ),
+      );
+    }
+
+    // 4️⃣ REAL DATA
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       itemCount: _favourites.length,
@@ -332,6 +380,31 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
           ),
         ]),
       ]),
+    );
+  }
+}
+
+class SkeletonBox extends StatelessWidget {
+  final double width;
+  final double height;
+  final BorderRadius borderRadius;
+
+  const SkeletonBox({
+    super.key,
+    required this.width,
+    required this.height,
+    this.borderRadius = const BorderRadius.all(Radius.circular(12)),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade400,
+        borderRadius: borderRadius,
+      ),
     );
   }
 }

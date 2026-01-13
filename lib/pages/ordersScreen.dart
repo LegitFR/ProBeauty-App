@@ -23,6 +23,82 @@ class _OrdersScreenState extends State<OrdersScreen> {
     });
   }
 
+  Widget _buildOrdersSkeleton(BuildContext context) {
+    final w = MediaQuery.of(context).size.width;
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 20),
+
+          // Section title
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: SkeletonBox(width: 140, height: 18),
+          ),
+
+          const SizedBox(height: 16),
+
+          ...List.generate(
+            4,
+            (_) => Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.softIvory,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SkeletonBox(
+                    width: 85,
+                    height: 120,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SkeletonBox(width: 160, height: 14),
+                        const SizedBox(height: 6),
+                        SkeletonBox(width: double.infinity, height: 16),
+                        const SizedBox(height: 6),
+                        SkeletonBox(width: 120, height: 13),
+                        const SizedBox(height: 6),
+                        SkeletonBox(width: 90, height: 13),
+                        const SizedBox(height: 12),
+                        SkeletonBox(width: 140, height: 16),
+                        const SizedBox(height: 14),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: SkeletonBox(
+                                  height: 42, width: double.infinity),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: SkeletonBox(
+                                  height: 42, width: double.infinity),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 30),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -85,64 +161,56 @@ class _OrdersScreenState extends State<OrdersScreen> {
             ),
           ],
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                child: Text(
-                  l10n.ordersActiveTitle,
-                  style: const TextStyle(
-                    fontFamily: "PoppinsSemiBold",
-                    fontSize: 16,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              if (ordersProvider.isLoading)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 40),
-                    child: CircularProgressIndicator(
-                      color: AppColors.rusticSunset,
-                    ),
-                  ),
-                )
-              else if (ordersProvider.error != null)
-                Padding(
-                  padding: const EdgeInsets.only(left: 20, top: 10),
-                  child: Text(
-                    ordersProvider.error!,
-                    style: const TextStyle(
-                        color: Colors.red,
-                        fontFamily: "PoppinsRegular",
-                        fontSize: 14),
-                  ),
-                )
-              else if (ordersProvider.orders.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(left: 20, top: 10),
-                  child: Text(
-                    l10n.ordersEmpty,
-                    style: const TextStyle(
-                      fontFamily: "PoppinsRegular",
-                      fontSize: 14,
-                      color: Colors.black,
-                    ),
-                  ),
-                )
-              else
-                Column(
-                  children: [
-                    for (final order in ordersProvider.orders)
-                      _orderCard(order),
-                  ],
-                ),
-              const SizedBox(height: 25),
-            ],
-          ),
+        body: SafeArea(
+          bottom: true,
+          child: ordersProvider.isLoading
+              ? _buildOrdersSkeleton(context) // 1️⃣ LOADING FIRST
+              : ordersProvider.error != null
+                  ? Padding(
+                      padding: const EdgeInsets.only(left: 20, top: 20),
+                      child: Text(
+                        ordersProvider.error!,
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontFamily: "PoppinsRegular",
+                          fontSize: 14,
+                        ),
+                      ),
+                    )
+                  : ordersProvider.orders.isEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.only(left: 20, top: 20),
+                          child: Text(
+                            l10n.ordersEmpty,
+                            style: const TextStyle(
+                              fontFamily: "PoppinsRegular",
+                              fontSize: 14,
+                              color: Colors.black,
+                            ),
+                          ),
+                        )
+                      : SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 12),
+                                child: Text(
+                                  l10n.ordersActiveTitle,
+                                  style: const TextStyle(
+                                    fontFamily: "PoppinsSemiBold",
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                              for (final order in ordersProvider.orders)
+                                _orderCard(order),
+                              const SizedBox(height: 25),
+                            ],
+                          ),
+                        ),
         ),
       ),
     );
@@ -407,6 +475,31 @@ class _OrdersScreenState extends State<OrdersScreen> {
             child: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class SkeletonBox extends StatelessWidget {
+  final double width;
+  final double height;
+  final BorderRadius borderRadius;
+
+  const SkeletonBox({
+    super.key,
+    required this.width,
+    required this.height,
+    this.borderRadius = const BorderRadius.all(Radius.circular(12)),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade400,
+        borderRadius: borderRadius,
       ),
     );
   }

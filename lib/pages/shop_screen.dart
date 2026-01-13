@@ -3,10 +3,12 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
-import 'package:flutter_sound/public/flutter_sound_recorder.dart';
+
 import 'package:permission_handler/permission_handler.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
+import 'package:probeauty_app/pages/product_screen.dart';
 import 'package:probeauty_app/pages/product_search_screen.dart';
+import 'package:probeauty_app/providers/offers_provider.dart';
 import 'package:probeauty_app/providers/product_provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +26,7 @@ class _ShopScreenState extends State<ShopScreen> {
     super.initState();
     Future.microtask(() {
       context.read<ProductProvider>().fetchProducts();
+      context.read<OfferProvider>().fetchActiveOffers(reset: true);
     });
   }
 
@@ -116,6 +119,51 @@ class _ShopScreenState extends State<ShopScreen> {
 
   // ---------------------- UI ----------------------
 
+  Future<void> _openProductFromOffer(
+    BuildContext context,
+    Map<String, dynamic> offer,
+  ) async {
+    try {
+      final productProvider = context.read<ProductProvider>();
+
+      final String productId = offer["productId"];
+      final String salonId = offer["salonId"];
+
+      // 1️⃣ Ensure products are loaded
+      if (productProvider.products.isEmpty) {
+        await productProvider.fetchProducts();
+      }
+
+      // 2️⃣ Find product by ID
+      final product = productProvider.products.firstWhere(
+        (p) => p.id == productId,
+      );
+
+      // 3️⃣ Get salon name (already cached by ProductProvider)
+      final salonName = productProvider.salonNames[salonId] ?? "Salon";
+
+      if (!context.mounted) return;
+
+      // 4️⃣ Navigate (ONLY required args)
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ProductScreen(
+            product: product,
+            salonName: salonName,
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint("Failed to open product: $e");
+
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Unable to open product")),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -123,6 +171,8 @@ class _ShopScreenState extends State<ShopScreen> {
     final width = size.width;
     final height = size.height;
     final productProvider = context.watch<ProductProvider>();
+    final offerProvider = context.watch<OfferProvider>();
+    final productOffers = offerProvider.productOffers;
 
     return SafeArea(
       bottom: true,
@@ -244,30 +294,85 @@ class _ShopScreenState extends State<ShopScreen> {
                 SizedBox(height: height * 0.025),
 
                 // Carousel banner
-                CarouselSlider(
-                  options: CarouselOptions(
-                    viewportFraction: 0.78,
-                    height: height * 0.20,
-                    autoPlay: true,
-                    enlargeCenterPage: true,
-                  ),
-                  items: [
-                    'assets/images/shop/banner1.png',
-                    'assets/images/shop/banner2.png',
-                    'assets/images/shop/banner3.png',
-                  ].map((imagePath) {
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(18),
-                      child: Image.asset(
-                        imagePath,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
-                    );
-                  }).toList(),
-                ),
 
-                SizedBox(height: height * 0.035),
+                offerProvider.isLoading
+                    ? SizedBox(
+                        height: height * 0.20,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          padding:
+                              EdgeInsets.symmetric(horizontal: width * 0.04),
+                          itemCount: 3,
+                          separatorBuilder: (_, __) =>
+                              SizedBox(width: width * 0.04),
+                          itemBuilder: (_, __) => SkeletonBox(
+                            width: width * 0.75,
+                            height: height * 0.20,
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                        ),
+                      )
+                    : productOffers.isEmpty
+                        ? const SizedBox()
+                        : CarouselSlider(
+                            options: CarouselOptions(
+                              height: height * 0.20,
+
+                              // 🔥 prevent duplication
+                              autoPlay: productOffers.length > 1,
+                              enableInfiniteScroll: productOffers.length > 1,
+                              enlargeCenterPage: productOffers.length > 1,
+
+                              // 🔥 padding for single item
+                              viewportFraction:
+                                  productOffers.length > 1 ? 0.78 : 0.9,
+
+                              aspectRatio: 16 / 9,
+                              autoPlayInterval: const Duration(seconds: 3),
+                            ),
+                            items: productOffers.map((offer) {
+                              final String imageUrl = offer["image"] ?? "";
+
+                              return GestureDetector(
+                                onTap: () =>
+                                    _openProductFromOffer(context, offer),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal:
+                                        productOffers.length == 1 ? 12 : 6,
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(18),
+                                    child: Image.network(
+                                      imageUrl,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                      loadingBuilder:
+                                          (context, child, progress) {
+                                        if (progress == null) return child;
+                                        return const Center(
+                                          child: CircularProgressIndicator(
+                                            color: AppColors.rusticSunset,
+                                          ),
+                                        );
+                                      },
+                                      errorBuilder: (_, __, ___) => Container(
+                                        color: Colors.grey.shade200,
+                                        child: const Icon(
+                                          Icons.image_not_supported,
+                                          size: 40,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+
+                offerProvider.isLoading || productOffers.isEmpty
+                    ? Container()
+                    : SizedBox(height: height * 0.035),
 
                 // Title
                 Padding(
@@ -311,9 +416,61 @@ class _ShopScreenState extends State<ShopScreen> {
     final provider = context.watch<ProductProvider>();
 
     if (provider.isLoading && provider.products.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(
-          color: AppColors.rusticSunset,
+      return SizedBox(
+        height: MediaQuery.of(context).size.height * 0.32,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: EdgeInsets.only(left: width * 0.035),
+          itemCount: 3,
+          separatorBuilder: (_, __) => SizedBox(width: width * 0.04),
+          itemBuilder: (_, __) => Container(
+            width: width * 0.55,
+            decoration: BoxDecoration(
+              color: AppColors.softIvory,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.black, width: 2),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Image skeleton
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: SkeletonBox(
+                    width: double.infinity,
+                    height: width * 0.32,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SkeletonBox(width: width * 0.25, height: 12),
+                      const SizedBox(height: 6),
+                      SkeletonBox(width: width * 0.35, height: 14),
+                      const SizedBox(height: 10),
+                      SkeletonBox(width: width * 0.18, height: 16),
+                    ],
+                  ),
+                ),
+
+                const Spacer(),
+
+                // Button skeleton
+                Container(
+                  height: 40,
+                  margin: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       );
     }
@@ -665,6 +822,31 @@ class _VoiceWaveformState extends State<VoiceWaveform> {
             ),
           );
         }).toList(),
+      ),
+    );
+  }
+}
+
+class SkeletonBox extends StatelessWidget {
+  final double width;
+  final double height;
+  final BorderRadius borderRadius;
+
+  const SkeletonBox({
+    super.key,
+    required this.width,
+    required this.height,
+    this.borderRadius = const BorderRadius.all(Radius.circular(14)),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade400,
+        borderRadius: borderRadius,
       ),
     );
   }

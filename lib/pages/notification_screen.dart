@@ -24,6 +24,77 @@ class _NotificationScreenState extends State<NotificationScreen> {
     _fetchNotifications();
   }
 
+  Widget _notificationSkeletonTile(double screenWidth) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.softIvory,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            offset: Offset(0, 3),
+            blurRadius: 6,
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          SkeletonBox(
+              width: 24, height: 24, borderRadius: BorderRadius.circular(6)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                SkeletonBox(width: double.infinity, height: 14),
+                SizedBox(height: 6),
+                SkeletonBox(width: 180, height: 12),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          SkeletonBox(width: 40, height: 12),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotificationsSkeleton(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Unread header
+            SkeletonBox(width: screenWidth * 0.5, height: 22),
+            const SizedBox(height: 16),
+
+            ...List.generate(
+              3,
+              (_) => _notificationSkeletonTile(screenWidth),
+            ),
+
+            const SizedBox(height: 30),
+
+            // Read header
+            SkeletonBox(width: screenWidth * 0.35, height: 22),
+            const SizedBox(height: 16),
+
+            ...List.generate(
+              2,
+              (_) => _notificationSkeletonTile(screenWidth),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   // ================= AUTH =================
   Future<String> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -127,10 +198,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           child: _buildAppBar(l10n, screenWidth),
         ),
         body: _loading
-            ? const Center(
-                child: CircularProgressIndicator(
-                color: AppColors.rusticSunset,
-              ))
+            ? _buildNotificationsSkeleton(context)
             : Padding(
                 padding: const EdgeInsets.all(16),
                 child: SingleChildScrollView(
@@ -370,6 +438,31 @@ class _NotificationItem {
       type: json['type'],
       isRead: json['isRead'],
       createdAt: DateTime.parse(json['createdAt']),
+    );
+  }
+}
+
+class SkeletonBox extends StatelessWidget {
+  final double width;
+  final double height;
+  final BorderRadius borderRadius;
+
+  const SkeletonBox({
+    super.key,
+    required this.width,
+    required this.height,
+    this.borderRadius = const BorderRadius.all(Radius.circular(12)),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade400,
+        borderRadius: borderRadius,
+      ),
     );
   }
 }

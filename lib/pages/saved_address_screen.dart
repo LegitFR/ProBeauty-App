@@ -30,6 +30,7 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
   Map<String, dynamic>? defaultAddress;
   bool isEditMode = false; // True when editing
   String? editAddressId; // Holds id of address being edited
+  bool _addressLoading = true;
 
   @override
   void initState() {
@@ -41,10 +42,15 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
   // GET DEFAULT ADDRESS
   // -------------------------------------------------------
   Future<void> _fetchDefaultAddress() async {
+    setState(() => _addressLoading = true);
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString("accessToken");
 
-    if (token == null) return;
+    if (token == null) {
+      setState(() => _addressLoading = false);
+      return;
+    }
 
     final url =
         Uri.parse("https://probeauty-backend.onrender.com/api/v1/addresses");
@@ -56,23 +62,63 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
 
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
-
       List list = json["data"];
 
       if (list.isNotEmpty) {
-        // Find default address
         final d = list.firstWhere(
           (a) => a["isDefault"] == true,
           orElse: () => null,
         );
 
         if (d != null) {
-          setState(() {
-            defaultAddress = d;
-          });
+          defaultAddress = d;
         }
       }
     }
+
+    setState(() => _addressLoading = false);
+  }
+
+  Widget _addressSkeleton() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade300,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 16,
+            height: 16,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade400,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                    height: 12,
+                    width: double.infinity,
+                    color: Colors.grey.shade400),
+                const SizedBox(height: 6),
+                Container(
+                    height: 12,
+                    width: double.infinity,
+                    color: Colors.grey.shade400),
+                const SizedBox(height: 6),
+                Container(height: 12, width: 160, color: Colors.grey.shade400),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   // -------------------------------------------------------
@@ -245,7 +291,9 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
               // -------------------------------------------------
               // DEFAULT ADDRESS CARD
               // -------------------------------------------------
-              if (defaultAddress != null)
+              if (_addressLoading)
+                _addressSkeleton()
+              else if (defaultAddress != null)
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
@@ -276,23 +324,18 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
                           ),
                         ),
                       ),
-
-                      // EDIT BUTTON
                       GestureDetector(
                         onTap: _enterEditMode,
                         child: SvgPicture.asset(
                           "assets/images/icons/edit_icon.svg",
                           height: 15,
                           colorFilter: const ColorFilter.mode(
-                            Colors.white,
-                            BlendMode.srcIn,
-                          ),
+                              Colors.white, BlendMode.srcIn),
                         ),
                       )
                     ],
                   ),
                 ),
-
               const SizedBox(height: 20),
 
               // ---------------- ADD NEW ADDRESS ----------------

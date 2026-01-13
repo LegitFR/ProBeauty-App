@@ -210,7 +210,7 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
                           color: Colors.black.withOpacity(0.08),
                           blurRadius: 8,
                           offset: const Offset(0, 6),
-                        )
+                        ),
                       ],
                     ),
                     child: Row(
@@ -220,39 +220,17 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
                           height: 22,
                         ),
                         const SizedBox(width: 12),
+
+                        /// -------- TEXT AREA (AUTO ADJUSTS) --------
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget.serviceText ?? "Haircut & styling",
-                                style: const TextStyle(
-                                  fontFamily: "PoppinsMedium",
-                                  fontSize: 15,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                [
-                                  widget.dateText,
-                                  widget.timeText,
-                                  widget.locationText,
-                                ]
-                                    .where(
-                                        (e) => e != null && e.trim().isNotEmpty)
-                                    .join(" | "),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontFamily: "PoppinsRegular",
-                                  fontSize: 12.5,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ],
+                          child: _SearchTextBlock(
+                            title: widget.serviceText,
+                            dateText: widget.dateText,
+                            timeText: widget.timeText,
+                            locationText: widget.locationText,
                           ),
                         ),
+
                         const SizedBox(width: 8),
                         SvgPicture.asset(
                           "assets/images/icons/audio_icon.svg",
@@ -1003,5 +981,74 @@ class _SalonCardState extends State<SalonCard> {
     }
 
     return Row(children: stars);
+  }
+}
+
+class _SearchTextBlock extends StatelessWidget {
+  final String? title;
+  final String? dateText;
+  final String? timeText;
+  final String? locationText;
+
+  const _SearchTextBlock({
+    this.title,
+    this.dateText,
+    this.timeText,
+    this.locationText,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final String? cleanTitle =
+        title != null && title!.trim().isNotEmpty ? title : null;
+
+    final String subtitle = [
+      dateText,
+      timeText,
+      locationText,
+    ].where((e) => e != null && e.trim().isNotEmpty).join(" | ");
+
+    if (cleanTitle == null && subtitle.isEmpty) {
+      return const Text(
+        "Search salons & services",
+        style: TextStyle(
+          fontFamily: "PoppinsRegular",
+          fontSize: 14,
+          color: Colors.black54,
+        ),
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: cleanTitle != null && subtitle.isNotEmpty
+          ? MainAxisAlignment.start
+          : MainAxisAlignment.center,
+      children: [
+        if (cleanTitle != null)
+          Text(
+            cleanTitle,
+            style: const TextStyle(
+              fontFamily: "PoppinsMedium",
+              fontSize: 15,
+              color: Colors.black,
+            ),
+          ),
+        if (cleanTitle != null && subtitle.isNotEmpty)
+          const SizedBox(height: 2),
+        if (subtitle.isNotEmpty)
+          Text(
+            subtitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontFamily: "PoppinsRegular",
+              fontSize: 12.5,
+              color: Colors.black,
+            ),
+          ),
+      ],
+    );
   }
 }

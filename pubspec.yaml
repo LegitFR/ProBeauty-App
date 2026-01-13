@@ -56,6 +56,7 @@ dependencies:
   audio_waveforms: ^2.0.2
   flutter_sound: ^9.30.0
   permission_handler: ^12.0.1
+  google_sign_in: 6.2.1
 
 dev_dependencies:
   flutter_test:

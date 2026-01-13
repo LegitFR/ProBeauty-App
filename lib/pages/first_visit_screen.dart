@@ -41,55 +41,52 @@ class FirstVisitScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return SafeArea(
-      bottom: true,
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: AppColors.softIvory,
+      appBar: AppBar(
         backgroundColor: AppColors.softIvory,
-        appBar: AppBar(
-          backgroundColor: AppColors.softIvory,
-          elevation: 0,
-          leading: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-          ),
+        elevation: 0,
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 10),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 10),
 
-              // ---------- TITLE ----------
-              Text(
-                l10n.firstVisitTitle(salonName),
-                style: const TextStyle(
-                  fontFamily: "PoppinsSemiBold",
-                  fontSize: 22,
-                  height: 1.3,
-                  color: Colors.black,
-                ),
+            // ---------- TITLE ----------
+            Text(
+              l10n.firstVisitTitle(salonName),
+              style: const TextStyle(
+                fontFamily: "PoppinsSemiBold",
+                fontSize: 22,
+                height: 1.3,
+                color: Colors.black,
               ),
+            ),
 
-              const SizedBox(height: 30),
+            const SizedBox(height: 30),
 
-              // ---------- YES ----------
-              _optionCard(
-                title: l10n.firstVisitYesTitle,
-                subtitle: l10n.firstVisitYesSubtitle,
-                onTap: () => _goNext(context, true),
-              ),
+            // ---------- YES ----------
+            _optionCard(
+              title: l10n.firstVisitYesTitle,
+              subtitle: l10n.firstVisitYesSubtitle,
+              onTap: () => _goNext(context, true),
+            ),
 
-              const SizedBox(height: 14),
+            const SizedBox(height: 14),
 
-              // ---------- NO ----------
-              _optionCard(
-                title: l10n.firstVisitNoTitle,
-                subtitle: l10n.firstVisitNoSubtitle,
-                onTap: () => _goNext(context, false),
-              ),
-            ],
-          ),
+            // ---------- NO ----------
+            _optionCard(
+              title: l10n.firstVisitNoTitle,
+              subtitle: l10n.firstVisitNoSubtitle,
+              onTap: () => _goNext(context, false),
+            ),
+          ],
         ),
       ),
     );

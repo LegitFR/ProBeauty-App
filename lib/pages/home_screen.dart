@@ -5,8 +5,10 @@ import 'package:flutter_svg/svg.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/explore_results_screen.dart';
 import 'package:probeauty_app/pages/salon_detail_screen.dart';
+import 'package:probeauty_app/providers/offers_provider.dart';
 import 'package:probeauty_app/providers/salon_provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
+import 'package:probeauty_app/services/salon_service.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -22,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     Future.microtask(() {
       context.read<SalonProvider>().fetchSalons();
+      context.read<OfferProvider>().fetchActiveOffers();
     });
   }
 
@@ -33,7 +36,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final height = size.height;
 
     final salonProvider = context.watch<SalonProvider>();
-
+    final offerProvider = context.watch<OfferProvider>();
+    final offers = offerProvider.salonOffers;
     // fallback images
     final fallbackImages = [
       'assets/images/saloons/saloon1.png',
@@ -117,35 +121,97 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(height: height * 0.03),
 
               // === Offers carousel ===
-              CarouselSlider(
-                options: CarouselOptions(
-                  height: height * 0.20,
-                  autoPlay: true,
-                  enlargeCenterPage: true,
-                  viewportFraction: 0.78,
-                  aspectRatio: 16 / 9,
-                  autoPlayInterval: const Duration(seconds: 3),
-                ),
-                items: [
-                  'assets/images/offers/offer1.svg',
-                  'assets/images/offers/offer2.svg',
-                  'assets/images/offers/offer3.svg',
-                ].map((imagePath) {
-                  return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 6),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: SvgPicture.asset(
-                        imagePath,
-                        fit: BoxFit.cover, // 👈 important
-                        width: double.infinity,
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
 
-              SizedBox(height: height * 0.04),
+              offerProvider.isLoading
+                  ? SizedBox(
+                      height: height * 0.20,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: EdgeInsets.symmetric(horizontal: width * 0.04),
+                        itemCount: 3,
+                        separatorBuilder: (_, __) =>
+                            SizedBox(width: width * 0.04),
+                        itemBuilder: (_, __) => SkeletonBox(
+                          width: width * 0.75,
+                          height: height * 0.20,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                    )
+                  : CarouselSlider(
+                      options: CarouselOptions(
+                        height: height * 0.20,
+
+                        // 🔥 prevent duplication
+                        autoPlay: offers.length > 1,
+                        enableInfiniteScroll: offers.length > 1,
+                        enlargeCenterPage: offers.length > 1,
+
+                        // 🔥 padding behavior
+                        viewportFraction: offers.length > 1 ? 0.78 : 0.9,
+
+                        aspectRatio: 16 / 9,
+                        autoPlayInterval: const Duration(seconds: 3),
+                      ),
+                      items: offers.map((offer) {
+                        final String imageUrl = offer["image"] ?? "";
+                        final String salonId = offer["salonId"];
+
+                        return GestureDetector(
+                          onTap: () async {
+                            try {
+                              final salon =
+                                  await SalonService.fetchSalonById(salonId);
+
+                              if (!context.mounted) return;
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => SalonDetailScreen(
+                                    id: salon["id"],
+                                    name: salon["name"] ?? "",
+                                    address: salon["address"] ?? "",
+                                    image: salon["thumbnail"] ??
+                                        'assets/images/saloons/saloon1.png',
+                                    services: salon["services"] ?? [],
+                                    salonStaffList: salon["staff"] ?? [],
+                                    hours: salon["hours"] ?? {},
+                                  ),
+                                ),
+                              );
+                            } catch (e) {
+                              debugPrint("Failed to open salon: $e");
+
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text("Unable to open salon")),
+                              );
+                            }
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: offers.length == 1 ? 12 : 6,
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Image.network(
+                                imageUrl,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) =>
+                                    const Icon(Icons.image_not_supported),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+
+              offerProvider.isLoading || offers.isEmpty
+                  ? Container()
+                  : SizedBox(height: height * 0.035),
 
               Padding(
                 padding: EdgeInsets.only(
@@ -163,9 +229,39 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(height: height * 0.02),
 
               salonProvider.isLoading && salonProvider.salons.isEmpty
-                  ? const Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.rusticSunset,
+                  ? SizedBox(
+                      height: height * 0.315,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: EdgeInsets.symmetric(horizontal: width * 0.04),
+                        itemCount: 3,
+                        separatorBuilder: (_, __) =>
+                            SizedBox(width: width * 0.04),
+                        itemBuilder: (_, __) => Container(
+                          width: width * 0.65,
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.softIvory,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.black, width: 4),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SkeletonBox(
+                                width: double.infinity,
+                                height: height * 0.135,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              const SizedBox(height: 10),
+                              SkeletonBox(width: width * 0.4, height: 14),
+                              const SizedBox(height: 8),
+                              SkeletonBox(width: width * 0.25, height: 12),
+                              const SizedBox(height: 8),
+                              SkeletonBox(width: width * 0.5, height: 12),
+                            ],
+                          ),
+                        ),
                       ),
                     )
                   : buildSalonList(
@@ -233,7 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     return SizedBox(
-      height: height * 0.3,
+      height: height * 0.315,
       child: NotificationListener<ScrollNotification>(
         onNotification: (notification) {
           if (notification.metrics.pixels >=
@@ -299,17 +395,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     children: [
                       // IMAGE
-                      ClipRRect(
-                        borderRadius: imageRadius,
-                        child: Image(
-                          image: img.startsWith('http')
-                              ? NetworkImage(img)
-                              : AssetImage(img) as ImageProvider,
-                          width: double.infinity,
-                          height: height * 0.135,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) =>
-                              const Icon(Icons.image_not_supported),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: 6,
+                          right: 6,
+                          top: 6,
+                        ),
+                        child: ClipRRect(
+                          borderRadius: imageRadius,
+                          child: Image(
+                            image: img.startsWith('http')
+                                ? NetworkImage(img)
+                                : AssetImage(img) as ImageProvider,
+                            width: double.infinity,
+                            height: height * 0.135,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) =>
+                                const Icon(Icons.image_not_supported),
+                          ),
                         ),
                       ),
 
@@ -411,7 +514,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             'assets/images/icons/discount_tag.png',
                                             width: width * 0.035,
                                           ),
-                                          SizedBox(width: width * 0.025),
+                                          SizedBox(width: width * 0.045),
                                           Expanded(
                                             child: Text(
                                               l10n.homeSaveUpto("10"),
@@ -495,6 +598,31 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class SkeletonBox extends StatelessWidget {
+  final double width;
+  final double height;
+  final BorderRadius borderRadius;
+
+  const SkeletonBox({
+    super.key,
+    required this.width,
+    required this.height,
+    this.borderRadius = const BorderRadius.all(Radius.circular(12)),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade400,
+        borderRadius: borderRadius,
       ),
     );
   }

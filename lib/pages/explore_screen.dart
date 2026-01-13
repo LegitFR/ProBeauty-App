@@ -451,7 +451,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   Widget _buildServiceShimmer(double width) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
+        color: Colors.grey.shade400,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.black, width: 2.87),
       ),

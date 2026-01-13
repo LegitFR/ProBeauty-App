@@ -68,37 +68,21 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         "&key=YOUR_GOOGLE_MAPS_API_KEY";
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final appointmentProvider = context.watch<AppointmentProvider>();
 
-    if (appointmentProvider.isLoading && appointmentProvider.bookings.isEmpty) {
-      return const Scaffold(
-        backgroundColor: AppColors.softIvory,
-        body: Center(
-          child: CircularProgressIndicator(
-            color: AppColors.rusticSunset,
-          ),
-        ),
-      );
-    }
-
-    // fallback when no bookings exist
     final allBookings = appointmentProvider.bookings;
 
     if (allBookings.isEmpty) {
-      return Scaffold(
-        backgroundColor: AppColors.softIvory,
-        body: Center(
-          child: Text(
-            l10n.appointmentsEmpty,
-            style: const TextStyle(
-              fontSize: 18,
-              fontFamily: "PoppinsMedium",
-            ),
+      return Center(
+        child: Text(
+          l10n.appointmentsEmpty,
+          style: const TextStyle(
+            fontSize: 18,
+            fontFamily: "PoppinsMedium",
           ),
         ),
       );
@@ -106,99 +90,191 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
 
     final confirmed = allBookings.first;
     final allPrevious = allBookings.length > 1 ? allBookings.sublist(1) : [];
-
     final previous =
         showAllPrevious ? allPrevious : allPrevious.take(3).toList();
 
-    return Scaffold(
-      backgroundColor: AppColors.softIvory,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 18.0,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 18.0,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: screenHeight * 0.04),
+
+            /// ------------ TITLE ------------
+            Text(
+              l10n.appointmentsTitle,
+              style: TextStyle(
+                fontSize: screenWidth * 0.08,
+                fontFamily: "PlayfairDisplayBold",
+                color: Colors.black87,
+              ),
+            ),
+
+            const SizedBox(height: 25),
+
+            /// ------------ CONFIRMED SECTION TITLE ------------
+            Text(
+              l10n.appointmentsConfirmedTitle,
+              style: TextStyle(
+                fontSize: screenWidth * 0.05,
+                fontFamily: "PoppinsSemiBold",
+                color: Colors.black87,
+              ),
+            ),
+            SizedBox(height: screenHeight * 0.03),
+
+            /// ------------ CONFIRMED APPOINTMENT CARD ------------
+            _buildConfirmedCard(confirmed, screenWidth, screenHeight),
+
+            SizedBox(height: screenHeight * 0.02),
+
+            /// ------------ PREVIOUS SECTION TITLE ------------
+            /// ------------ PREVIOUS SECTION HEADER ------------
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SizedBox(height: screenHeight * 0.04),
-
-                /// ------------ TITLE ------------
                 Text(
-                  l10n.appointmentsTitle,
-                  style: TextStyle(
-                    fontSize: screenWidth * 0.08,
-                    fontFamily: "PlayfairDisplayBold",
-                    color: Colors.black87,
-                  ),
-                ),
-
-                const SizedBox(height: 25),
-
-                /// ------------ CONFIRMED SECTION TITLE ------------
-                Text(
-                  l10n.appointmentsConfirmedTitle,
+                  l10n.appointmentsPreviousTitle,
                   style: TextStyle(
                     fontSize: screenWidth * 0.05,
                     fontFamily: "PoppinsSemiBold",
                     color: Colors.black87,
                   ),
                 ),
-                SizedBox(height: screenHeight * 0.03),
 
-                /// ------------ CONFIRMED APPOINTMENT CARD ------------
-                _buildConfirmedCard(confirmed, screenWidth, screenHeight),
-
-                SizedBox(height: screenHeight * 0.02),
-
-                /// ------------ PREVIOUS SECTION TITLE ------------
-                /// ------------ PREVIOUS SECTION HEADER ------------
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      l10n.appointmentsPreviousTitle,
-                      style: TextStyle(
-                        fontSize: screenWidth * 0.05,
-                        fontFamily: "PoppinsSemiBold",
-                        color: Colors.black87,
+                // 👇 SEE ALL / SHOW LESS
+                if (allPrevious.length > 3)
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        showAllPrevious = !showAllPrevious;
+                      });
+                    },
+                    child: Text(
+                      showAllPrevious
+                          ? l10n.appointmentsShowLess
+                          : l10n.appointmentsSeeAll,
+                      style: const TextStyle(
+                        fontFamily: "PoppinsMedium",
+                        fontSize: 14,
+                        color: AppColors.rusticSunset,
                       ),
                     ),
-
-                    // 👇 SEE ALL / SHOW LESS
-                    if (allPrevious.length > 3)
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            showAllPrevious = !showAllPrevious;
-                          });
-                        },
-                        child: Text(
-                          showAllPrevious
-                              ? l10n.appointmentsShowLess
-                              : l10n.appointmentsSeeAll,
-                          style: const TextStyle(
-                            fontFamily: "PoppinsMedium",
-                            fontSize: 14,
-                            color: AppColors.rusticSunset,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-
-                const SizedBox(height: 12),
-
-                /// ------------ PREVIOUS BOOKINGS LIST ------------
-                Column(
-                  children: previous.map((booking) {
-                    return _buildPreviousCard(booking, screenWidth);
-                  }).toList(),
-                ),
+                  ),
               ],
             ),
-          ),
+
+            const SizedBox(height: 12),
+
+            /// ------------ PREVIOUS BOOKINGS LIST ------------
+            Column(
+              children: previous.map((booking) {
+                return _buildPreviousCard(booking, screenWidth);
+              }).toList(),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSkeleton(BuildContext context) {
+    final w = MediaQuery.of(context).size.width;
+    final h = MediaQuery.of(context).size.height;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 18),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: h * 0.04),
+
+            // Title
+            SkeletonBox(width: w * 0.6, height: 36),
+
+            const SizedBox(height: 30),
+
+            // Confirmed title
+            SkeletonBox(width: w * 0.4, height: 22),
+
+            const SizedBox(height: 20),
+
+            // Confirmed card skeleton
+            SkeletonBox(
+              width: double.infinity,
+              height: h * 0.38,
+              borderRadius: BorderRadius.circular(20),
+            ),
+
+            const SizedBox(height: 30),
+
+            // Previous title
+            SkeletonBox(width: w * 0.45, height: 22),
+
+            const SizedBox(height: 20),
+
+            // Previous cards
+            ...List.generate(
+              3,
+              (_) => Padding(
+                padding: const EdgeInsets.only(bottom: 18),
+                child: Row(
+                  children: [
+                    SkeletonBox(
+                      width: w * 0.22,
+                      height: w * 0.22,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          SkeletonBox(width: double.infinity, height: 16),
+                          SizedBox(height: 8),
+                          SkeletonBox(width: 180, height: 14),
+                          SizedBox(height: 8),
+                          SkeletonBox(width: 140, height: 14),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  @override
+  Widget build(BuildContext context) {
+    final appointmentProvider = context.watch<AppointmentProvider>();
+    final l10n = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      backgroundColor: AppColors.softIvory,
+      body: SafeArea(
+        child: appointmentProvider.isLoading
+            ? _buildSkeleton(context) // 1️⃣ LOADING FIRST
+            : appointmentProvider.bookings.isEmpty
+                ? Center(
+                    // 2️⃣ EMPTY AFTER LOAD
+                    child: Text(
+                      l10n.appointmentsEmpty,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontFamily: "PoppinsMedium",
+                      ),
+                    ),
+                  )
+                : _buildContent(context), // 3️⃣ DATA
       ),
     );
   }
@@ -243,15 +319,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                     height: screenHeight * 0.25,
                     fit: BoxFit.cover,
                     loadingBuilder: (context, child, progress) {
-                      if (progress == null) return child;
-                      return const SizedBox(
-                        height: 200,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: AppColors.rusticSunset,
-                          ),
-                        ),
-                      );
+                      return child;
                     },
                     errorBuilder: (context, error, stackTrace) {
                       return Image.asset(
@@ -395,14 +463,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                     height: screenWidth * 0.22,
                     fit: BoxFit.cover,
                     loadingBuilder: (context, child, progress) {
-                      if (progress == null) return child;
-                      return SizedBox(
-                        width: screenWidth * 0.22,
-                        height: screenWidth * 0.22,
-                        child: const Center(
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      );
+                      return child;
                     },
                     errorBuilder: (context, error, stackTrace) {
                       return Image.asset(
@@ -521,6 +582,31 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class SkeletonBox extends StatelessWidget {
+  final double width;
+  final double height;
+  final BorderRadius borderRadius;
+
+  const SkeletonBox({
+    super.key,
+    required this.width,
+    required this.height,
+    this.borderRadius = const BorderRadius.all(Radius.circular(12)),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade400,
+        borderRadius: borderRadius,
       ),
     );
   }

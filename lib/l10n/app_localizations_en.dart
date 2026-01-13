@@ -101,7 +101,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get bottomNavHome => 'My Precut';
+  String get bottomNavHome => 'Home';
 
   @override
   String get bottomNavExplore => 'Explore';

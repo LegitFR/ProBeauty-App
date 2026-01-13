@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">probeauty_app</string>
+
+    <string name="default_web_client_id">
+        744378484852-l7o5h92lorsucarblhjh4i1t4v019or5.apps.googleusercontent.com
+    </string>
+</resources>
