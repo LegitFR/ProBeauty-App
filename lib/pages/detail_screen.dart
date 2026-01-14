@@ -177,10 +177,12 @@ class DetailScreen extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             _openStatusText(),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: "PoppinsRegular",
                               fontSize: 13,
-                              color: Colors.green,
+                              color: _openStatusText() == "Closed today"
+                                  ? Colors.red
+                                  : Colors.green,
                             ),
                           ),
                         ],

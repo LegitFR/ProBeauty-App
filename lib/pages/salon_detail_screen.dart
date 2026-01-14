@@ -99,6 +99,29 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
     }
   }
 
+  String _openStatusText() {
+    final now = DateTime.now();
+    final weekday = _weekdayKey(now.weekday);
+    final today = widget.hours[weekday];
+
+    if (today == null) return "Closed today";
+
+    return "Open until ${today["close"]}";
+  }
+
+  String _weekdayKey(int day) {
+    const map = {
+      1: "monday",
+      2: "tuesday",
+      3: "wednesday",
+      4: "thursday",
+      5: "friday",
+      6: "saturday",
+      7: "sunday",
+    };
+    return map[day]!;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -269,11 +292,13 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
 
                     const SizedBox(height: 4),
                     Text(
-                      l10n.salonOpenUntil("10:00pm"),
-                      style: const TextStyle(
+                      _openStatusText(),
+                      style: TextStyle(
                         fontFamily: "PoppinsRegular",
                         fontSize: 14,
-                        color: Colors.black54,
+                        color: _openStatusText() == "Closed today"
+                            ? Colors.red
+                            : Colors.green,
                       ),
                     ),
 

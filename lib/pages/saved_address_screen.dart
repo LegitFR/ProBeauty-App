@@ -15,6 +15,7 @@ class SavedAddressScreen extends StatefulWidget {
 
 class _SavedAddressScreenState extends State<SavedAddressScreen> {
   String selectedType = "Home";
+  bool _showForm = false;
 
   // Controllers
   final TextEditingController houseController = TextEditingController();
@@ -130,15 +131,15 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
     setState(() {
       houseController.text = defaultAddress!["addressLine1"] ?? "";
       buildingController.text = defaultAddress!["addressLine2"] ?? "";
-      landmarkController.text = ""; // no separate field in backend
+      landmarkController.text = "";
       cityController.text = defaultAddress!["city"] ?? "";
-      districtController.text =
-          defaultAddress!["city"] ?? ""; // district = city
+      districtController.text = defaultAddress!["city"] ?? "";
       pincodeController.text = defaultAddress!["postalCode"] ?? "";
 
-      selectedType = "Home"; // Because isDefault = true
+      selectedType = "Home";
       editAddressId = defaultAddress!["id"];
       isEditMode = true;
+      _showForm = true; // 🔥 KEY
     });
   }
 
@@ -339,94 +340,149 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
               const SizedBox(height: 20),
 
               // ---------------- ADD NEW ADDRESS ----------------
-              Row(
-                children: [
-                  SvgPicture.asset(
-                    "assets/images/icons/add_new_address_icon.svg",
-                    height: 14,
-                    width: 14,
-                    colorFilter: const ColorFilter.mode(
-                      AppColors.rusticSunset,
-                      BlendMode.srcIn,
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    isEditMode = false;
+                    editAddressId = null;
+                    _showForm = true;
+
+                    houseController.clear();
+                    buildingController.clear();
+                    landmarkController.clear();
+                    cityController.clear();
+                    districtController.clear();
+                    pincodeController.clear();
+
+                    selectedType = "Home";
+                  });
+                },
+                child: Row(
+                  children: [
+                    SvgPicture.asset(
+                      "assets/images/icons/add_new_address_icon.svg",
+                      height: 14,
+                      width: 14,
+                      colorFilter: const ColorFilter.mode(
+                        AppColors.rusticSunset,
+                        BlendMode.srcIn,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    AppLocalizations.of(context)!.savedAddressAddNew,
-                    style: const TextStyle(
-                      fontFamily: "PoppinsRegular",
-                      fontSize: 14,
-                      color: AppColors.rusticSunset,
+                    const SizedBox(width: 6),
+                    Text(
+                      AppLocalizations.of(context)!.savedAddressAddNew,
+                      style: const TextStyle(
+                        fontFamily: "PoppinsRegular",
+                        fontSize: 14,
+                        color: AppColors.rusticSunset,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
 
               const SizedBox(height: 20),
 
               // FORM FIELDS
-              _labelField(l10n.savedAddressHouseLabel, houseController),
-              const SizedBox(height: 15),
-              _labelField(l10n.savedAddressBuildingLabel, buildingController),
-              const SizedBox(height: 15),
-              _labelField(l10n.savedAddressLandmarkLabel, landmarkController),
-              const SizedBox(height: 15),
-              _labelField(l10n.savedAddressCityLabel, cityController),
-              const SizedBox(height: 15),
-              _labelField(l10n.savedAddressLandmarkLabel, districtController),
-              const SizedBox(height: 15),
-              _labelField(l10n.savedAddressPincodeLabel, pincodeController),
+              if (_showForm) ...[
+                const SizedBox(height: 20),
 
-              const SizedBox(height: 20),
-              Text(
-                l10n.savedAddressSaveAs,
-                style: const TextStyle(
-                    fontFamily: "PoppinsRegular",
-                    fontSize: 14,
-                    color: Colors.black54),
-              ),
-              const SizedBox(height: 10),
+                _labelField(l10n.savedAddressHouseLabel, houseController),
+                const SizedBox(height: 15),
+                _labelField(l10n.savedAddressBuildingLabel, buildingController),
+                const SizedBox(height: 15),
+                _labelField(l10n.savedAddressLandmarkLabel, landmarkController),
+                const SizedBox(height: 15),
+                _labelField(l10n.savedAddressCityLabel, cityController),
+                const SizedBox(height: 15),
+                _labelField(l10n.savedAddressLandmarkLabel, districtController),
+                const SizedBox(height: 15),
+                _labelField(l10n.savedAddressPincodeLabel, pincodeController),
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _typeChip(l10n.savedAddressTypeHome),
-                  _typeChip(l10n.savedAddressTypeWork),
-                  _typeChip(l10n.savedAddressTypeOthers),
-                ],
-              ),
+                const SizedBox(height: 20),
+                Text(
+                  l10n.savedAddressSaveAs,
+                  style: const TextStyle(
+                      fontFamily: "PoppinsRegular",
+                      fontSize: 14,
+                      color: Colors.black54),
+                ),
+                const SizedBox(height: 10),
 
-              const SizedBox(height: 26),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _typeChip(l10n.savedAddressTypeHome),
+                    _typeChip(l10n.savedAddressTypeWork),
+                    _typeChip(l10n.savedAddressTypeOthers),
+                  ],
+                ),
 
-              // ---------------- SAVE / UPDATE BUTTON ----------------
-              GestureDetector(
-                onTap: isLoading ? null : _saveOrUpdateAddress,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFA7D4F), Color(0xFFC64414)],
+                const SizedBox(height: 26),
+
+                // 🔴 CANCEL + SAVE / UPDATE BUTTONS
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          setState(() {
+                            _showForm = false;
+                            isEditMode = false;
+                            editAddressId = null;
+                          });
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.black45),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: const Text(
+                          "Cancel",
+                          style: TextStyle(
+                            fontFamily: "PoppinsSemiBold",
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                  child: Center(
-                    child: isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : Text(
-                            isEditMode
-                                ? l10n.savedAddressUpdateButton
-                                : l10n.savedAddressSaveButton,
-                            style: const TextStyle(
-                              fontFamily: "PoppinsSemiBold",
-                              fontSize: 16,
-                              color: Colors.white,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: isLoading ? null : _saveOrUpdateAddress,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFFA7D4F), Color(0xFFC64414)],
                             ),
                           ),
-                  ),
+                          child: Center(
+                            child: isLoading
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white)
+                                : Text(
+                                    isEditMode
+                                        ? l10n.savedAddressUpdateButton
+                                        : l10n.savedAddressSaveButton,
+                                    style: const TextStyle(
+                                      fontFamily: "PoppinsSemiBold",
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
 
+                const SizedBox(height: 30),
+              ],
               const SizedBox(height: 30),
             ],
           ),

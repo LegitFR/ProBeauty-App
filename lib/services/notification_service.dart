@@ -19,11 +19,8 @@ class NotificationService {
     // Get FCM token
     final fcmToken = await FirebaseMessaging.instance.getToken();
     if (fcmToken == null) {
-      print('⚠️ FCM token is null');
       return;
     }
-
-    print('📱 FCM Token: $fcmToken');
 
     // Send token to backend
     await http.post(

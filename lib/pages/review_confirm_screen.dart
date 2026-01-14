@@ -91,22 +91,24 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
     try {
       setState(() => _applyingOffer = true);
 
-      // 🔥 selected service context (NOT from offer)
-      final String? selectedServiceId = widget.selectedServices.isNotEmpty
-          ? widget.selectedServices.first["id"]
-          : null;
-
       final Map<String, dynamic> payload = {
         "offerId": offer["id"],
-        "amount": subtotal,
-        "salonId": widget.salonId,
-        "serviceId": selectedServiceId
+        "amount": subtotal.toString(),
       };
 
-      // // ✅ attach serviceId ONLY when validating service offers
-      // if (offer["offerType"] == "salon" && selectedServiceId != null) {
-      //   payload["serviceId"] = selectedServiceId;
-      // }
+      // 🔥 IMPORTANT: build payload based on offerType
+      if (offer["offerType"] == "salon") {
+        payload["salonId"] = widget.salonId;
+      } else if (offer["offerType"] == "service") {
+        // use selected service (context of booking, not from offer list)
+        final String? selectedServiceId = widget.selectedServices.isNotEmpty
+            ? widget.selectedServices.first["id"]
+            : null;
+
+        if (selectedServiceId == null) return;
+
+        payload["serviceId"] = selectedServiceId;
+      }
 
       final res = await http.post(
         Uri.parse("http://10.0.2.2:5000/api/v1/offers/validate"),
@@ -114,7 +116,7 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
         body: jsonEncode(payload),
       );
 
-      print(payload);
+      debugPrint("OFFER PAYLOAD => $payload");
 
       if (res.statusCode == 200) {
         final json = jsonDecode(res.body);
@@ -463,6 +465,48 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
     }
   }
 
+  Widget _pulseOfferLoader() {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.3, end: 0.8),
+      duration: const Duration(milliseconds: 900),
+      curve: Curves.easeInOut,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.black12),
+              color: AppColors.softIvory,
+            ),
+            child: const Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text("Finding best offers for you",
+                          style: TextStyle(
+                              fontSize: 13, fontFamily: "PoppinsSemiBold")),
+                      SizedBox(height: 6),
+                      Text("Please wait…",
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black54,
+                              fontFamily: "PoppinsRegular")),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.local_offer, color: AppColors.rusticSunset),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   // --------------------------------------------------
   @override
   Widget build(BuildContext context) {
@@ -669,9 +713,15 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
             const Divider(thickness: 1),
             const SizedBox(height: 15),
 
-            if (_offersLoading)
-              const LinearProgressIndicator(color: AppColors.rusticSunset)
-            else if (_availableOffers.isNotEmpty) ...[
+            if (_offersLoading) ...[
+              const SizedBox(height: 12),
+              const Text(
+                "Available offers",
+                style: TextStyle(fontFamily: "PoppinsSemiBold", fontSize: 15),
+              ),
+              const SizedBox(height: 10),
+              _pulseOfferLoader(),
+            ] else if (_availableOffers.isNotEmpty) ...[
               const SizedBox(height: 12),
               const Text(
                 "Available offers",

@@ -289,9 +289,39 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(height: height * 0.02),
 
               salonProvider.isLoading && salonProvider.salons.isEmpty
-                  ? const Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.rusticSunset,
+                  ? SizedBox(
+                      height: height * 0.315,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: EdgeInsets.symmetric(horizontal: width * 0.04),
+                        itemCount: 3,
+                        separatorBuilder: (_, __) =>
+                            SizedBox(width: width * 0.04),
+                        itemBuilder: (_, __) => Container(
+                          width: width * 0.65,
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.softIvory,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.black, width: 4),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SkeletonBox(
+                                width: double.infinity,
+                                height: height * 0.135,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              const SizedBox(height: 10),
+                              SkeletonBox(width: width * 0.4, height: 14),
+                              const SizedBox(height: 8),
+                              SkeletonBox(width: width * 0.25, height: 12),
+                              const SizedBox(height: 8),
+                              SkeletonBox(width: width * 0.5, height: 12),
+                            ],
+                          ),
+                        ),
                       ),
                     )
                   : Padding(

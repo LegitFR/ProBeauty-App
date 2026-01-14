@@ -35,7 +35,6 @@ import 'pages/notification_screen.dart';
 import 'models/product.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter/services.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -87,9 +86,39 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    final notification = message.notification;
+    if (notification == null) return;
+
+    flutterLocalNotificationsPlugin.show(
+      notification.hashCode,
+      notification.title,
+      notification.body,
+      const NotificationDetails(
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
+        android: AndroidNotificationDetails(
+          'default',
+          'Default Notifications',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+      ),
+    );
+  });
+
   await requestNotificationPermission();
   await setupNotificationChannel();
   await initializeLocalNotifications();
+
+  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
 
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
