@@ -8,6 +8,7 @@ import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:probeauty_app/config/api_config.dart';
 
 import '../models/product.dart';
 
@@ -35,7 +36,6 @@ class _ProductScreenState extends State<ProductScreen> {
   final sizes = ["180ml", "250ml", "450ml", "1000ml"];
   int currentImageIndex = 0;
 
-  final String baseUrl = "https://probeauty-backend.onrender.com";
   bool _cartUpdating = false;
   bool _favUpdating = false;
   bool _isFavourited = false;
@@ -55,8 +55,7 @@ class _ProductScreenState extends State<ProductScreen> {
   Future<void> _fetchApplicableOffers() async {
     try {
       final uri = Uri.parse(
-        "http://10.0.2.2:5000/api/v1/offers/public/active"
-        "?limit=20",
+        "${ApiConfig.baseUrl}/api/v1/offers/public/active?limit=20",
       );
 
       final res = await http.get(uri);
@@ -98,7 +97,8 @@ class _ProductScreenState extends State<ProductScreen> {
       final token = prefs.getString("accessToken");
       if (token == null) return;
 
-      final url = Uri.parse("$baseUrl/api/v1/favourites/check/$productId");
+      final url =
+          Uri.parse("${ApiConfig.baseUrl}/api/v1/favourites/check/$productId");
 
       final resp = await http.get(
         url,
@@ -138,7 +138,8 @@ class _ProductScreenState extends State<ProductScreen> {
       http.Response resp;
 
       if (_isFavourited) {
-        final url = Uri.parse("$baseUrl/api/v1/favourites/$productId");
+        final url =
+            Uri.parse("${ApiConfig.baseUrl}/api/v1/favourites/$productId");
         resp = await http.delete(
           url,
           headers: {
@@ -157,7 +158,7 @@ class _ProductScreenState extends State<ProductScreen> {
           );
         }
       } else {
-        final url = Uri.parse("$baseUrl/api/v1/favourites");
+        final url = Uri.parse("${ApiConfig.baseUrl}/api/v1/favourites");
         resp = await http.post(
           url,
           headers: {
@@ -198,7 +199,7 @@ class _ProductScreenState extends State<ProductScreen> {
         return;
       }
 
-      final url = Uri.parse("$baseUrl/api/v1/cart");
+      final url = Uri.parse("${ApiConfig.baseUrl}/api/v1/cart");
       final resp = await http.get(
         url,
         headers: {
@@ -232,10 +233,10 @@ class _ProductScreenState extends State<ProductScreen> {
           });
         }
       } else {
-        print("❌ Failed to load cart: ${resp.statusCode}");
+        debugPrint("❌ Failed to load cart: ${resp.statusCode}");
       }
     } catch (e) {
-      print("❌ Error loading cart: $e");
+      debugPrint("❌ Error loading cart: $e");
     }
   }
 
@@ -278,7 +279,7 @@ class _ProductScreenState extends State<ProductScreen> {
 
       if (quantity == 0) {
         // First time adding → POST /cart/items
-        final url = Uri.parse("$baseUrl/api/v1/cart/items");
+        final url = Uri.parse("${ApiConfig.baseUrl}/api/v1/cart/items");
         final body = {
           "productId": productId,
           "quantity": newQty,
@@ -294,7 +295,8 @@ class _ProductScreenState extends State<ProductScreen> {
         );
       } else {
         // Already in cart → PATCH /cart/items/:productId
-        final url = Uri.parse("$baseUrl/api/v1/cart/items/$productId");
+        final url =
+            Uri.parse("${ApiConfig.baseUrl}/api/v1/cart/items/$productId");
         final body = {
           "quantity": newQty,
         };
@@ -387,7 +389,8 @@ class _ProductScreenState extends State<ProductScreen> {
 
       if (newQty > 0) {
         // Update quantity → PATCH
-        final url = Uri.parse("$baseUrl/api/v1/cart/items/$productId");
+        final url =
+            Uri.parse("${ApiConfig.baseUrl}/api/v1/cart/items/$productId");
         final body = {
           "quantity": newQty,
         };
@@ -402,7 +405,8 @@ class _ProductScreenState extends State<ProductScreen> {
         );
       } else {
         // Quantity becomes 0 → DELETE
-        final url = Uri.parse("$baseUrl/api/v1/cart/items/$productId");
+        final url =
+            Uri.parse("${ApiConfig.baseUrl}/api/v1/cart/items/$productId");
 
         resp = await http.delete(
           url,
@@ -1109,7 +1113,7 @@ class _ProductScreenState extends State<ProductScreen> {
                   ),
                 ],
               ),
-              Row(
+              const Row(
                 children: const [
                   Text(
                     "Change",
@@ -1125,7 +1129,7 @@ class _ProductScreenState extends State<ProductScreen> {
             ],
           ),
           SizedBox(height: height * 0.02),
-          Row(
+          const Row(
             children: const [
               Icon(
                 Icons.local_shipping_outlined,

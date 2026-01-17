@@ -1,13 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:probeauty_app/config/api_config.dart';
 
 class SalonService {
-  static const String _baseUrl =
-      "https://probeauty-backend.onrender.com/api/v1/salons";
-
   static Future<Map<String, dynamic>> fetchSalonById(String salonId) async {
     final res = await http.get(
-      Uri.parse("$_baseUrl/$salonId"),
+      Uri.parse("${ApiConfig.baseUrl}/api/v1/salons/$salonId"),
       headers: {
         "Content-Type": "application/json",
       },

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
+import 'package:probeauty_app/config/api_config.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -66,8 +67,9 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    final url =
-        Uri.parse("https://probeauty-backend.onrender.com/api/v1/auth/signup");
+    final url = Uri.parse(
+      "${ApiConfig.baseUrl}/api/v1/auth/signup",
+    );
 
     final Map<String, dynamic> bodyData = {
       "name": "$firstName $lastName",

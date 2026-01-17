@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:probeauty_app/config/api_config.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -44,7 +45,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           SkeletonBox(
               width: 24, height: 24, borderRadius: BorderRadius.circular(6)),
           const SizedBox(width: 12),
-          Expanded(
+          const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
@@ -55,7 +56,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
             ),
           ),
           const SizedBox(width: 10),
-          SkeletonBox(width: 40, height: 12),
+          const SkeletonBox(width: 40, height: 12),
         ],
       ),
     );
@@ -112,7 +113,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
       final res = await http.get(
         Uri.parse(
-          'https://probeauty-backend.onrender.com/api/v1/notifications',
+          '${ApiConfig.baseUrl}/api/v1/notifications',
         ),
         headers: {
           'Authorization': 'Bearer $token',
@@ -144,7 +145,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
     await http.put(
       Uri.parse(
-        'https://probeauty-backend.onrender.com/api/v1/notifications/$id/read',
+        '${ApiConfig.baseUrl}/api/v1/notifications/$id/read',
       ),
       headers: {
         'Authorization': 'Bearer $token',
@@ -159,7 +160,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
     await http.delete(
       Uri.parse(
-        'https://probeauty-backend.onrender.com/api/v1/notifications/$id',
+        '${ApiConfig.baseUrl}/api/v1/notifications/$id',
       ),
       headers: {
         'Authorization': 'Bearer $token',
@@ -174,7 +175,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
     await http.put(
       Uri.parse(
-        'https://probeauty-backend.onrender.com/api/v1/notifications/read-all',
+        '${ApiConfig.baseUrl}/api/v1/notifications/read-all',
       ),
       headers: {
         'Authorization': 'Bearer $token',

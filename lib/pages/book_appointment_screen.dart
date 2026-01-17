@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/first_visit_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
+import 'package:probeauty_app/config/api_config.dart';
 
 class BookAppointmentScreen extends StatefulWidget {
   final String salonId;
@@ -90,7 +91,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     final dateStr = DateFormat("yyyy-MM-dd").format(date);
 
     final uri = Uri.parse(
-      "https://probeauty-backend.onrender.com/api/v1/bookings/availability"
+      "${ApiConfig.baseUrl}/api/v1/bookings/availability"
       "?salonId=${widget.salonId}"
       "&serviceId=${service["id"]}"
       "${widget.staff != null ? "&staffId=${widget.staff!["id"]}" : ""}"

@@ -11,6 +11,7 @@ import 'package:probeauty_app/pages/salon_tabs/salon_tab_bar.dart';
 import 'package:probeauty_app/pages/select_services_screen.dart';
 import 'package:probeauty_app/pages/team_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
+import 'package:probeauty_app/config/api_config.dart';
 
 class SalonDetailScreen extends StatefulWidget {
   final String id;
@@ -55,7 +56,7 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
   }
 
   Future<void> _fetchSalonRating() async {
-    // ✅ 1. Check cache first
+    // ✅ Use cache first
     if (_ratingCache.containsKey(widget.id)) {
       final cached = _ratingCache[widget.id]!;
       setState(() {
@@ -66,34 +67,52 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
       return;
     }
 
-    // ✅ 2. Fetch only if not cached
     try {
-      final url = Uri.parse(
-        "https://probeauty-backend.onrender.com/api/v1/reviews/salon/${widget.id}?page=1&limit=1",
-      );
+      int page = 1;
+      int totalPages = 1;
+      double totalRatingSum = 0;
+      int totalReviews = 0;
 
-      final response = await http.get(url);
+      do {
+        final url = Uri.parse(
+          "${ApiConfig.baseUrl}/api/v1/reviews/salon/${widget.id}"
+          "?page=$page&limit=20",
+        );
 
-      if (response.statusCode == 200) {
+        final response = await http.get(url);
+
+        if (response.statusCode != 200) break;
+
         final body = jsonDecode(response.body);
+        final List reviews = body["data"] ?? [];
+        final pagination = body["pagination"];
 
-        final avg = (body["averageRating"] ?? 0).toDouble();
-        final total = body["pagination"]?["total"] ?? 0;
+        totalPages = pagination?["totalPages"] ?? 1;
 
-        // ✅ Save to cache
-        _ratingCache[widget.id] = {
-          "avgRating": avg,
-          "totalReviews": total,
-        };
+        for (final r in reviews) {
+          final rating = (r["rating"] ?? 0).toDouble();
+          totalRatingSum += rating;
+          totalReviews++;
+        }
 
-        setState(() {
-          _avgRating = avg;
-          _totalReviews = total;
-          _ratingLoading = false;
-        });
-      } else {
-        _setRatingFallback();
-      }
+        page++;
+      } while (page <= totalPages);
+
+      final avg = totalReviews == 0
+          ? 0.0
+          : double.parse((totalRatingSum / totalReviews).toStringAsFixed(1));
+
+      // ✅ Cache result
+      _ratingCache[widget.id] = {
+        "avgRating": avg,
+        "totalReviews": totalReviews,
+      };
+
+      setState(() {
+        _avgRating = avg;
+        _totalReviews = totalReviews;
+        _ratingLoading = false;
+      });
     } catch (_) {
       _setRatingFallback();
     }
@@ -500,43 +519,6 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------
-// TAB BUTTON WIDGET
-// ---------------------------------------
-class _TabButton extends StatelessWidget {
-  final String title;
-  final int index;
-  final int selectedIndex;
-  final VoidCallback onTap;
-
-  const _TabButton({
-    required this.title,
-    required this.index,
-    required this.selectedIndex,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final bool isActive = selectedIndex == index;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18),
-        child: Text(
-          title,
-          style: TextStyle(
-            fontFamily: "PoppinsSemiBold",
-            fontSize: 13,
-            color: isActive ? AppColors.rusticSunset : Colors.black54,
-          ),
-        ),
       ),
     );
   }

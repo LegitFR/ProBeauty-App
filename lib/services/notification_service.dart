@@ -3,11 +3,9 @@ import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
+import 'package:probeauty_app/config/api_config.dart';
 
 class NotificationService {
-  static const String _baseUrl =
-      'https://probeauty-backend.onrender.com/api/v1';
-
   static Future<void> registerDevice(String jwt) async {
     await FirebaseMessaging.instance.requestPermission(
       alert: true,
@@ -23,7 +21,7 @@ class NotificationService {
 
     // Send token to backend
     await http.post(
-      Uri.parse('$_baseUrl/notifications/register-token'),
+      Uri.parse('${ApiConfig.baseUrl}/api/v1/notifications/register-token'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $jwt',

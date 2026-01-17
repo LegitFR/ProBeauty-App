@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -5,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:probeauty_app/config/api_config.dart';
 
 class FavouritesScreen extends StatefulWidget {
   const FavouritesScreen({super.key});
@@ -14,8 +17,6 @@ class FavouritesScreen extends StatefulWidget {
 }
 
 class _FavouritesScreenState extends State<FavouritesScreen> {
-  final String baseUrl = "https://probeauty-backend.onrender.com";
-
   bool _loading = true;
   String? _error;
   List<dynamic> _favourites = [];
@@ -49,11 +50,11 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
                 borderRadius: BorderRadius.circular(10),
               ),
               const SizedBox(height: 12),
-              SkeletonBox(width: 220, height: 16),
+              const SkeletonBox(width: 220, height: 16),
               const SizedBox(height: 6),
-              SkeletonBox(width: 140, height: 14),
+              const SkeletonBox(width: 140, height: 14),
               const SizedBox(height: 12),
-              Row(
+              const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   SkeletonBox(width: 80, height: 18),
@@ -83,7 +84,8 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
         return;
       }
 
-      final url = Uri.parse("$baseUrl/api/v1/favourites?page=1&limit=20");
+      final url =
+          Uri.parse("${ApiConfig.baseUrl}/api/v1/favourites?page=1&limit=20");
 
       final resp = await http.get(
         url,
@@ -122,7 +124,8 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
       final token = prefs.getString("accessToken");
       if (token == null) return;
 
-      final url = Uri.parse("$baseUrl/api/v1/favourites/$productId");
+      final url =
+          Uri.parse("${ApiConfig.baseUrl}/api/v1/favourites/$productId");
 
       final resp = await http.delete(
         url,
@@ -181,7 +184,7 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
         return;
       }
 
-      final url = Uri.parse("$baseUrl/api/v1/cart/items");
+      final url = Uri.parse("${ApiConfig.baseUrl}/api/v1/cart/items");
 
       final resp = await http.post(
         url,

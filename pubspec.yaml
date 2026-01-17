@@ -57,6 +57,7 @@ dependencies:
   flutter_sound: ^9.30.0
   permission_handler: ^12.0.1
   google_sign_in: 6.2.1
+  flutter_dotenv: ^6.0.0
 
 dev_dependencies:
   flutter_test:
@@ -93,6 +94,7 @@ flutter:
     - assets/images/offers/
     - assets/images/services/
     - assets/lottie/
+    - assets/.env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

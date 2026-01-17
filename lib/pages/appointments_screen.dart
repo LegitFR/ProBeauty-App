@@ -18,9 +18,6 @@ class AppointmentsScreen extends StatefulWidget {
 }
 
 class _AppointmentsScreenState extends State<AppointmentsScreen> {
-  final String baseUrl =
-      "https://probeauty-backend.onrender.com/api/v1/bookings";
-
   bool showAllPrevious = false;
 
   @override

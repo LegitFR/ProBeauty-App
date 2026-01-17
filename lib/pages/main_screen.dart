@@ -50,7 +50,7 @@ class _MainScreenState extends State<MainScreen> {
 
     // 🔔 When user taps notification (background → open app)
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print("📲 Notification tapped");
+      debugPrint("📲 Notification tapped");
       _handleNotificationTap(message.data);
     });
 
@@ -62,7 +62,7 @@ class _MainScreenState extends State<MainScreen> {
     final message = await FirebaseMessaging.instance.getInitialMessage();
 
     if (message != null) {
-      print("🚀 App opened from terminated via notification");
+      debugPrint("🚀 App opened from terminated via notification");
       _handleNotificationTap(message.data);
     }
   }

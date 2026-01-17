@@ -6,18 +6,6 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:probeauty_app/app_locale.dart';
 import 'package:probeauty_app/firebase_options.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
-import 'package:probeauty_app/pages/favourites_screen.dart';
-import 'package:probeauty_app/pages/ordersScreen.dart';
-import 'package:probeauty_app/pages/cart_screen.dart';
-import 'package:probeauty_app/pages/main_screen.dart';
-import 'package:probeauty_app/pages/login_screen.dart';
-import 'package:probeauty_app/pages/notification_settings.dart';
-import 'package:probeauty_app/pages/onboarding_screen.dart';
-import 'package:probeauty_app/pages/otp_screen.dart';
-import 'package:probeauty_app/pages/product_screen.dart';
-import 'package:probeauty_app/pages/profile_details.dart';
-import 'package:probeauty_app/pages/saved_address_screen.dart';
-import 'package:probeauty_app/pages/signup_screen.dart';
 import 'package:probeauty_app/pages/splash_screen.dart';
 import 'package:probeauty_app/providers/appointment_provider.dart';
 import 'package:probeauty_app/providers/cart_provider.dart';
@@ -29,12 +17,10 @@ import 'package:probeauty_app/providers/salon_provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'pages/appointments_screen.dart';
-import 'pages/decision_screen.dart';
-import 'pages/notification_screen.dart';
-import 'models/product.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:probeauty_app/routes/app_routes.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -78,6 +64,7 @@ Future<void> initializeLocalNotifications() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: "assets/.env"); //
 
   final prefs = await SharedPreferences.getInstance();
   final code = prefs.getString('languageCode') ?? 'en';
@@ -122,8 +109,8 @@ void main() async {
 
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-  Stripe.publishableKey =
-      'pk_test_51SSLPXFg60Wha3A5QhjKRseEZTKPkpEIfQdfGp0p2TKi7ScL6CSbJmsQUB6VzDwpZsN9foPJfmFZYVq5Z9JSX2I700VsaiuHRe';
+  Stripe.publishableKey = dotenv.env['STRIPE_PUBLISHABLE_KEY']!;
+
   await Stripe.instance.applySettings();
 
   runApp(
@@ -186,61 +173,7 @@ class _MyAppState extends State<MyApp> {
       home: const SplashScreen(),
 
       // ------------- FIXED: onGenerateRoute for passing arguments -------------
-      onGenerateRoute: (settings) {
-        if (settings.name == '/product_screen') {
-          final args = settings.arguments as Map<String, dynamic>;
-
-          final Product product = args["product"];
-          final String salonName = args["salonName"];
-
-          return MaterialPageRoute(
-            builder: (_) => ProductScreen(
-              product: product,
-              salonName: salonName,
-            ),
-          );
-        }
-
-        // default routes
-        switch (settings.name) {
-          case '/decision':
-            return MaterialPageRoute(builder: (_) => const DecisionScreen());
-          case '/login':
-            return MaterialPageRoute(builder: (_) => const LoginScreen());
-          case '/signup':
-            return MaterialPageRoute(builder: (_) => const SignupScreen());
-          case '/OTP':
-            return MaterialPageRoute(builder: (_) => const OTPScreen());
-          case '/main':
-            return MaterialPageRoute(builder: (_) => const MainScreen());
-          case '/onboarding':
-            return MaterialPageRoute(builder: (_) => const OnboardingScreen());
-          case '/notification':
-            return MaterialPageRoute(
-                builder: (_) => const NotificationScreen());
-          case '/notification_setting':
-            return MaterialPageRoute(
-                builder: (_) => const NotificationSettings());
-          case '/appointments':
-            return MaterialPageRoute(
-                builder: (_) => const AppointmentsScreen());
-
-          case '/profile_details':
-            return MaterialPageRoute(builder: (_) => const ProfileDetails());
-          case '/saved_address':
-            return MaterialPageRoute(
-                builder: (_) => const SavedAddressScreen());
-          case '/cart':
-            return MaterialPageRoute(builder: (_) => const CartScreen());
-          case '/orders':
-            return MaterialPageRoute(builder: (_) => const OrdersScreen());
-          case "/favourites":
-            return MaterialPageRoute(builder: (_) => const FavouritesScreen());
-        }
-
-        // Fallback: main screen
-        return MaterialPageRoute(builder: (_) => const MainScreen());
-      },
+      onGenerateRoute: AppRoutes.generate,
     );
   }
 }

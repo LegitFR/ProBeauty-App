@@ -9,6 +9,7 @@ import 'package:probeauty_app/pages/salon_tabs/salon_tab_bar.dart';
 import 'package:probeauty_app/pages/team_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:probeauty_app/config/api_config.dart';
 
 class ReviewsScreen extends StatefulWidget {
   final String salonId;
@@ -35,8 +36,6 @@ class ReviewsScreen extends StatefulWidget {
 }
 
 class _ReviewsScreenState extends State<ReviewsScreen> {
-  final String baseUrl = "https://probeauty-backend.onrender.com";
-
   bool _loading = true;
   String? _error;
 
@@ -83,8 +82,8 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     try {
       List<dynamic> allReviews = [];
       int page = 1;
+      int totalPages = 1;
       const int limit = 50;
-      bool hasMore = true;
 
       // reset counts
       _ratingCount = {
@@ -95,21 +94,20 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
         1: 0,
       };
 
-      while (hasMore) {
+      do {
         final url = Uri.parse(
-          "$baseUrl/api/v1/reviews/salon/${widget.salonId}?page=$page&limit=$limit",
+          "${ApiConfig.baseUrl}/api/v1/reviews/salon/${widget.salonId}"
+          "?page=$page&limit=$limit",
         );
 
         final resp = await http.get(url);
         if (resp.statusCode != 200) break;
 
         final body = jsonDecode(resp.body);
-
         final List data = body["data"] ?? [];
+        final pagination = body["pagination"];
 
-        // API values
-        _avgRating = (body["averageRating"] ?? 0).toDouble();
-        _totalReviews = body["pagination"]?["total"] ?? data.length;
+        totalPages = pagination?["totalPages"] ?? 1;
 
         allReviews.addAll(data);
 
@@ -121,17 +119,23 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
           }
         }
 
-        if (data.length < limit) {
-          hasMore = false;
-        } else {
-          page++;
-        }
+        page++;
+      } while (page <= totalPages);
+
+      // 🔥 Compute real average from all reviews
+      double sum = 0;
+      for (final r in allReviews) {
+        sum += (r["rating"] ?? 0).toDouble();
       }
 
       if (!mounted) return;
 
       setState(() {
         _reviews = allReviews;
+        _totalReviews = allReviews.length;
+        _avgRating = _totalReviews == 0
+            ? 0.0
+            : double.parse((sum / _totalReviews).toStringAsFixed(1));
         _loading = false;
       });
     } catch (e) {
@@ -149,7 +153,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
 
     try {
       final url = Uri.parse(
-        "https://probeauty-backend.onrender.com/api/v1/reviews",
+        "${ApiConfig.baseUrl}/api/v1/reviews",
       );
 
       final prefs = await SharedPreferences.getInstance();
@@ -732,31 +736,6 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
           ],
         )
       ]),
-    );
-  }
-}
-
-// ========================
-// TOP TAB
-// ========================
-class _TopTab extends StatelessWidget {
-  final String title;
-  final bool isActive;
-
-  const _TopTab({required this.title, required this.isActive});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontFamily: "PoppinsSemiBold",
-          fontSize: 13,
-          color: isActive ? AppColors.rusticSunset : Colors.black54,
-        ),
-      ),
     );
   }
 }

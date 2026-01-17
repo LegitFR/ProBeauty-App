@@ -130,16 +130,6 @@ class SelectProfessionalScreen extends StatelessWidget {
               color: AppColors.rusticSunset,
             ),
           ),
-          // const SizedBox(height: 4),
-          // Text(
-          //   "Any Staff",
-          //   textAlign: TextAlign.center,
-          //   style: const TextStyle(
-          //     fontFamily: "PoppinsRegular",
-          //     fontSize: 12,
-          //     color: Colors.black54,
-          //   ),
-          // ),
         ],
       ),
     );

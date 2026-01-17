@@ -236,45 +236,6 @@ class DetailScreen extends StatelessWidget {
             ),
           ],
         ),
-
-        // ---------------- BOTTOM BAR ----------------
-        // bottomNavigationBar: Container(
-        //   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        //   decoration: const BoxDecoration(
-        //     border: Border(top: BorderSide(color: Colors.black12)),
-        //   ),
-        //   child: Row(
-        //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        //     children: [
-        //       const Text(
-        //         "Services available",
-        //         style: TextStyle(
-        //           fontFamily: "PoppinsRegular",
-        //           fontSize: 13,
-        //         ),
-        //       ),
-        //       ElevatedButton(
-        //         onPressed: () {},
-        //         style: ElevatedButton.styleFrom(
-        //           backgroundColor: AppColors.rusticSunset,
-        //           padding:
-        //               const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        //           shape: RoundedRectangleBorder(
-        //             borderRadius: BorderRadius.circular(12),
-        //           ),
-        //         ),
-        //         child: const Text(
-        //           "Book now",
-        //           style: TextStyle(
-        //             fontFamily: "PoppinsSemiBold",
-        //             color: Colors.white,
-        //             fontSize: 14,
-        //           ),
-        //         ),
-        //       )
-        //     ],
-        //   ),
-        // ),
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:probeauty_app/config/api_config.dart';
 
 class ProfileDetails extends StatefulWidget {
   const ProfileDetails({super.key});
@@ -92,8 +93,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       return;
     }
 
-    final url =
-        Uri.parse("https://probeauty-backend.onrender.com/api/v1/user/me");
+    final url = Uri.parse("${ApiConfig.baseUrl}/api/v1/user/me");
 
     final body = {"name": fullName, if (phone.isNotEmpty) "phone": phone};
 

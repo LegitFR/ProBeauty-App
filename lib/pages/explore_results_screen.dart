@@ -9,10 +9,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:probeauty_app/pages/select_services_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
+import 'package:probeauty_app/config/api_config.dart';
 
-/// ExploreResultsScreen
-/// - Services now come directly from /salons/search
-/// - Booking integration added: POST /api/v1/bookings
 class ExploreResultsScreen extends StatefulWidget {
   final String? serviceText;
   final String? dateText;
@@ -43,8 +41,6 @@ class ExploreResultsScreen extends StatefulWidget {
 }
 
 class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
-  final String baseUrl = "https://probeauty-backend.onrender.com";
-
   int _page = 1;
   final int _limit = 10;
   bool _isLoadingPage = false;
@@ -130,7 +126,7 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
 
     try {
       final params = _buildSearchParams(page: page, limit: _limit);
-      final uri = Uri.parse("$baseUrl/api/v1/salons/search")
+      final uri = Uri.parse("${ApiConfig.baseUrl}/api/v1/salons/search")
           .replace(queryParameters: params);
       final response = await http.get(uri).timeout(const Duration(seconds: 15));
 
@@ -655,7 +651,7 @@ class _SalonCardState extends State<SalonCard> {
 
     try {
       final url = Uri.parse(
-        "https://probeauty-backend.onrender.com/api/v1/salons/${widget.salon.id}",
+        "${ApiConfig.baseUrl}/api/v1/salons/${widget.salon.id}",
       );
 
       final response = await http.get(url);
@@ -711,7 +707,7 @@ class _SalonCardState extends State<SalonCard> {
 
     try {
       final url = Uri.parse(
-        "https://probeauty-backend.onrender.com/api/v1/reviews/salon/${widget.salon.id}",
+        "${ApiConfig.baseUrl}/api/v1/reviews/salon/${widget.salon.id}",
       );
 
       final response = await http.get(url).timeout(

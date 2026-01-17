@@ -1,3 +1,5 @@
+// ignore_for_file: no_leading_underscores_for_local_identifiers, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
@@ -25,8 +27,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
   }
 
   Widget _buildOrdersSkeleton(BuildContext context) {
-    final w = MediaQuery.of(context).size.width;
-
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,7 +34,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           const SizedBox(height: 20),
 
           // Section title
-          Padding(
+          const Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: SkeletonBox(width: 140, height: 18),
           ),
@@ -59,7 +59,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   const SizedBox(width: 14),
-                  Expanded(
+                  const Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

@@ -1,7 +1,10 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:probeauty_app/resources/AppColors.dart';
+import 'package:probeauty_app/config/api_config.dart';
 
 class OTPScreen extends StatefulWidget {
   const OTPScreen({super.key});
@@ -45,8 +48,8 @@ class _OTPScreenState extends State<OTPScreen> {
       return;
     }
 
-    final url = Uri.parse(
-        "https://probeauty-backend.onrender.com/api/v1/auth/confirm-registration");
+    final url =
+        Uri.parse("${ApiConfig.baseUrl}/api/v1/auth/confirm-registration");
 
     final Map<String, dynamic> bodyData = {"otp": otp};
     if (contact.contains("@")) {

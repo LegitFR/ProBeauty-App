@@ -7,6 +7,7 @@ import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:probeauty_app/services/notification_service.dart';
+import 'package:probeauty_app/config/api_config.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -52,8 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final url =
-          Uri.parse("https://probeauty-backend.onrender.com/api/v1/auth/login");
+      final url = Uri.parse("${ApiConfig.baseUrl}/api/v1/auth/login");
 
       final response = await http.post(
         url,
@@ -100,14 +100,6 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _isLoading = false);
     }
   }
-
-  // Widget _buildDot(Color color) {
-  //   return Container(
-  //     width: 8,
-  //     height: 8,
-  //     decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-  //   );
-  // }
 
   @override
   void dispose() {
