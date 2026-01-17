@@ -1,60 +1,26 @@
-// lib/providers/order_provider.dart
-
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:probeauty_app/models/order.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:probeauty_app/config/api_config.dart';
 
-class OrderModel {
-  final String id;
-  final String salonId;
-  final String salonName;
-  final String title;
-  final double price;
-  final int quantity;
-  final String status;
-  final String image;
-
-  OrderModel({
-    required this.id,
-    required this.salonId,
-    required this.salonName,
-    required this.title,
-    required this.price,
-    required this.quantity,
-    required this.status,
-    required this.image,
-  });
-
-  // ✅ ADD THIS
-  OrderModel copyWith({
-    String? status,
-  }) {
-    return OrderModel(
-      id: id,
-      salonId: salonId,
-      salonName: salonName,
-      title: title,
-      price: price,
-      quantity: quantity,
-      status: status ?? this.status,
-      image: image,
-    );
-  }
-}
-
+// ================= PROVIDER =================
 class OrderProvider with ChangeNotifier {
-  static const String _baseUrl = "https://probeauty-backend.onrender.com";
+  static const String _ordersEndpoint = "/api/v1/orders";
+  static const String _cancelEndpoint = "/api/v1/orders"; // + /{id}/cancel
 
   bool isLoading = false;
   String? error;
   List<OrderModel> orders = [];
 
+  // ================= TOKEN =================
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString("accessToken");
   }
 
+  // ================= FETCH ORDERS =================
   Future<void> fetchOrders() async {
     isLoading = true;
     error = null;
@@ -69,7 +35,10 @@ class OrderProvider with ChangeNotifier {
         return;
       }
 
-      final url = Uri.parse("$_baseUrl/api/v1/orders");
+      final url = Uri.parse(
+        "${ApiConfig.baseUrl}$_ordersEndpoint",
+      );
+
       final resp = await http.get(
         url,
         headers: {
@@ -98,7 +67,9 @@ class OrderProvider with ChangeNotifier {
             price: double.tryParse(product["price"]?.toString() ?? "0") ?? 0,
             quantity: firstItem?["quantity"] ?? 1,
             status: o["status"] ?? "",
-            image: product["images"][0] ?? "",
+            image: (product["images"] is List && product["images"].isNotEmpty)
+                ? product["images"][0]
+                : "",
           );
         }).toList();
       } else {
@@ -112,6 +83,7 @@ class OrderProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // ================= CANCEL ORDER =================
   Future<void> cancelOrder(String orderId) async {
     try {
       final token = await _getToken();
@@ -120,7 +92,7 @@ class OrderProvider with ChangeNotifier {
       }
 
       final url = Uri.parse(
-        "$_baseUrl/api/v1/orders/$orderId/cancel",
+        "${ApiConfig.baseUrl}$_cancelEndpoint/$orderId/cancel",
       );
 
       final response = await http.post(

@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:probeauty_app/config/api_config.dart';
 
 class OfferProvider with ChangeNotifier {
-  final String _baseUrl = "https://probeauty-backend.onrender.com";
+  // ================= ENDPOINT =================
+  static const String _offersEndpoint = "/api/v1/offers/public/active";
 
   bool _isLoading = false;
   int _page = 1;
@@ -14,7 +16,6 @@ class OfferProvider with ChangeNotifier {
 
   // ================= GETTERS =================
   bool get isLoading => _isLoading;
-
   bool get hasMore => _page <= _totalPages;
 
   List<Map<String, dynamic>> get offers => List.unmodifiable(_offers);
@@ -45,7 +46,9 @@ class OfferProvider with ChangeNotifier {
     if (showLoader) notifyListeners();
 
     try {
-      final uri = Uri.parse("$_baseUrl/api/v1/offers/public/active").replace(
+      final uri = Uri.parse(
+        "${ApiConfig.baseUrl}$_offersEndpoint",
+      ).replace(
         queryParameters: {
           "page": _page.toString(),
           "limit": _limit.toString(),
@@ -108,8 +111,9 @@ class OfferProvider with ChangeNotifier {
         if (serviceId != null) "serviceId": serviceId,
       };
 
-      final uri = Uri.parse("$_baseUrl/api/v1/offers/public/active")
-          .replace(queryParameters: query);
+      final uri = Uri.parse(
+        "${ApiConfig.baseUrl}$_offersEndpoint",
+      ).replace(queryParameters: query);
 
       final response = await http.get(uri);
 

@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:probeauty_app/models/booking.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:probeauty_app/config/api_config.dart';
 
 class AppointmentProvider with ChangeNotifier {
-  static const String _baseUrl =
-      "https://probeauty-backend.onrender.com/api/v1/bookings";
+  static const String _endpoint = "/api/v1/bookings";
 
   bool _isLoading = true; // 🔥 MUST start true
   bool _hasFetchedOnce = false;
@@ -33,7 +33,7 @@ class AppointmentProvider with ChangeNotifier {
       }
 
       final res = await http.get(
-        Uri.parse(_baseUrl),
+        Uri.parse("${ApiConfig.baseUrl}$_endpoint"),
         headers: {
           "Authorization": "Bearer $token",
         },

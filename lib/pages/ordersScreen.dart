@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
+import 'package:probeauty_app/models/order.dart';
 import 'package:provider/provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:probeauty_app/providers/order_provider.dart';

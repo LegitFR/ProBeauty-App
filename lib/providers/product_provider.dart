@@ -1,15 +1,20 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:probeauty_app/config/api_config.dart';
 import '../models/product.dart';
 
 class ProductProvider with ChangeNotifier {
-  static const String _baseUrl = 'https://probeauty-backend.onrender.com';
-  static const String _productsEndpoint = '$_baseUrl/api/v1/products';
+  // ================= ENDPOINTS =================
+  static const String _productsEndpoint = "/api/v1/products";
+  static const String _searchEndpoint = "/api/v1/products/search";
+  static const String _salonEndpoint = "/api/v1/salons";
 
+  // ================= STATE =================
   List<Product> _products = [];
   bool _isLoading = false;
   String? _error;
+
   List<Product> searchResults = [];
   bool isSearching = false;
   String? searchError;
@@ -17,11 +22,13 @@ class ProductProvider with ChangeNotifier {
   // salonId → salonName cache
   final Map<String, String> _salonNames = {};
 
-  List<Product> get products => _products;
+  // ================= GETTERS =================
+  List<Product> get products => List.unmodifiable(_products);
   bool get isLoading => _isLoading;
   String? get error => _error;
   Map<String, String> get salonNames => _salonNames;
 
+  // ================= FETCH PRODUCTS =================
   Future<void> fetchProducts({bool forceRefresh = false}) async {
     if (_products.isNotEmpty && !forceRefresh) return;
     if (_isLoading) return;
@@ -31,7 +38,11 @@ class ProductProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final res = await http.get(Uri.parse(_productsEndpoint));
+      final uri = Uri.parse(
+        "${ApiConfig.baseUrl}$_productsEndpoint",
+      );
+
+      final res = await http.get(uri);
       final body = json.decode(res.body);
       final data = body['data'];
 
@@ -43,12 +54,13 @@ class ProductProvider with ChangeNotifier {
       }
     } catch (_) {
       _error = 'Failed to fetch products';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-
-    _isLoading = false;
-    notifyListeners();
   }
 
+  // ================= SALON NAME CACHE =================
   Future<void> _fetchSalonNames() async {
     final uniqueSalonIds = _products
         .map((p) => p.salonId)
@@ -59,9 +71,11 @@ class ProductProvider with ChangeNotifier {
       if (_salonNames.containsKey(id)) continue;
 
       try {
-        final res = await http.get(
-          Uri.parse('$_baseUrl/api/v1/salons/$id'),
+        final uri = Uri.parse(
+          "${ApiConfig.baseUrl}$_salonEndpoint/$id",
         );
+
+        final res = await http.get(uri);
 
         if (res.statusCode == 200) {
           final body = json.decode(res.body);
@@ -75,6 +89,7 @@ class ProductProvider with ChangeNotifier {
     }
   }
 
+  // ================= SEARCH =================
   Future<void> searchProducts({
     required String query,
     int page = 1,
@@ -88,7 +103,7 @@ class ProductProvider with ChangeNotifier {
 
     try {
       final uri = Uri.parse(
-        "$_baseUrl/api/v1/products/search"
+        "${ApiConfig.baseUrl}$_searchEndpoint"
         "?q=${Uri.encodeQueryComponent(query)}"
         "&page=$page&limit=$limit",
       );
@@ -108,9 +123,17 @@ class ProductProvider with ChangeNotifier {
       }
     } catch (e) {
       searchError = "Something went wrong";
+    } finally {
+      isSearching = false;
+      notifyListeners();
     }
+  }
 
-    isSearching = false;
+  // ================= UTIL =================
+  void clearProducts() {
+    _products.clear();
+    _salonNames.clear();
+    _error = null;
     notifyListeners();
   }
 }

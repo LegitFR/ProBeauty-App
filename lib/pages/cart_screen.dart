@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:probeauty_app/models/cart_item.dart';
 import 'package:provider/provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:probeauty_app/providers/cart_provider.dart';

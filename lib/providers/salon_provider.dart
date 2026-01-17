@@ -1,29 +1,32 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:probeauty_app/config/api_config.dart';
 
 class SalonProvider with ChangeNotifier {
-  List<dynamic> _salons = [];
+  final List<dynamic> _salons = [];
+
   bool _isLoading = false;
   bool _hasMore = true;
   int _currentPage = 1;
 
-  List<dynamic> get salons => _salons;
+  final Map<String, Map<String, dynamic>> _ratingCache = {};
+
+  // ================= GETTERS =================
+  List<dynamic> get salons => List.unmodifiable(_salons);
   bool get isLoading => _isLoading;
   bool get hasMore => _hasMore;
-  final Map<String, Map<String, dynamic>> _ratingCache = {};
 
   Map<String, dynamic>? getSalonRating(String salonId) {
     return _ratingCache[salonId];
   }
 
   Future<void> fetchSalonRating(String salonId) async {
-    // Already cached → skip
     if (_ratingCache.containsKey(salonId)) return;
 
     try {
       final uri = Uri.parse(
-        "https://probeauty-backend.onrender.com/api/v1/reviews/salon/$salonId?page=1&limit=1",
+        "${ApiConfig.baseUrl}/api/v1/reviews/salon/$salonId?page=1&limit=1",
       );
 
       final res = await http.get(uri);
@@ -39,42 +42,73 @@ class SalonProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (_) {
-      // silent fail → no UI crash
+      // silent fail
     }
   }
 
-  Future<void> fetchSalons({bool refresh = false}) async {
+  // ================= CORE FETCH =================
+  Future<void> fetchSalons({
+    bool refresh = false,
+    bool showLoader = true, // 🔥 silent refresh support
+  }) async {
     if (_isLoading) return;
 
     if (refresh) {
       _salons.clear();
       _currentPage = 1;
       _hasMore = true;
+      if (showLoader) notifyListeners();
     }
 
     _isLoading = true;
-    notifyListeners();
+    if (showLoader) notifyListeners();
 
     try {
-      final url = Uri.parse(
-        "https://probeauty-backend.onrender.com/api/v1/salons?page=$_currentPage",
-      );
+      // 🔥 Keep fetching until backend sends empty page
+      while (_hasMore) {
+        final url = Uri.parse(
+          "${ApiConfig.baseUrl}/api/v1/salons?page=$_currentPage",
+        );
 
-      final res = await http.get(url);
-      final data = jsonDecode(res.body);
-      final List newSalons = data["data"] ?? [];
+        final res = await http.get(url);
 
-      if (newSalons.isEmpty) {
-        _hasMore = false;
-      } else {
+        if (res.statusCode != 200) {
+          _hasMore = false;
+          break;
+        }
+
+        final decoded = jsonDecode(res.body);
+        final List newSalons = decoded["data"] ?? [];
+
+        if (newSalons.isEmpty) {
+          _hasMore = false;
+          break;
+        }
+
         _salons.addAll(newSalons);
         _currentPage++;
-      }
-    } catch (_) {
-      // handle error silently or expose later
-    }
 
-    _isLoading = false;
+        // 🔥 Live update UI as pages stream in
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint("Fetch salons error: $e");
+    } finally {
+      _isLoading = false;
+      if (showLoader) notifyListeners();
+    }
+  }
+
+  // ================= MANUAL REFRESH =================
+  Future<void> hardRefresh() async {
+    await fetchSalons(refresh: true, showLoader: true);
+  }
+
+  // ================= UTIL =================
+  void clearSalons() {
+    _salons.clear();
+    _currentPage = 1;
+    _hasMore = true;
     notifyListeners();
   }
 }

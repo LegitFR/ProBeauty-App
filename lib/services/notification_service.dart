@@ -9,7 +9,6 @@ class NotificationService {
       'https://probeauty-backend.onrender.com/api/v1';
 
   static Future<void> registerDevice(String jwt) async {
-    // Ask permission (Android 13+, iOS)
     await FirebaseMessaging.instance.requestPermission(
       alert: true,
       badge: true,

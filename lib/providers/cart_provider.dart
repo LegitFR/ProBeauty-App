@@ -3,26 +3,17 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
+import 'package:probeauty_app/models/cart_item.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-class CartItemModel {
-  final String id;
-  final String productId;
-  final String title;
-  final double price;
-  final int quantity;
-
-  CartItemModel({
-    required this.id,
-    required this.productId,
-    required this.title,
-    required this.price,
-    required this.quantity,
-  });
-}
+import 'package:probeauty_app/config/api_config.dart';
 
 class CartProvider with ChangeNotifier {
-  static const String _baseUrl = "https://probeauty-backend.onrender.com";
+  // ================= ENDPOINTS =================
+  static const String _cartEndpoint = "/api/v1/cart";
+  static const String _cartItemEndpoint = "/api/v1/cart/items";
+  static const String _addressesEndpoint = "/api/v1/addresses";
+  static const String _ordersEndpoint = "/api/v1/orders";
+  static const String _checkoutEndpoint = "/api/v1/orders/checkout";
 
   bool _isLoading = false;
   String? _error;
@@ -59,7 +50,7 @@ class CartProvider with ChangeNotifier {
       if (token == null) throw Exception("No auth token");
 
       final resp = await http.get(
-        Uri.parse("$_baseUrl/api/v1/cart"),
+        Uri.parse("${ApiConfig.baseUrl}$_cartEndpoint"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -115,7 +106,7 @@ class CartProvider with ChangeNotifier {
       if (token == null) throw Exception("No auth token");
 
       final resp = await http.delete(
-        Uri.parse("$_baseUrl/api/v1/cart/items/$productId"),
+        Uri.parse("${ApiConfig.baseUrl}$_cartItemEndpoint/$productId"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -146,7 +137,7 @@ class CartProvider with ChangeNotifier {
       if (token == null) throw Exception("No auth token");
 
       final resp = await http.patch(
-        Uri.parse("$_baseUrl/api/v1/cart/items/$productId"),
+        Uri.parse("${ApiConfig.baseUrl}$_cartItemEndpoint/$productId"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -174,7 +165,7 @@ class CartProvider with ChangeNotifier {
       if (token == null) throw Exception("No auth token");
 
       final addressResp = await http.get(
-        Uri.parse("$_baseUrl/api/v1/addresses"),
+        Uri.parse("${ApiConfig.baseUrl}$_addressesEndpoint"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -196,7 +187,7 @@ class CartProvider with ChangeNotifier {
       }
 
       final resp = await http.post(
-        Uri.parse("$_baseUrl/api/v1/orders/checkout"),
+        Uri.parse("${ApiConfig.baseUrl}$_checkoutEndpoint"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -260,7 +251,7 @@ class CartProvider with ChangeNotifier {
       if (token == null) return null;
 
       final resp = await http.get(
-        Uri.parse("$_baseUrl/api/v1/orders/$orderId"),
+        Uri.parse("${ApiConfig.baseUrl}$_ordersEndpoint/$orderId"),
         headers: {"Authorization": "Bearer $token"},
       );
 
@@ -281,7 +272,7 @@ class CartProvider with ChangeNotifier {
       if (token == null) return "No token found";
 
       final addressResp = await http.get(
-        Uri.parse("$_baseUrl/api/v1/addresses"),
+        Uri.parse("${ApiConfig.baseUrl}$_addressesEndpoint"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -297,7 +288,7 @@ class CartProvider with ChangeNotifier {
       if (defaultAddress == null) return "No default address";
 
       final resp = await http.post(
-        Uri.parse("$_baseUrl/api/v1/orders"),
+        Uri.parse("${ApiConfig.baseUrl}$_ordersEndpoint"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",

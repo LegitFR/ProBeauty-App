@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:probeauty_app/config/api_config.dart';
 
 class ExploreProvider with ChangeNotifier {
-  final String _baseUrl = "https://probeauty-backend.onrender.com";
+  // ================= ENDPOINT =================
+  static const String _servicesEndpoint = "/api/v1/services";
 
   bool isLoadingServices = false;
   String? error;
@@ -27,7 +29,11 @@ class ExploreProvider with ChangeNotifier {
     ];
 
     try {
-      final resp = await http.get(Uri.parse("$_baseUrl/api/v1/services"));
+      final uri = Uri.parse(
+        "${ApiConfig.baseUrl}$_servicesEndpoint",
+      );
+
+      final resp = await http.get(uri);
 
       if (resp.statusCode == 200) {
         final json = jsonDecode(resp.body);
@@ -54,10 +60,10 @@ class ExploreProvider with ChangeNotifier {
       }
     } catch (e) {
       error = "Error: $e";
+    } finally {
+      isLoadingServices = false;
+      notifyListeners();
     }
-
-    isLoadingServices = false;
-    notifyListeners();
   }
 
   /// Optional: manual refresh
