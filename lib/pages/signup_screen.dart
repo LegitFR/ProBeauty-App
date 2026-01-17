@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:probeauty_app/config/api_config.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -67,10 +68,6 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    final url = Uri.parse(
-      "${ApiConfig.baseUrl}/api/v1/auth/signup",
-    );
-
     final Map<String, dynamic> bodyData = {
       "name": "$firstName $lastName",
       "password": password,
@@ -84,10 +81,9 @@ class _SignupScreenState extends State<SignupScreen> {
     }
 
     try {
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(bodyData),
+      final response = await ApiClient.post(
+        "/api/v1/auth/signup",
+        body: bodyData,
       );
 
       final data = jsonDecode(response.body);

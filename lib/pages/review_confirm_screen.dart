@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 class ReviewConfirmScreen extends StatefulWidget {
   final String salonId;
@@ -57,12 +58,13 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
 
   Future<void> _fetchApplicableOffers() async {
     try {
-      final uri = Uri.parse(
-        "http://10.0.2.2:5000/api/v1/offers/public/active"
-        "?salonId=${widget.salonId}&limit=20",
+      final res = await ApiClient.get(
+        "/api/v1/offers/public/active",
+        query: {
+          "salonId": widget.salonId,
+          "limit": "20",
+        },
       );
-
-      final res = await http.get(uri);
 
       if (res.statusCode == 200) {
         final body = jsonDecode(res.body);
@@ -110,10 +112,9 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
         payload["serviceId"] = selectedServiceId;
       }
 
-      final res = await http.post(
-        Uri.parse("http://10.0.2.2:5000/api/v1/offers/validate"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(payload),
+      final res = await ApiClient.post(
+        "/api/v1/offers/validate",
+        body: payload,
       );
 
       debugPrint("OFFER PAYLOAD => $payload");
@@ -156,11 +157,13 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
 
     // ✅ 2. Fetch from API only if not cached
     try {
-      final uri = Uri.parse(
-        "https://probeauty-backend.onrender.com/api/v1/reviews/salon/${widget.salonId}?page=1&limit=1",
+      final res = await ApiClient.get(
+        "/api/v1/reviews/salon/${widget.salonId}",
+        query: {
+          "page": "1",
+          "limit": "1",
+        },
       );
-
-      final res = await http.get(uri);
 
       if (res.statusCode == 200) {
         final body = jsonDecode(res.body);
@@ -254,14 +257,9 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
 
   // --------------------------------------------------
   Future<void> _createBooking({
-    required String accessToken,
     required String serviceId,
     required String startTime,
   }) async {
-    final uri = Uri.parse(
-      "https://probeauty-backend.onrender.com/api/v1/bookings",
-    );
-
     final Map<String, dynamic> body = {
       "salonId": widget.salonId,
       "serviceId": serviceId,
@@ -272,14 +270,9 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
     if (widget.staff != null) {
       body["staffId"] = widget.staff!["id"];
     }
-
-    final response = await http.post(
-      uri,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $accessToken",
-      },
-      body: jsonEncode(body),
+    final response = await ApiClient.post(
+      "/api/v1/bookings",
+      body: body,
     );
 
     final bodyJson = jsonDecode(response.body);
@@ -314,19 +307,8 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
     try {
       setState(() => _isProcessing = true);
 
-      final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString("accessToken");
-
-      if (accessToken == null) {
-        throw BookingException("User not authenticated");
-      }
-
       final service = widget.selectedServices.first;
       final startTime = _buildStartTimeISO();
-
-      final uri = Uri.parse(
-        "https://probeauty-backend.onrender.com/api/v1/bookings/checkout",
-      );
 
       final body = {
         "salonId": widget.salonId,
@@ -335,13 +317,9 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
         if (widget.staff != null) "staffId": widget.staff!["id"],
       };
 
-      final res = await http.post(
-        uri,
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $accessToken",
-        },
-        body: jsonEncode(body),
+      final res = await ApiClient.post(
+        "/api/v1/bookings/checkout",
+        body: body,
       );
 
       final json = jsonDecode(res.body);
@@ -388,14 +366,12 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
     BuildContext context,
     String bookingId,
   ) async {
-    final uri = Uri.parse(
-      "https://probeauty-backend.onrender.com/api/v1/bookings/$bookingId",
-    );
-
     for (int i = 0; i < 6; i++) {
       await Future.delayed(const Duration(seconds: 2));
 
-      final res = await http.get(uri);
+      final res = await ApiClient.get(
+        "/api/v1/bookings/$bookingId",
+      );
 
       if (res.statusCode == 200) {
         final json = jsonDecode(res.body);
@@ -427,18 +403,10 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
     try {
       setState(() => _isProcessing = true);
 
-      final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString("accessToken");
-
-      if (accessToken == null) {
-        throw BookingException("User not authenticated");
-      }
-
       final startTime = _buildStartTimeISO();
 
       for (final service in widget.selectedServices) {
         await _createBooking(
-          accessToken: accessToken,
           serviceId: service["id"],
           startTime: startTime,
         );

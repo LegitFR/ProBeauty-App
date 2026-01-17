@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:probeauty_app/pages/select_services_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:probeauty_app/config/api_config.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 class ExploreResultsScreen extends StatefulWidget {
   final String? serviceText;
@@ -126,9 +127,11 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
 
     try {
       final params = _buildSearchParams(page: page, limit: _limit);
-      final uri = Uri.parse("${ApiConfig.baseUrl}/api/v1/salons/search")
-          .replace(queryParameters: params);
-      final response = await http.get(uri).timeout(const Duration(seconds: 15));
+
+      final response = await ApiClient.get(
+        "/api/v1/salons/search",
+        query: params,
+      );
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
@@ -650,11 +653,9 @@ class _SalonCardState extends State<SalonCard> {
     });
 
     try {
-      final url = Uri.parse(
-        "${ApiConfig.baseUrl}/api/v1/salons/${widget.salon.id}",
+      final response = await ApiClient.get(
+        "/api/v1/salons/${widget.salon.id}",
       );
-
-      final response = await http.get(url);
 
       if (!mounted) return;
 
@@ -706,13 +707,9 @@ class _SalonCardState extends State<SalonCard> {
     }
 
     try {
-      final url = Uri.parse(
-        "${ApiConfig.baseUrl}/api/v1/reviews/salon/${widget.salon.id}",
+      final response = await ApiClient.get(
+        "/api/v1/reviews/salon/${widget.salon.id}",
       );
-
-      final response = await http.get(url).timeout(
-            const Duration(seconds: 10),
-          );
 
       if (!mounted) return;
 
@@ -724,7 +721,7 @@ class _SalonCardState extends State<SalonCard> {
           totalReviews: json["pagination"]?["total"] ?? 0,
         );
 
-        // ✅ store in cache
+        // ✅ cache
         SalonRatingCache.set(widget.salon.id, rating);
 
         setState(() {

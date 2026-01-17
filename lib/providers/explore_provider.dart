@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:probeauty_app/config/api_config.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 class ExploreProvider with ChangeNotifier {
   // ================= ENDPOINT =================
@@ -29,11 +28,7 @@ class ExploreProvider with ChangeNotifier {
     ];
 
     try {
-      final uri = Uri.parse(
-        "${ApiConfig.baseUrl}$_servicesEndpoint",
-      );
-
-      final resp = await http.get(uri);
+      final resp = await ApiClient.get(_servicesEndpoint);
 
       if (resp.statusCode == 200) {
         final json = jsonDecode(resp.body);

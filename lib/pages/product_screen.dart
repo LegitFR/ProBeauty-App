@@ -6,9 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:probeauty_app/config/api_config.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 import '../models/product.dart';
 
@@ -54,11 +52,10 @@ class _ProductScreenState extends State<ProductScreen> {
 
   Future<void> _fetchApplicableOffers() async {
     try {
-      final uri = Uri.parse(
-        "${ApiConfig.baseUrl}/api/v1/offers/public/active?limit=20",
+      final res = await ApiClient.get(
+        "/api/v1/offers/public/active",
+        query: {"limit": "20"},
       );
-
-      final res = await http.get(uri);
 
       if (res.statusCode == 200) {
         final body = jsonDecode(res.body);
@@ -93,19 +90,8 @@ class _ProductScreenState extends State<ProductScreen> {
     if (productId == null) return;
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString("accessToken");
-      if (token == null) return;
-
-      final url =
-          Uri.parse("${ApiConfig.baseUrl}/api/v1/favourites/check/$productId");
-
-      final resp = await http.get(
-        url,
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
+      final resp = await ApiClient.get(
+        "/api/v1/favourites/check/$productId",
       );
 
       if (resp.statusCode == 200) {
@@ -125,31 +111,15 @@ class _ProductScreenState extends State<ProductScreen> {
     setState(() => _favUpdating = true);
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString("accessToken");
-
-      if (token == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please login first")),
-        );
-        return;
-      }
-
-      http.Response resp;
+      late final response;
 
       if (_isFavourited) {
-        final url =
-            Uri.parse("${ApiConfig.baseUrl}/api/v1/favourites/$productId");
-        resp = await http.delete(
-          url,
-          headers: {
-            "Authorization": "Bearer $token",
-            "Content-Type": "application/json",
-          },
+        response = await ApiClient.delete(
+          "/api/v1/favourites/$productId",
         );
 
-        if (resp.statusCode == 200) {
-          setState(() => _isFavourited = false);
+        if (response.statusCode == 200) {
+          if (mounted) setState(() => _isFavourited = false);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text("Removed from favourites"),
@@ -158,18 +128,13 @@ class _ProductScreenState extends State<ProductScreen> {
           );
         }
       } else {
-        final url = Uri.parse("${ApiConfig.baseUrl}/api/v1/favourites");
-        resp = await http.post(
-          url,
-          headers: {
-            "Authorization": "Bearer $token",
-            "Content-Type": "application/json",
-          },
-          body: jsonEncode({"productId": productId}),
+        response = await ApiClient.post(
+          "/api/v1/favourites",
+          body: {"productId": productId},
         );
 
-        if (resp.statusCode == 201) {
-          setState(() => _isFavourited = true);
+        if (response.statusCode == 201 || response.statusCode == 200) {
+          if (mounted) setState(() => _isFavourited = true);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text("Added to favourites"),
@@ -185,28 +150,14 @@ class _ProductScreenState extends State<ProductScreen> {
           backgroundColor: Colors.red,
         ),
       );
+    } finally {
+      if (mounted) setState(() => _favUpdating = false);
     }
-
-    setState(() => _favUpdating = false);
   }
 
   Future<void> _loadInitialCartQuantity() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString("accessToken");
-      if (token == null) {
-        print("⚠ No token found; cart remains local only (quantity = 0)");
-        return;
-      }
-
-      final url = Uri.parse("${ApiConfig.baseUrl}/api/v1/cart");
-      final resp = await http.get(
-        url,
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-      );
+      final resp = await ApiClient.get("/api/v1/cart");
 
       if (resp.statusCode == 200) {
         final jsonBody = jsonDecode(resp.body);
@@ -260,77 +211,27 @@ class _ProductScreenState extends State<ProductScreen> {
     });
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString("accessToken");
-      if (token == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("⚠ Please login to use cart"),
-            backgroundColor: Colors.red,
-          ),
-        );
-        setState(() {
-          _cartUpdating = false;
-        });
-        return;
-      }
-
-      http.Response resp;
-
       if (quantity == 0) {
-        // First time adding → POST /cart/items
-        final url = Uri.parse("${ApiConfig.baseUrl}/api/v1/cart/items");
-        final body = {
-          "productId": productId,
-          "quantity": newQty,
-        };
-
-        resp = await http.post(
-          url,
-          headers: {
-            "Authorization": "Bearer $token",
-            "Content-Type": "application/json",
+        await ApiClient.post(
+          "/api/v1/cart/items",
+          body: {
+            "productId": productId,
+            "quantity": newQty,
           },
-          body: jsonEncode(body),
         );
       } else {
-        // Already in cart → PATCH /cart/items/:productId
-        final url =
-            Uri.parse("${ApiConfig.baseUrl}/api/v1/cart/items/$productId");
-        final body = {
-          "quantity": newQty,
-        };
-
-        resp = await http.patch(
-          url,
-          headers: {
-            "Authorization": "Bearer $token",
-            "Content-Type": "application/json",
+        await ApiClient.post(
+          "/api/v1/cart/items/$productId",
+          body: {
+            "quantity": newQty,
           },
-          body: jsonEncode(body),
         );
       }
 
-      if (resp.statusCode == 201 || resp.statusCode == 200) {
-        if (mounted) {
-          setState(() {
-            quantity = newQty;
-          });
-        }
-      } else {
-        String msg = "Failed to update cart";
-        try {
-          final j = jsonDecode(resp.body);
-          if (j is Map && j["message"] != null) {
-            msg = j["message"].toString();
-          }
-        } catch (_) {}
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(msg),
-            backgroundColor: Colors.red,
-          ),
-        );
+      if (mounted) {
+        setState(() {
+          quantity = newQty;
+        });
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -370,73 +271,23 @@ class _ProductScreenState extends State<ProductScreen> {
     });
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString("accessToken");
-      if (token == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("⚠ Please login to use cart"),
-            backgroundColor: Colors.red,
-          ),
-        );
-        setState(() {
-          _cartUpdating = false;
-        });
-        return;
-      }
-
-      http.Response resp;
-
       if (newQty > 0) {
-        // Update quantity → PATCH
-        final url =
-            Uri.parse("${ApiConfig.baseUrl}/api/v1/cart/items/$productId");
-        final body = {
-          "quantity": newQty,
-        };
-
-        resp = await http.patch(
-          url,
-          headers: {
-            "Authorization": "Bearer $token",
-            "Content-Type": "application/json",
+        await ApiClient.post(
+          "/api/v1/cart/items/$productId",
+          body: {
+            "quantity": newQty,
           },
-          body: jsonEncode(body),
         );
       } else {
-        // Quantity becomes 0 → DELETE
-        final url =
-            Uri.parse("${ApiConfig.baseUrl}/api/v1/cart/items/$productId");
-
-        resp = await http.delete(
-          url,
-          headers: {
-            "Authorization": "Bearer $token",
-            "Content-Type": "application/json",
-          },
+        await ApiClient.delete(
+          "/api/v1/cart/items/$productId",
         );
       }
 
-      if (resp.statusCode == 200) {
-        if (mounted) {
-          setState(() {
-            quantity = newQty;
-          });
-        }
-      } else {
-        String msg = "Failed to update cart";
-        try {
-          final j = jsonDecode(resp.body);
-          if (j is Map && j["message"] != null) {
-            msg = j["message"].toString();
-          }
-        } catch (_) {}
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(msg),
-            backgroundColor: Colors.red,
-          ),
-        );
+      if (mounted) {
+        setState(() {
+          quantity = newQty;
+        });
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1113,7 +964,7 @@ class _ProductScreenState extends State<ProductScreen> {
                   ),
                 ],
               ),
-              const Row(
+              Row(
                 children: const [
                   Text(
                     "Change",
@@ -1129,7 +980,7 @@ class _ProductScreenState extends State<ProductScreen> {
             ],
           ),
           SizedBox(height: height * 0.02),
-          const Row(
+          Row(
             children: const [
               Icon(
                 Icons.local_shipping_outlined,

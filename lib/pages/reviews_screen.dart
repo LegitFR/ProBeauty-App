@@ -10,6 +10,7 @@ import 'package:probeauty_app/pages/team_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:probeauty_app/config/api_config.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 class ReviewsScreen extends StatefulWidget {
   final String salonId;
@@ -95,12 +96,14 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
       };
 
       do {
-        final url = Uri.parse(
-          "${ApiConfig.baseUrl}/api/v1/reviews/salon/${widget.salonId}"
-          "?page=$page&limit=$limit",
+        final resp = await ApiClient.get(
+          "/api/v1/reviews/salon/${widget.salonId}",
+          query: {
+            "page": page.toString(),
+            "limit": limit.toString(),
+          },
         );
 
-        final resp = await http.get(url);
         if (resp.statusCode != 200) break;
 
         final body = jsonDecode(resp.body);
@@ -152,24 +155,13 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     });
 
     try {
-      final url = Uri.parse(
-        "${ApiConfig.baseUrl}/api/v1/reviews",
-      );
-
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString("accessToken");
-
-      final response = await http.post(
-        url,
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token",
-        },
-        body: jsonEncode({
+      final response = await ApiClient.post(
+        "/api/v1/reviews",
+        body: {
           "salonId": widget.salonId,
           "rating": _selectedRating,
           "comment": _reviewController.text.trim(),
-        }),
+        },
       );
 
       if (!mounted) return;

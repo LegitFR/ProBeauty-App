@@ -1,9 +1,10 @@
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:probeauty_app/config/api_config.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 class GoogleAuthService {
   static final GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -12,21 +13,48 @@ class GoogleAuthService {
   );
 
   static Future<void> signInWithGoogle() async {
-    final account = await _googleSignIn.signIn();
-    if (account == null) return;
+    try {
+      final account = await _googleSignIn.signIn();
+      if (account == null) return;
 
-    final auth = await account.authentication;
-    final idToken = auth.idToken;
+      final auth = await account.authentication;
+      final idToken = auth.idToken;
 
-    final response = await http.post(
-      Uri.parse("${ApiConfig.baseUrl}/api/v1/auth/google"),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'idToken': idToken}),
-    );
+      if (idToken == null) {
+        throw Exception("Google ID token missing");
+      }
 
-    final data = jsonDecode(response.body);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("accessToken", data["accessToken"]);
-    await prefs.setString("refreshToken", data["refreshToken"]);
+      // 🔥 Use ApiClient instead of raw http
+      final response = await ApiClient.post(
+        "/api/v1/auth/google",
+        body: {
+          "idToken": idToken,
+        },
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final prefs = await SharedPreferences.getInstance();
+
+        await prefs.setString("accessToken", data["accessToken"]);
+        await prefs.setString("refreshToken", data["refreshToken"]);
+
+        if (data["user"] != null) {
+          await prefs.setString("userId", data["user"]["id"]);
+          await prefs.setString("userName", data["user"]["name"]);
+          await prefs.setString("userEmail", data["user"]["email"]);
+
+          if (data["user"]["phone"] != null) {
+            await prefs.setString("userPhone", data["user"]["phone"]);
+          }
+        }
+      } else {
+        throw Exception(data["message"] ?? "Google login failed");
+      }
+    } catch (e) {
+      debugPrint("Google sign-in failed: $e");
+      rethrow;
+    }
   }
 }

@@ -6,6 +6,7 @@ import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/first_visit_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:probeauty_app/config/api_config.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 class BookAppointmentScreen extends StatefulWidget {
   final String salonId;
@@ -90,25 +91,24 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
 
     final dateStr = DateFormat("yyyy-MM-dd").format(date);
 
-    final uri = Uri.parse(
-      "${ApiConfig.baseUrl}/api/v1/bookings/availability"
-      "?salonId=${widget.salonId}"
-      "&serviceId=${service["id"]}"
-      "${widget.staff != null ? "&staffId=${widget.staff!["id"]}" : ""}"
-      "&date=$dateStr",
-    );
-
     try {
-      final res = await http.get(uri);
+      final response = await ApiClient.get(
+        "/api/v1/bookings/availability",
+        query: {
+          "salonId": widget.salonId,
+          "serviceId": service["id"].toString(),
+          if (widget.staff != null) "staffId": widget.staff!["id"].toString(),
+          "date": dateStr,
+        },
+      );
 
       if (!mounted) return;
 
-      if (res.statusCode == 200) {
-        final body = jsonDecode(res.body);
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
         final List rawSlots = body["data"]["slots"] ?? [];
 
         final now = DateTime.now();
-
         final isToday = date.year == now.year &&
             date.month == now.month &&
             date.day == now.day;

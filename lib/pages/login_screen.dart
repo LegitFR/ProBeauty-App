@@ -2,12 +2,11 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:probeauty_app/services/notification_service.dart';
-import 'package:probeauty_app/config/api_config.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -53,27 +52,21 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final url = Uri.parse("${ApiConfig.baseUrl}/api/v1/auth/login");
-
-      final response = await http.post(
-        url,
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-        body: jsonEncode({
+      final response = await ApiClient.post(
+        "/api/v1/auth/login",
+        body: {
           "identifier": identifier,
           "password": password,
-        }),
+        },
       );
 
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
+        // ApiClient already handles storing tokens via refresh logic,
+        // but we still store user profile data
         final prefs = await SharedPreferences.getInstance();
 
-        await prefs.setString("accessToken", data["accessToken"]);
-        await prefs.setString("refreshToken", data["refreshToken"]);
         await prefs.setString("userId", data["user"]["id"]);
         await prefs.setString("userName", data["user"]["name"]);
         await prefs.setString("userEmail", data["user"]["email"]);
@@ -82,10 +75,9 @@ class _LoginScreenState extends State<LoginScreen> {
           await prefs.setString("userPhone", data["user"]["phone"]);
         }
 
-        await NotificationService.registerDevice(data["accessToken"]);
+        await NotificationService.registerDevice();
 
         if (!mounted) return;
-
         Navigator.pushNamedAndRemoveUntil(context, "/main", (route) => false);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:probeauty_app/config/api_config.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -97,28 +95,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   // ================= AUTH =================
-  Future<String> _getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('accessToken');
-    if (token == null || token.isEmpty) {
-      throw Exception('Access token missing');
-    }
-    return token;
-  }
 
   // ================= FETCH =================
   Future<void> _fetchNotifications() async {
     try {
-      final token = await _getToken();
-
-      final res = await http.get(
-        Uri.parse(
-          '${ApiConfig.baseUrl}/api/v1/notifications',
-        ),
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
-      );
+      final res = await ApiClient.get("/api/v1/notifications");
 
       if (res.statusCode != 200) {
         throw Exception('Failed to fetch notifications');
@@ -141,45 +122,24 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   // ================= ACTIONS =================
   Future<void> _markAsRead(String id) async {
-    final token = await _getToken();
-
-    await http.put(
-      Uri.parse(
-        '${ApiConfig.baseUrl}/api/v1/notifications/$id/read',
-      ),
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
+    await ApiClient.post(
+      "/api/v1/notifications/$id/read",
     );
 
     _fetchNotifications();
   }
 
   Future<void> _deleteNotification(String id) async {
-    final token = await _getToken();
-
-    await http.delete(
-      Uri.parse(
-        '${ApiConfig.baseUrl}/api/v1/notifications/$id',
-      ),
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
+    await ApiClient.delete(
+      "/api/v1/notifications/$id",
     );
 
     _fetchNotifications();
   }
 
   Future<void> _markAllAsRead() async {
-    final token = await _getToken();
-
-    await http.put(
-      Uri.parse(
-        '${ApiConfig.baseUrl}/api/v1/notifications/read-all',
-      ),
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
+    await ApiClient.post(
+      "/api/v1/notifications/read-all",
     );
 
     _fetchNotifications();

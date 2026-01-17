@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:probeauty_app/config/api_config.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 class OfferProvider with ChangeNotifier {
   // ================= ENDPOINT =================
@@ -46,16 +45,13 @@ class OfferProvider with ChangeNotifier {
     if (showLoader) notifyListeners();
 
     try {
-      final uri = Uri.parse(
-        "${ApiConfig.baseUrl}$_offersEndpoint",
-      ).replace(
-        queryParameters: {
+      final response = await ApiClient.get(
+        _offersEndpoint,
+        query: {
           "page": _page.toString(),
           "limit": _limit.toString(),
         },
       );
-
-      final response = await http.get(uri);
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
@@ -111,11 +107,10 @@ class OfferProvider with ChangeNotifier {
         if (serviceId != null) "serviceId": serviceId,
       };
 
-      final uri = Uri.parse(
-        "${ApiConfig.baseUrl}$_offersEndpoint",
-      ).replace(queryParameters: query);
-
-      final response = await http.get(uri);
+      final response = await ApiClient.get(
+        _offersEndpoint,
+        query: query.map((k, v) => MapEntry(k, v.toString())),
+      );
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);

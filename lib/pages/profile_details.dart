@@ -2,11 +2,10 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:probeauty_app/config/api_config.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 class ProfileDetails extends StatefulWidget {
   const ProfileDetails({super.key});
@@ -85,31 +84,18 @@ class _ProfileDetailsState extends State<ProfileDetails> {
 
     setState(() => _saving = true);
 
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("accessToken");
-
-    if (token == null) {
-      _showMessage(l10n.profileUserNotLoggedIn);
-      return;
-    }
-
-    final url = Uri.parse("${ApiConfig.baseUrl}/api/v1/user/me");
-
     final body = {"name": fullName, if (phone.isNotEmpty) "phone": phone};
 
     try {
-      final response = await http.patch(
-        url,
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode(body),
+      final response = await ApiClient.post(
+        "/api/v1/user/me",
+        body: body,
       );
 
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
+        final prefs = await SharedPreferences.getInstance();
         await prefs.setString("userName", fullName);
         await prefs.setString("userPhone", phone);
 

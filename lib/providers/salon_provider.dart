@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:probeauty_app/config/api_config.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 class SalonProvider with ChangeNotifier {
   final List<dynamic> _salons = [];
@@ -25,14 +24,12 @@ class SalonProvider with ChangeNotifier {
     if (_ratingCache.containsKey(salonId)) return;
 
     try {
-      final uri = Uri.parse(
-        "${ApiConfig.baseUrl}/api/v1/reviews/salon/$salonId?page=1&limit=1",
+      final response = await ApiClient.get(
+        "/api/v1/reviews/salon/$salonId?page=1&limit=1",
       );
 
-      final res = await http.get(uri);
-
-      if (res.statusCode == 200) {
-        final body = jsonDecode(res.body);
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
 
         _ratingCache[salonId] = {
           "avgRating": (body["averageRating"] ?? 0).toDouble(),
@@ -66,18 +63,16 @@ class SalonProvider with ChangeNotifier {
     try {
       // 🔥 Keep fetching until backend sends empty page
       while (_hasMore) {
-        final url = Uri.parse(
-          "${ApiConfig.baseUrl}/api/v1/salons?page=$_currentPage",
+        final response = await ApiClient.get(
+          "/api/v1/salons?page=$_currentPage",
         );
 
-        final res = await http.get(url);
-
-        if (res.statusCode != 200) {
+        if (response.statusCode != 200) {
           _hasMore = false;
           break;
         }
 
-        final decoded = jsonDecode(res.body);
+        final decoded = jsonDecode(response.body);
         final List newSalons = decoded["data"] ?? [];
 
         if (newSalons.isEmpty) {

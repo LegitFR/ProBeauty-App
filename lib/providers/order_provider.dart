@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:probeauty_app/models/order.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:probeauty_app/config/api_config.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 // ================= PROVIDER =================
 class OrderProvider with ChangeNotifier {
@@ -14,12 +12,6 @@ class OrderProvider with ChangeNotifier {
   String? error;
   List<OrderModel> orders = [];
 
-  // ================= TOKEN =================
-  Future<String?> _getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString("accessToken");
-  }
-
   // ================= FETCH ORDERS =================
   Future<void> fetchOrders() async {
     isLoading = true;
@@ -27,24 +19,8 @@ class OrderProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final token = await _getToken();
-      if (token == null) {
-        error = "No token found";
-        isLoading = false;
-        notifyListeners();
-        return;
-      }
-
-      final url = Uri.parse(
-        "${ApiConfig.baseUrl}$_ordersEndpoint",
-      );
-
-      final resp = await http.get(
-        url,
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
+      final resp = await ApiClient.get(
+        _ordersEndpoint,
       );
 
       if (resp.statusCode == 200) {
@@ -86,21 +62,8 @@ class OrderProvider with ChangeNotifier {
   // ================= CANCEL ORDER =================
   Future<void> cancelOrder(String orderId) async {
     try {
-      final token = await _getToken();
-      if (token == null) {
-        throw Exception("Not authenticated");
-      }
-
-      final url = Uri.parse(
-        "${ApiConfig.baseUrl}$_cancelEndpoint/$orderId/cancel",
-      );
-
-      final response = await http.post(
-        url,
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
+      final response = await ApiClient.post(
+        "$_cancelEndpoint/$orderId/cancel",
       );
 
       final body = jsonDecode(response.body);

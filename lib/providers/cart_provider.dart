@@ -1,11 +1,8 @@
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:http/http.dart' as http;
 import 'package:probeauty_app/models/cart_item.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:probeauty_app/config/api_config.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 class CartProvider with ChangeNotifier {
   // ================= ENDPOINTS =================
@@ -28,11 +25,6 @@ class CartProvider with ChangeNotifier {
   double get subtotal => _subtotal;
   int get totalItems => _totalItems;
 
-  Future<String?> _getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString("accessToken");
-  }
-
   void _setLoading(bool v) {
     _isLoading = v;
     notifyListeners();
@@ -46,16 +38,7 @@ class CartProvider with ChangeNotifier {
     _error = null;
 
     try {
-      final token = await _getToken();
-      if (token == null) throw Exception("No auth token");
-
-      final resp = await http.get(
-        Uri.parse("${ApiConfig.baseUrl}$_cartEndpoint"),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-      );
+      final resp = await ApiClient.get(_cartEndpoint);
 
       if (resp.statusCode != 200) {
         throw Exception("Failed to fetch cart (${resp.statusCode})");
@@ -102,16 +85,7 @@ class CartProvider with ChangeNotifier {
   // ==========================================================
   Future<String?> removeItem({required String productId}) async {
     try {
-      final token = await _getToken();
-      if (token == null) throw Exception("No auth token");
-
-      final resp = await http.delete(
-        Uri.parse("${ApiConfig.baseUrl}$_cartItemEndpoint/$productId"),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-      );
+      final resp = await ApiClient.delete("$_cartItemEndpoint/$productId");
 
       if (resp.statusCode != 200) {
         return jsonDecode(resp.body)["message"];
@@ -133,16 +107,9 @@ class CartProvider with ChangeNotifier {
     }
 
     try {
-      final token = await _getToken();
-      if (token == null) throw Exception("No auth token");
-
-      final resp = await http.patch(
-        Uri.parse("${ApiConfig.baseUrl}$_cartItemEndpoint/$productId"),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({"quantity": quantity}),
+      final resp = await ApiClient.post(
+        "$_cartItemEndpoint/$productId",
+        body: {"quantity": quantity},
       );
 
       if (resp.statusCode != 200) {
@@ -161,16 +128,7 @@ class CartProvider with ChangeNotifier {
   // ==========================================================
   Future<Map<String, dynamic>?> checkoutWithStripe() async {
     try {
-      final token = await _getToken();
-      if (token == null) throw Exception("No auth token");
-
-      final addressResp = await http.get(
-        Uri.parse("${ApiConfig.baseUrl}$_addressesEndpoint"),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-      );
+      final addressResp = await ApiClient.get(_addressesEndpoint);
 
       if (addressResp.statusCode != 200) {
         throw Exception("Failed to fetch addresses");
@@ -185,14 +143,9 @@ class CartProvider with ChangeNotifier {
       if (defaultAddress == null) {
         throw Exception("No default address found");
       }
-
-      final resp = await http.post(
-        Uri.parse("${ApiConfig.baseUrl}$_checkoutEndpoint"),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({"addressId": defaultAddress["id"]}),
+      final resp = await ApiClient.post(
+        _checkoutEndpoint,
+        body: {"addressId": defaultAddress["id"]},
       );
 
       if (resp.statusCode != 200 && resp.statusCode != 201) {
@@ -247,13 +200,7 @@ class CartProvider with ChangeNotifier {
   // ==========================================================
   Future<String?> pollOrderStatus(String orderId) async {
     try {
-      final token = await _getToken();
-      if (token == null) return null;
-
-      final resp = await http.get(
-        Uri.parse("${ApiConfig.baseUrl}$_ordersEndpoint/$orderId"),
-        headers: {"Authorization": "Bearer $token"},
-      );
+      final resp = await ApiClient.get("$_ordersEndpoint/$orderId");
 
       if (resp.statusCode != 200) return null;
 
@@ -268,16 +215,7 @@ class CartProvider with ChangeNotifier {
   // ==========================================================
   Future<String?> checkout() async {
     try {
-      final token = await _getToken();
-      if (token == null) return "No token found";
-
-      final addressResp = await http.get(
-        Uri.parse("${ApiConfig.baseUrl}$_addressesEndpoint"),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-      );
+      final addressResp = await ApiClient.get(_addressesEndpoint);
 
       final addresses = jsonDecode(addressResp.body)["data"] as List;
       final defaultAddress = addresses.firstWhere(
@@ -287,13 +225,9 @@ class CartProvider with ChangeNotifier {
 
       if (defaultAddress == null) return "No default address";
 
-      final resp = await http.post(
-        Uri.parse("${ApiConfig.baseUrl}$_ordersEndpoint"),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({"addressId": defaultAddress["id"]}),
+      final resp = await ApiClient.post(
+        _ordersEndpoint,
+        body: {"addressId": defaultAddress["id"]},
       );
 
       return resp.statusCode == 200 || resp.statusCode == 201

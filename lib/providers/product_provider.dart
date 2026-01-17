@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:probeauty_app/config/api_config.dart';
 import '../models/product.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 class ProductProvider with ChangeNotifier {
   // ================= ENDPOINTS =================
@@ -38,11 +39,10 @@ class ProductProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final uri = Uri.parse(
-        "${ApiConfig.baseUrl}$_productsEndpoint",
+      final res = await ApiClient.get(
+        _productsEndpoint,
       );
 
-      final res = await http.get(uri);
       final body = json.decode(res.body);
       final data = body['data'];
 
@@ -71,11 +71,9 @@ class ProductProvider with ChangeNotifier {
       if (_salonNames.containsKey(id)) continue;
 
       try {
-        final uri = Uri.parse(
-          "${ApiConfig.baseUrl}$_salonEndpoint/$id",
+        final res = await ApiClient.get(
+          "$_salonEndpoint/$id",
         );
-
-        final res = await http.get(uri);
 
         if (res.statusCode == 200) {
           final body = json.decode(res.body);
@@ -102,15 +100,10 @@ class ProductProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final uri = Uri.parse(
-        "${ApiConfig.baseUrl}$_searchEndpoint"
+      final res = await ApiClient.get(
+        "$_searchEndpoint"
         "?q=${Uri.encodeQueryComponent(query)}"
         "&page=$page&limit=$limit",
-      );
-
-      final res = await http.get(
-        uri,
-        headers: {"Content-Type": "application/json"},
       );
 
       if (res.statusCode == 200) {

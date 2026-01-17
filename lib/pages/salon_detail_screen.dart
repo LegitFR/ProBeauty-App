@@ -12,6 +12,7 @@ import 'package:probeauty_app/pages/select_services_screen.dart';
 import 'package:probeauty_app/pages/team_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:probeauty_app/config/api_config.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 class SalonDetailScreen extends StatefulWidget {
   final String id;
@@ -74,12 +75,13 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
       int totalReviews = 0;
 
       do {
-        final url = Uri.parse(
-          "${ApiConfig.baseUrl}/api/v1/reviews/salon/${widget.id}"
-          "?page=$page&limit=20",
+        final response = await ApiClient.get(
+          "/api/v1/reviews/salon/${widget.id}",
+          query: {
+            "page": page.toString(),
+            "limit": "20",
+          },
         );
-
-        final response = await http.get(url);
 
         if (response.statusCode != 200) break;
 

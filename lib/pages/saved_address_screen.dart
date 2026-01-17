@@ -1,11 +1,13 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:probeauty_app/config/api_config.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 class SavedAddressScreen extends StatefulWidget {
   const SavedAddressScreen({super.key});
@@ -46,38 +48,25 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
   Future<void> _fetchDefaultAddress() async {
     setState(() => _addressLoading = true);
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString("accessToken");
+    try {
+      final response = await ApiClient.get("/api/v1/addresses");
 
-    if (token == null) {
-      setState(() => _addressLoading = false);
-      return;
-    }
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        List list = json["data"] ?? [];
 
-    final url = Uri.parse(
-      "${ApiConfig.baseUrl}/api/v1/addresses",
-    );
+        if (list.isNotEmpty) {
+          final d = list.firstWhere(
+            (a) => a["isDefault"] == true,
+            orElse: () => null,
+          );
 
-    final response = await http.get(
-      url,
-      headers: {"Authorization": "Bearer $token"},
-    );
-
-    if (response.statusCode == 200) {
-      final json = jsonDecode(response.body);
-      List list = json["data"];
-
-      if (list.isNotEmpty) {
-        final d = list.firstWhere(
-          (a) => a["isDefault"] == true,
-          orElse: () => null,
-        );
-
-        if (d != null) {
-          defaultAddress = d;
+          if (d != null) {
+            defaultAddress = d;
+          }
         }
       }
-    }
+    } catch (_) {}
 
     setState(() => _addressLoading = false);
   }
@@ -152,14 +141,6 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
     setState(() => isLoading = true);
 
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString("accessToken");
-
-      if (token == null) {
-        print("⚠ No token found");
-        return;
-      }
-
       // Build body
       final body = {
         "fullName": "User Name",
@@ -177,31 +158,17 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
 
       if (isEditMode && editAddressId != null) {
         // UPDATE MODE
-        final url = Uri.parse(
-          "${ApiConfig.baseUrl}/api/v1/addresses/$editAddressId",
-        );
 
-        response = await http.patch(
-          url,
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer $token",
-          },
-          body: jsonEncode(body),
+        response = await ApiClient.post(
+          "/api/v1/addresses/$editAddressId",
+          body: body,
         );
       } else {
         // CREATE NEW ADDRESS
-        final url = Uri.parse(
-          "${ApiConfig.baseUrl}/api/v1/addresses",
-        );
 
-        response = await http.post(
-          url,
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer $token",
-          },
-          body: jsonEncode(body),
+        response = await ApiClient.post(
+          "/api/v1/addresses",
+          body: body,
         );
       }
 

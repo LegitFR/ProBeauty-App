@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:probeauty_app/models/booking.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:probeauty_app/config/api_config.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 class AppointmentProvider with ChangeNotifier {
   static const String _endpoint = "/api/v1/bookings";
@@ -23,21 +21,7 @@ class AppointmentProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString("accessToken");
-
-      if (token == null) {
-        _bookings = [];
-        _hasFetchedOnce = true;
-        return;
-      }
-
-      final res = await http.get(
-        Uri.parse("${ApiConfig.baseUrl}$_endpoint"),
-        headers: {
-          "Authorization": "Bearer $token",
-        },
-      );
+      final res = await ApiClient.get(_endpoint);
 
       if (res.statusCode == 200) {
         final decoded = jsonDecode(res.body);

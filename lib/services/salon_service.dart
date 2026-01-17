@@ -1,18 +1,15 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:probeauty_app/config/api_config.dart';
+
+import 'package:probeauty_app/services/api_client.dart';
 
 class SalonService {
   static Future<Map<String, dynamic>> fetchSalonById(String salonId) async {
-    final res = await http.get(
-      Uri.parse("${ApiConfig.baseUrl}/api/v1/salons/$salonId"),
-      headers: {
-        "Content-Type": "application/json",
-      },
+    final response = await ApiClient.get(
+      "/api/v1/salons/$salonId",
     );
 
-    if (res.statusCode == 200) {
-      final decoded = jsonDecode(res.body);
+    if (response.statusCode == 200) {
+      final decoded = jsonDecode(response.body);
       return decoded["data"];
     } else {
       throw Exception("Failed to fetch salon");

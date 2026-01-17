@@ -3,11 +3,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:probeauty_app/config/api_config.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 class FavouritesScreen extends StatefulWidget {
   const FavouritesScreen({super.key});
@@ -73,25 +71,11 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
   // ==========================
   Future<void> _fetchFavourites() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString("accessToken");
-
-      if (token == null) {
-        setState(() {
-          _error = "Please login to view favourites";
-          _loading = false;
-        });
-        return;
-      }
-
-      final url =
-          Uri.parse("${ApiConfig.baseUrl}/api/v1/favourites?page=1&limit=20");
-
-      final resp = await http.get(
-        url,
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
+      final resp = await ApiClient.get(
+        "/api/v1/favourites",
+        query: {
+          "page": "1",
+          "limit": "20",
         },
       );
 
@@ -120,19 +104,8 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
   // ==========================
   Future<void> _removeFavourite(String productId, int index) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString("accessToken");
-      if (token == null) return;
-
-      final url =
-          Uri.parse("${ApiConfig.baseUrl}/api/v1/favourites/$productId");
-
-      final resp = await http.delete(
-        url,
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
+      final resp = await ApiClient.delete(
+        "/api/v1/favourites/$productId",
       );
 
       if (resp.statusCode == 200) {
@@ -142,8 +115,9 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content:
-                  Text(AppLocalizations.of(context)!.favouritesRemovedSuccess)),
+            content:
+                Text(AppLocalizations.of(context)!.favouritesRemovedSuccess),
+          ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -156,9 +130,11 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text(
-                AppLocalizations.of(context)!.favouritesError(e.toString())),
-            backgroundColor: Colors.red),
+          content: Text(
+            AppLocalizations.of(context)!.favouritesError(e.toString()),
+          ),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -170,46 +146,28 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
     try {
       setState(() => _addingToCartId = productId);
 
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString("accessToken");
-
-      if (token == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content:
-                Text(AppLocalizations.of(context)!.favouritesLoginToAddCart),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-
-      final url = Uri.parse("${ApiConfig.baseUrl}/api/v1/cart/items");
-
-      final resp = await http.post(
-        url,
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({
+      final resp = await ApiClient.post(
+        "/api/v1/cart/items",
+        body: {
           "productId": productId,
           "quantity": 1,
-        }),
+        },
       );
 
       if (resp.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content:
-                  Text(AppLocalizations.of(context)!.favouritesAddedToCart)),
+            content: Text(AppLocalizations.of(context)!.favouritesAddedToCart),
+          ),
         );
       } else {
         final body = jsonDecode(resp.body);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(body["message"] ??
-                AppLocalizations.of(context)!.favouritesAddToCartFailed),
+            content: Text(
+              body["message"] ??
+                  AppLocalizations.of(context)!.favouritesAddToCartFailed,
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -217,9 +175,11 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text(
-                AppLocalizations.of(context)!.favouritesError(e.toString())),
-            backgroundColor: Colors.red),
+          content: Text(
+            AppLocalizations.of(context)!.favouritesError(e.toString()),
+          ),
+          backgroundColor: Colors.red,
+        ),
       );
     } finally {
       setState(() => _addingToCartId = null);

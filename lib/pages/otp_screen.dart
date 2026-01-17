@@ -2,9 +2,8 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:probeauty_app/resources/AppColors.dart';
-import 'package:probeauty_app/config/api_config.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 class OTPScreen extends StatefulWidget {
   const OTPScreen({super.key});
@@ -48,10 +47,8 @@ class _OTPScreenState extends State<OTPScreen> {
       return;
     }
 
-    final url =
-        Uri.parse("${ApiConfig.baseUrl}/api/v1/auth/confirm-registration");
-
     final Map<String, dynamic> bodyData = {"otp": otp};
+
     if (contact.contains("@")) {
       bodyData["email"] = contact;
     } else {
@@ -59,38 +56,36 @@ class _OTPScreenState extends State<OTPScreen> {
     }
 
     try {
-      final response = await http.post(
-        url,
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-        body: jsonEncode(bodyData),
+      final response = await ApiClient.post(
+        "/api/v1/auth/confirm-registration",
+        body: bodyData,
       );
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Account verified successfully!")),
         );
-        // Navigate to onboarding after short delay
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (!mounted) return;
-          Navigator.pushNamedAndRemoveUntil(
-              context, "/onboarding", (route) => false);
-        });
+
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (!mounted) return;
+
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          "/onboarding",
+          (route) => false,
+        );
       } else {
         final data = jsonDecode(response.body);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? "Verification failed")),
+          SnackBar(content: Text(data["message"] ?? "Verification failed")),
         );
       }
     } catch (e) {
-      debugPrint(e.toString());
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: $e")),
       );
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
