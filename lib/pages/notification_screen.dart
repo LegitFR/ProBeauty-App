@@ -145,6 +145,21 @@ class _NotificationScreenState extends State<NotificationScreen> {
     _fetchNotifications();
   }
 
+  Future<void> _clearAllNotifications() async {
+    await ApiClient.delete(
+      "/api/v1/notifications/clear-all",
+    );
+
+    setState(() {
+      _unread.clear();
+      _read.clear();
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("All notifications cleared")),
+    );
+  }
+
   // ================= UI =================
   @override
   Widget build(BuildContext context) {
@@ -177,12 +192,27 @@ class _NotificationScreenState extends State<NotificationScreen> {
                               fontFamily: "PoppinsSemiBold",
                             ),
                           ),
-                          if (_unread.isNotEmpty)
-                            IconButton(
-                              icon: const Icon(Icons.done_all,
-                                  color: AppColors.rusticSunset),
-                              onPressed: _markAllAsRead,
-                            ),
+                          Row(
+                            children: [
+                              if (_unread.isNotEmpty)
+                                IconButton(
+                                  icon: const Icon(Icons.done_all,
+                                      color: AppColors.rusticSunset),
+                                  onPressed: _markAllAsRead,
+                                ),
+                              if (_unread.isNotEmpty || _read.isNotEmpty)
+                                TextButton(
+                                  onPressed: _clearAllNotifications,
+                                  child: const Text(
+                                    "Clear all",
+                                    style: TextStyle(
+                                      fontFamily: "PoppinsSemiBold",
+                                      color: AppColors.rusticSunset,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ],
                       ),
                       const SizedBox(height: 12),
