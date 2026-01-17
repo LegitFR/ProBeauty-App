@@ -261,6 +261,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     return Scaffold(
       backgroundColor: AppColors.softIvory,
       body: SafeArea(
+        bottom: true,
         child: appointmentProvider.isLoading
             ? _buildSkeleton(context) // 1️⃣ LOADING FIRST
             : appointmentProvider.bookings.isEmpty

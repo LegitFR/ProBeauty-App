@@ -23,8 +23,18 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      context.read<SalonProvider>().fetchSalons();
-      context.read<OfferProvider>().fetchActiveOffers();
+      final salonProvider = context.read<SalonProvider>();
+      final offerProvider = context.read<OfferProvider>();
+
+      if (salonProvider.salons.isEmpty) {
+        salonProvider.fetchSalons();
+      }
+
+      if (offerProvider.offers.isEmpty) {
+        offerProvider.fetchActiveOffers(showLoader: true);
+      } else {
+        offerProvider.fetchActiveOffers(showLoader: false);
+      }
     });
   }
 
@@ -48,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: AppColors.softIvory,
       body: SafeArea(
+        bottom: true,
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               // === Offers carousel ===
 
-              offerProvider.isLoading
+              offerProvider.isLoading && offers.isEmpty
                   ? SizedBox(
                       height: height * 0.20,
                       child: ListView.separated(
@@ -138,80 +149,90 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     )
-                  : CarouselSlider(
-                      options: CarouselOptions(
-                        height: height * 0.20,
+                  : NotificationListener<ScrollNotification>(
+                      onNotification: (notification) {
+                        if (notification.metrics.pixels >=
+                                notification.metrics.maxScrollExtent - 100 &&
+                            offerProvider.hasMore &&
+                            !offerProvider.isLoading) {
+                          offerProvider.fetchActiveOffers(showLoader: false);
+                        }
+                        return false;
+                      },
+                      child: CarouselSlider(
+                        options: CarouselOptions(
+                          height: height * 0.20,
 
-                        // 🔥 prevent duplication
-                        autoPlay: offers.length > 1,
-                        enableInfiniteScroll: offers.length > 1,
-                        enlargeCenterPage: offers.length > 1,
+                          // 🔥 prevent duplication
+                          autoPlay: offers.length > 1,
+                          enableInfiniteScroll: offers.length > 1,
+                          enlargeCenterPage: offers.length > 1,
 
-                        // 🔥 padding behavior
-                        viewportFraction: offers.length > 1 ? 0.78 : 0.9,
+                          // 🔥 padding behavior
+                          viewportFraction: offers.length > 1 ? 0.78 : 0.9,
 
-                        aspectRatio: 16 / 9,
-                        autoPlayInterval: const Duration(seconds: 3),
-                      ),
-                      items: offers.map((offer) {
-                        final String imageUrl = offer["image"] ?? "";
-                        final String salonId = offer["salonId"];
+                          aspectRatio: 16 / 9,
+                          autoPlayInterval: const Duration(seconds: 3),
+                        ),
+                        items: offers.map((offer) {
+                          final String imageUrl = offer["image"] ?? "";
+                          final String salonId = offer["salonId"] ?? "";
 
-                        return GestureDetector(
-                          onTap: () async {
-                            try {
-                              final salon =
-                                  await SalonService.fetchSalonById(salonId);
+                          return GestureDetector(
+                            onTap: () async {
+                              try {
+                                if (salonId.isEmpty) return;
+                                final salon =
+                                    await SalonService.fetchSalonById(salonId);
 
-                              if (!context.mounted) return;
+                                if (!context.mounted) return;
 
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => SalonDetailScreen(
-                                    id: salon["id"],
-                                    name: salon["name"] ?? "",
-                                    address: salon["address"] ?? "",
-                                    image: salon["thumbnail"] ??
-                                        'assets/images/saloons/saloon1.png',
-                                    services: salon["services"] ?? [],
-                                    salonStaffList: salon["staff"] ?? [],
-                                    hours: salon["hours"] ?? {},
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => SalonDetailScreen(
+                                      id: salon["id"],
+                                      name: salon["name"] ?? "",
+                                      address: salon["address"] ?? "",
+                                      image: salon["thumbnail"] ??
+                                          'assets/images/saloons/saloon1.png',
+                                      services: salon["services"] ?? [],
+                                      salonStaffList: salon["staff"] ?? [],
+                                      hours: salon["hours"] ?? {},
+                                    ),
                                   ),
-                                ),
-                              );
-                            } catch (e) {
-                              debugPrint("Failed to open salon: $e");
+                                );
+                              } catch (e) {
+                                debugPrint("Failed to open salon: $e");
 
-                              if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text("Unable to open salon")),
-                              );
-                            }
-                          },
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: offers.length == 1 ? 12 : 6,
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Image.network(
-                                imageUrl,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) =>
-                                    const Icon(Icons.image_not_supported),
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text("Unable to open salon")),
+                                );
+                              }
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: offers.length == 1 ? 12 : 6,
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: Image.network(
+                                  imageUrl,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) =>
+                                      const Icon(Icons.image_not_supported),
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      }).toList(),
+                          );
+                        }).toList(),
+                      ),
                     ),
 
-              offerProvider.isLoading || offers.isEmpty
-                  ? Container()
-                  : SizedBox(height: height * 0.035),
+              SizedBox(height: height * 0.035),
 
               Padding(
                 padding: EdgeInsets.only(

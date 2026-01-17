@@ -167,280 +167,273 @@ class _ExploreScreenState extends State<ExploreScreen> {
     final height = MediaQuery.of(context).size.height;
     final provider = context.watch<ExploreProvider>();
 
-    return SafeArea(
-      bottom: true,
-      child: Scaffold(
-        backgroundColor: AppColors.softIvory,
-        body: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: height * 0.03),
+    return Scaffold(
+      backgroundColor: AppColors.softIvory,
+      body: SafeArea(
+        bottom: true,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: height * 0.03),
 
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: width * 0.045),
-                  child: Text(
-                    l10n.exploreTitle,
-                    style: TextStyle(
-                      fontFamily: "PlayfairDisplayBold",
-                      fontSize: width * 0.08,
-                      color: Colors.black,
-                    ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: width * 0.045),
+                child: Text(
+                  l10n.exploreTitle,
+                  style: TextStyle(
+                    fontFamily: "PlayfairDisplayBold",
+                    fontSize: width * 0.08,
+                    color: Colors.black,
                   ),
                 ),
+              ),
 
-                SizedBox(height: height * 0.03),
+              SizedBox(height: height * 0.03),
 
-                // ----------------------- SEARCH BOX -----------------------
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: width * 0.045),
-                  padding: EdgeInsets.all(width * 0.05),
-                  decoration: BoxDecoration(
-                    color: AppColors.softIvory,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: Colors.black,
-                      width: 2.87,
-                    ),
+              // ----------------------- SEARCH BOX -----------------------
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: width * 0.045),
+                padding: EdgeInsets.all(width * 0.05),
+                decoration: BoxDecoration(
+                  color: AppColors.softIvory,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: Colors.black,
+                    width: 2.87,
                   ),
-                  child: Column(
+                ),
+                child: Column(
+                  children: [
+                    _buildSearchField(
+                      controller: searchController,
+                      hint: l10n.exploreSearchHint,
+                      svgIcon: "assets/images/icons/search_icon.svg",
+                    ),
+                    SizedBox(height: height * 0.02),
+                    _buildLocationField(),
+                    SizedBox(height: height * 0.02),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: _selectDate,
+                            child: _buildChip(
+                              svgIcon: "assets/images/icons/calendar_icon.svg",
+                              label: selectedDate == null
+                                  ? l10n.exploreAnyDate
+                                  : _formatDate(selectedDate!),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: width * 0.04),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: _selectTimeSlot,
+                            child: _buildChip(
+                              svgIcon: "assets/images/icons/time_icon.svg",
+                              label: selectedTimeSlot ?? l10n.exploreAnyTime,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: height * 0.03),
+                    Column(
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          height: height * 0.06,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ExploreResultsScreen(
+                                      serviceText: searchController.text,
+                                      dateText: selectedDate != null
+                                          ? _formatDate(selectedDate!)
+                                          : "",
+                                      timeText: selectedTimeSlot ?? "",
+                                      locationText: currentCity),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.rusticSunset,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                l10n.exploreSearchButton,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontFamily: "PoppinsMedium",
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: height * 0.035),
+
+              // ----------------------- FILTERS ROW -----------------------
+              SingleChildScrollView(
+                controller: _filterScrollController,
+                scrollDirection: Axis.horizontal,
+                child: AnimatedPadding(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOut,
+                  padding: EdgeInsets.only(left: _leftPadding),
+                  child: Row(
                     children: [
-                      _buildSearchField(
-                        controller: searchController,
-                        hint: l10n.exploreSearchHint,
-                        svgIcon: "assets/images/icons/search_icon.svg",
+                      _buildFilterIcon(onTap: _openCombinedFilterSheet),
+                      SizedBox(width: width * 0.03),
+                      _buildFilterChip(l10n.exploreSort, onTap: _openSortSheet),
+                      SizedBox(width: width * 0.03),
+                      _buildFilterChip(
+                        l10n.exploreMaxPrice,
+                        onTap: _openMaxPriceSheet,
                       ),
-                      SizedBox(height: height * 0.02),
-                      _buildLocationField(),
-                      SizedBox(height: height * 0.02),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: _selectDate,
-                              child: _buildChip(
-                                svgIcon:
-                                    "assets/images/icons/calendar_icon.svg",
-                                label: selectedDate == null
-                                    ? l10n.exploreAnyDate
-                                    : _formatDate(selectedDate!),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: width * 0.04),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: _selectTimeSlot,
-                              child: _buildChip(
-                                svgIcon: "assets/images/icons/time_icon.svg",
-                                label: selectedTimeSlot ?? l10n.exploreAnyTime,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: height * 0.03),
-                      Column(
-                        children: [
-                          SizedBox(
-                            width: double.infinity,
-                            height: height * 0.06,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ExploreResultsScreen(
-                                        serviceText: searchController.text,
-                                        dateText: selectedDate != null
-                                            ? _formatDate(selectedDate!)
-                                            : "",
-                                        timeText: selectedTimeSlot ?? "",
-                                        locationText: currentCity),
-                                  ),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.rusticSunset,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  l10n.exploreSearchButton,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontFamily: "PoppinsMedium",
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                        ],
+                      SizedBox(width: width * 0.03),
+                      _buildFilterChip(
+                        l10n.exploreVenueType,
+                        onTap: _openVenueTypeSheet,
                       ),
                     ],
                   ),
                 ),
+              ),
 
-                SizedBox(height: height * 0.035),
+              SizedBox(height: height * 0.03),
 
-                // ----------------------- FILTERS ROW -----------------------
-                SingleChildScrollView(
-                  controller: _filterScrollController,
-                  scrollDirection: Axis.horizontal,
-                  child: AnimatedPadding(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeOut,
-                    padding: EdgeInsets.only(left: _leftPadding),
-                    child: Row(
-                      children: [
-                        _buildFilterIcon(onTap: _openCombinedFilterSheet),
-                        SizedBox(width: width * 0.03),
-                        _buildFilterChip(l10n.exploreSort,
-                            onTap: _openSortSheet),
-                        SizedBox(width: width * 0.03),
-                        _buildFilterChip(
-                          l10n.exploreMaxPrice,
-                          onTap: _openMaxPriceSheet,
-                        ),
-                        SizedBox(width: width * 0.03),
-                        _buildFilterChip(
-                          l10n.exploreVenueType,
-                          onTap: _openVenueTypeSheet,
-                        ),
-                      ],
-                    ),
+              Center(
+                child: Text(
+                  l10n.exploreAppointmentsBooked(446305.toString()),
+                  style: TextStyle(
+                    fontFamily: "PoppinsRegular",
+                    fontSize: width * 0.035,
+                    color: Colors.black87,
                   ),
                 ),
+              ),
 
-                SizedBox(height: height * 0.03),
+              SizedBox(height: height * 0.02),
 
-                Center(
-                  child: Text(
-                    l10n.exploreAppointmentsBooked(446305.toString()),
-                    style: TextStyle(
-                      fontFamily: "PoppinsRegular",
-                      fontSize: width * 0.035,
-                      color: Colors.black87,
-                    ),
+              // ----------------------- SERVICES SECTION -----------------------
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: width * 0.045),
+                child: Text(
+                  l10n.exploreServices,
+                  style: TextStyle(
+                    fontFamily: "PoppinsSemiBold",
+                    fontSize: width * 0.055,
+                    color: Colors.black,
                   ),
                 ),
+              ),
 
-                SizedBox(height: height * 0.02),
+              SizedBox(height: height * 0.02),
 
-                // ----------------------- SERVICES SECTION -----------------------
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: width * 0.045),
-                  child: Text(
-                    l10n.exploreServices,
-                    style: TextStyle(
-                      fontFamily: "PoppinsSemiBold",
-                      fontSize: width * 0.055,
-                      color: Colors.black,
-                    ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: width * 0.045),
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount:
+                      provider.isLoadingServices ? 4 : provider.services.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 14,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 1.25,
                   ),
-                ),
+                  itemBuilder: (context, index) {
+                    if (provider.isLoadingServices) {
+                      return _buildServiceShimmer(width);
+                    }
 
-                SizedBox(height: height * 0.02),
+                    final item = provider.services[index];
 
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: width * 0.045),
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: provider.isLoadingServices
-                        ? 4
-                        : provider.services.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 14,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 1.25,
-                    ),
-                    itemBuilder: (context, index) {
-                      if (provider.isLoadingServices) {
-                        return _buildServiceShimmer(width);
-                      }
-
-                      final item = provider.services[index];
-
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ExploreResultsScreen(
-                                serviceText: item["title"],
-                              ),
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ExploreResultsScreen(
+                              serviceText: item["title"],
                             ),
-                          );
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: AppColors.softIvory,
-                            borderRadius: BorderRadius.circular(10),
-                            border:
-                                Border.all(color: Colors.black, width: 2.87),
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: item['img']!.startsWith('http')
-                                      ? Image.network(
-                                          item['img']!,
-                                          height: width * 0.22,
-                                          width: double.infinity,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (_, __, ___) =>
-                                              Image.asset(
-                                            "assets/images/services/hair_styling.png",
-                                            height: width * 0.22,
-                                            width: double.infinity,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        )
-                                      : Image.asset(
-                                          item['img']!,
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.softIvory,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.black, width: 2.87),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: item['img']!.startsWith('http')
+                                    ? Image.network(
+                                        item['img']!,
+                                        height: width * 0.22,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) =>
+                                            Image.asset(
+                                          "assets/images/services/hair_styling.png",
                                           height: width * 0.22,
                                           width: double.infinity,
                                           fit: BoxFit.cover,
                                         ),
-                                ),
-                                const SizedBox(height: 5),
-                                Flexible(
-                                  child: Text(
-                                    item['title']!,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontFamily: "PoppinsMedium",
-                                      fontSize: 13,
-                                      color: Colors.black,
-                                    ),
+                                      )
+                                    : Image.asset(
+                                        item['img']!,
+                                        height: width * 0.22,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                      ),
+                              ),
+                              const SizedBox(height: 5),
+                              Flexible(
+                                child: Text(
+                                  item['title']!,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontFamily: "PoppinsMedium",
+                                    fontSize: 13,
+                                    color: Colors.black,
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
+              ),
 
-                SizedBox(height: height * 0.04),
-              ],
-            ),
+              SizedBox(height: height * 0.04),
+            ],
           ),
         ),
       ),

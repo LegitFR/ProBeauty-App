@@ -2,12 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-
 class OfferProvider with ChangeNotifier {
-  final String _baseUrl = "http://10.0.2.2:5000";
+  final String _baseUrl = "https://probeauty-backend.onrender.com";
 
   bool _isLoading = false;
   int _page = 1;
@@ -21,7 +17,7 @@ class OfferProvider with ChangeNotifier {
 
   bool get hasMore => _page <= _totalPages;
 
-  List<Map<String, dynamic>> get offers => _offers;
+  List<Map<String, dynamic>> get offers => List.unmodifiable(_offers);
 
   List<Map<String, dynamic>> get salonOffers =>
       _offers.where((o) => o["offerType"] == "salon").toList();
@@ -29,20 +25,24 @@ class OfferProvider with ChangeNotifier {
   List<Map<String, dynamic>> get productOffers =>
       _offers.where((o) => o["offerType"] == "product").toList();
 
-  // ================= PUBLIC API =================
-  Future<void> fetchActiveOffers({bool reset = false}) async {
+  // ================= CORE FETCH =================
+  Future<void> fetchActiveOffers({
+    bool reset = false,
+    bool showLoader = true, // 🔥 controls skeleton flicker
+  }) async {
     if (_isLoading) return;
 
     if (reset) {
       _page = 1;
       _totalPages = 1;
       _offers.clear();
+      if (showLoader) notifyListeners();
     }
 
     if (!hasMore) return;
 
     _isLoading = true;
-    notifyListeners();
+    if (showLoader) notifyListeners();
 
     try {
       final uri = Uri.parse("$_baseUrl/api/v1/offers/public/active").replace(
@@ -62,26 +62,30 @@ class OfferProvider with ChangeNotifier {
 
         _totalPages = pagination?["totalPages"] ?? 1;
 
-        _offers.addAll(
-          data.cast<Map<String, dynamic>>(),
-        );
+        final newOffers = data.cast<Map<String, dynamic>>();
 
-        _page++;
+        // 🔥 Only update UI if new data actually arrived
+        if (newOffers.isNotEmpty) {
+          _offers.addAll(newOffers);
+          _page++;
+          notifyListeners();
+        }
       }
     } catch (e) {
       debugPrint("Offer fetch error: $e");
     } finally {
       _isLoading = false;
-      notifyListeners();
+      if (showLoader) notifyListeners();
     }
   }
 
-  // ================= OPTIONAL FILTERED FETCH =================
+  // ================= FILTERED FETCH =================
   Future<void> fetchOffersByFilter({
     String? salonId,
     String? productId,
     String? serviceId,
     bool reset = true,
+    bool showLoader = true,
   }) async {
     if (_isLoading) return;
 
@@ -89,10 +93,11 @@ class OfferProvider with ChangeNotifier {
       _page = 1;
       _totalPages = 1;
       _offers.clear();
+      if (showLoader) notifyListeners();
     }
 
     _isLoading = true;
-    notifyListeners();
+    if (showLoader) notifyListeners();
 
     try {
       final query = {
@@ -116,17 +121,33 @@ class OfferProvider with ChangeNotifier {
 
         _totalPages = pagination?["totalPages"] ?? 1;
 
-        _offers.addAll(
-          data.cast<Map<String, dynamic>>(),
-        );
+        final newOffers = data.cast<Map<String, dynamic>>();
 
-        _page++;
+        // 🔥 Only notify UI if something changed
+        if (newOffers.isNotEmpty) {
+          _offers.addAll(newOffers);
+          _page++;
+          notifyListeners();
+        }
       }
     } catch (e) {
       debugPrint("Offer fetch error: $e");
     } finally {
       _isLoading = false;
-      notifyListeners();
+      if (showLoader) notifyListeners();
     }
+  }
+
+  // ================= MANUAL REFRESH =================
+  Future<void> hardRefresh() async {
+    await fetchActiveOffers(reset: true, showLoader: true);
+  }
+
+  // ================= UTIL =================
+  void clearOffers() {
+    _page = 1;
+    _totalPages = 1;
+    _offers.clear();
+    notifyListeners();
   }
 }

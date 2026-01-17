@@ -53,6 +53,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: AppColors.softIvory,
       body: SafeArea(
+        bottom: true,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18.0),
           child: ListView(

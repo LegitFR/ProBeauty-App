@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -38,11 +40,53 @@ class _ProductScreenState extends State<ProductScreen> {
   bool _favUpdating = false;
   bool _isFavourited = false;
 
+  List<Map<String, dynamic>> _availableOffers = [];
+  bool _offersLoading = true;
+  bool _showAllOffers = false;
+
   @override
   void initState() {
     super.initState();
     _loadInitialCartQuantity();
     _checkFavouriteStatus();
+    _fetchApplicableOffers();
+  }
+
+  Future<void> _fetchApplicableOffers() async {
+    try {
+      final uri = Uri.parse(
+        "http://10.0.2.2:5000/api/v1/offers/public/active"
+        "?limit=20",
+      );
+
+      final res = await http.get(uri);
+
+      if (res.statusCode == 200) {
+        final body = jsonDecode(res.body);
+        final List data = body["data"] ?? [];
+
+        final productId = widget.product.id;
+
+        _availableOffers = data
+            .where((offer) {
+              // // 🟢 Salon-wide offers apply to all
+              // if (offer["offerType"] == "salon") return true;
+
+              // 🟢 Product-specific offers
+              if (offer["offerType"] == "product") {
+                return offer["productId"] == productId;
+              }
+
+              return false;
+            })
+            .cast<Map<String, dynamic>>()
+            .toList();
+      }
+    } catch (e) {
+      debugPrint("Offer fetch error: $e");
+    } finally {
+      if (mounted) setState(() => _offersLoading = false);
+    }
   }
 
   Future<void> _checkFavouriteStatus() async {
@@ -772,6 +816,64 @@ class _ProductScreenState extends State<ProductScreen> {
 
                 // Offers (static)
                 _offersSection(width, height),
+                SizedBox(height: height * 0.02),
+
+                if (_showAllOffers)
+                  Column(
+                    children: _availableOffers.map((offer) {
+                      return Container(
+                        margin: const EdgeInsets.only(
+                          bottom: 12,
+                        ),
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: AppColors.softIvory,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.15),
+                              blurRadius: 3,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.local_offer,
+                                color: AppColors.rusticSunset, size: 22),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    offer["title"],
+                                    style: const TextStyle(
+                                      fontFamily: "PoppinsSemiBold",
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    offer["description"] ?? "",
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              offer["discountType"] == "percentage"
+                                  ? "${offer["discountValue"]}% OFF"
+                                  : "₹${offer["discountValue"]} OFF",
+                              style: const TextStyle(
+                                fontFamily: "PoppinsSemiBold",
+                                color: AppColors.rusticSunset,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
 
                 SizedBox(height: height * 0.02),
 
@@ -787,7 +889,7 @@ class _ProductScreenState extends State<ProductScreen> {
                       ),
                     ),
                     Text(
-                      "RELIANCE RETAIL LIMITED",
+                      salonName,
                       style: TextStyle(
                         fontSize: width * 0.032,
                         fontFamily: "PoppinsMedium",
@@ -855,27 +957,33 @@ class _ProductScreenState extends State<ProductScreen> {
         children: [
           Row(
             children: [
-              _offerChip(width, Icons.local_offer_outlined, "6 Offers"),
-              SizedBox(width: width * 0.03),
-              _offerChip(width, Icons.card_giftcard_outlined, "Free Gifts"),
+              _offerChip(width, Icons.local_offer_outlined,
+                  "${_availableOffers.length} Offers"),
+              // SizedBox(width: width * 0.03),
+              // _offerChip(width, Icons.card_giftcard_outlined, "Free Gifts"),
             ],
           ),
-          Row(
-            children: [
-              Text(
-                "View all",
-                style: TextStyle(
-                  fontFamily: "PoppinsMedium",
-                  fontSize: width * 0.03,
-                  color: Colors.black,
+          GestureDetector(
+            onTap: () {
+              setState(() => _showAllOffers = !_showAllOffers);
+            },
+            child: Row(
+              children: [
+                Text(
+                  _showAllOffers ? "Hide" : "View all",
+                  style: TextStyle(
+                    fontFamily: "PoppinsMedium",
+                    fontSize: width * 0.03,
+                  ),
                 ),
-              ),
-              const Icon(
-                Icons.arrow_forward_ios,
-                size: 14,
-                color: Colors.black,
-              ),
-            ],
+                Icon(
+                  _showAllOffers
+                      ? Icons.keyboard_arrow_up
+                      : Icons.arrow_forward_ios,
+                  size: 14,
+                ),
+              ],
+            ),
           ),
         ],
       ),

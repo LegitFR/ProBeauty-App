@@ -305,7 +305,7 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                     const SizedBox(height: 18),
 
                     SalonTabBar(
-                      selectedIndex: 0, // SERVICES ACTIVE
+                      selectedIndex: 0,
                       onTabTap: (index) {
                         if (index == 0) return;
 

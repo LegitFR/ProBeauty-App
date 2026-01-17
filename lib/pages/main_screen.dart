@@ -112,6 +112,7 @@ class _MainScreenState extends State<MainScreen> {
       child: SafeArea(
         bottom: true,
         child: Scaffold(
+          extendBody: true,
           body: _screens[_selectedIndex],
           bottomNavigationBar: SafeArea(
             bottom: true,

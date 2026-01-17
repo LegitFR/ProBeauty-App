@@ -25,8 +25,19 @@ class _ShopScreenState extends State<ShopScreen> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      context.read<ProductProvider>().fetchProducts();
-      context.read<OfferProvider>().fetchActiveOffers(reset: true);
+      final productProvider = context.read<ProductProvider>();
+      final offerProvider = context.read<OfferProvider>();
+
+      if (productProvider.products.isEmpty) {
+        productProvider.fetchProducts();
+      }
+
+      // Silent refresh for offers
+      if (offerProvider.offers.isEmpty) {
+        offerProvider.fetchActiveOffers(showLoader: true);
+      } else {
+        offerProvider.fetchActiveOffers(showLoader: false);
+      }
     });
   }
 
@@ -174,147 +185,157 @@ class _ShopScreenState extends State<ShopScreen> {
     final offerProvider = context.watch<OfferProvider>();
     final productOffers = offerProvider.productOffers;
 
-    return SafeArea(
-      bottom: true,
-      child: Scaffold(
-        backgroundColor: AppColors.softIvory,
-        body: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Search bar
-                Container(
-                  margin: EdgeInsets.only(
-                      left: width * 0.035,
-                      right: width * 0.035,
-                      top: width * 0.035),
-                  padding: EdgeInsets.symmetric(
-                      horizontal: width * 0.035, vertical: height * 0.01),
-                  decoration: BoxDecoration(
-                    color: AppColors.softIvory,
-                    borderRadius: BorderRadius.circular(14),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 6,
-                        offset: const Offset(2, 3),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.search, color: Colors.grey[600], size: 22),
-                      SizedBox(width: width * 0.025),
-                      Expanded(
-                        child: TextField(
-                          cursorColor: AppColors.rusticSunset,
-                          textInputAction: TextInputAction.search,
-                          onSubmitted: (value) {
-                            if (value.trim().isEmpty) return;
+    return Scaffold(
+      backgroundColor: AppColors.softIvory,
+      body: SafeArea(
+        bottom: true,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Search bar
+              Container(
+                margin: EdgeInsets.only(
+                    left: width * 0.035,
+                    right: width * 0.035,
+                    top: width * 0.035),
+                padding: EdgeInsets.symmetric(
+                    horizontal: width * 0.035, vertical: height * 0.01),
+                decoration: BoxDecoration(
+                  color: AppColors.softIvory,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 6,
+                      offset: const Offset(2, 3),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.search, color: Colors.grey[600], size: 22),
+                    SizedBox(width: width * 0.025),
+                    Expanded(
+                      child: TextField(
+                        cursorColor: AppColors.rusticSunset,
+                        textInputAction: TextInputAction.search,
+                        onSubmitted: (value) {
+                          if (value.trim().isEmpty) return;
 
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ProductSearchScreen(
-                                  initialQuery: value,
-                                ),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ProductSearchScreen(
+                                initialQuery: value,
                               ),
-                            );
-                          },
-                          decoration: InputDecoration(
-                            hintText: l10n.shopSearchHint,
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            backgroundColor: Colors.transparent,
-                            builder: (context) {
-                              return const VoiceBottomSheet();
-                            },
+                            ),
                           );
                         },
-                        child: Image.asset(
-                          'assets/images/icons/mic.png',
-                          width: 20,
-                          height: 20,
+                        decoration: InputDecoration(
+                          hintText: l10n.shopSearchHint,
+                          border: InputBorder.none,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) {
+                            return const VoiceBottomSheet();
+                          },
+                        );
+                      },
+                      child: Image.asset(
+                        'assets/images/icons/mic.png',
+                        width: 20,
+                        height: 20,
+                      ),
+                    ),
+                  ],
                 ),
+              ),
 
-                SizedBox(height: height * 0.025),
+              SizedBox(height: height * 0.025),
 
-                // Categories
-                SizedBox(
-                  height: height * 0.11,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: EdgeInsets.only(left: width * 0.035),
-                    itemCount: 4,
-                    separatorBuilder: (_, __) => SizedBox(width: width * 0.035),
-                    itemBuilder: (context, index) {
-                      final categories = [
-                        {
-                          "img": 'assets/images/shop/shampoo.png',
-                          "title": l10n.shopCategoryShampoo,
-                        },
-                        {
-                          "img": 'assets/images/shop/haircolor.png',
-                          "title": l10n.shopCategoryConditioner,
-                        },
-                        {
-                          "img": 'assets/images/shop/conditioner.png',
-                          "title": l10n.shopCategoryHairColour,
-                        },
-                        {
-                          "img": 'assets/images/shop/hairoil.png',
-                          "title": l10n.shopCategoryHairOil,
-                        },
-                      ];
+              // Categories
+              SizedBox(
+                height: height * 0.11,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: EdgeInsets.only(left: width * 0.035),
+                  itemCount: 4,
+                  separatorBuilder: (_, __) => SizedBox(width: width * 0.035),
+                  itemBuilder: (context, index) {
+                    final categories = [
+                      {
+                        "img": 'assets/images/shop/shampoo.png',
+                        "title": l10n.shopCategoryShampoo,
+                      },
+                      {
+                        "img": 'assets/images/shop/haircolor.png',
+                        "title": l10n.shopCategoryConditioner,
+                      },
+                      {
+                        "img": 'assets/images/shop/conditioner.png',
+                        "title": l10n.shopCategoryHairColour,
+                      },
+                      {
+                        "img": 'assets/images/shop/hairoil.png',
+                        "title": l10n.shopCategoryHairOil,
+                      },
+                    ];
 
-                      final item = categories[index];
+                    final item = categories[index];
 
-                      return _categoryItem(
-                        context,
-                        item["img"]!,
-                        item["title"]!,
-                        width,
-                      );
-                    },
-                  ),
+                    return _categoryItem(
+                      context,
+                      item["img"]!,
+                      item["title"]!,
+                      width,
+                    );
+                  },
                 ),
+              ),
 
-                SizedBox(height: height * 0.025),
+              SizedBox(height: height * 0.025),
 
-                // Carousel banner
+              // Carousel banner
 
-                offerProvider.isLoading
-                    ? SizedBox(
-                        height: height * 0.20,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          padding:
-                              EdgeInsets.symmetric(horizontal: width * 0.04),
-                          itemCount: 3,
-                          separatorBuilder: (_, __) =>
-                              SizedBox(width: width * 0.04),
-                          itemBuilder: (_, __) => SkeletonBox(
-                            width: width * 0.75,
-                            height: height * 0.20,
-                            borderRadius: BorderRadius.circular(18),
-                          ),
+              offerProvider.isLoading && productOffers.isEmpty
+                  ? SizedBox(
+                      height: height * 0.20,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: EdgeInsets.symmetric(horizontal: width * 0.04),
+                        itemCount: 3,
+                        separatorBuilder: (_, __) =>
+                            SizedBox(width: width * 0.04),
+                        itemBuilder: (_, __) => SkeletonBox(
+                          width: width * 0.75,
+                          height: height * 0.20,
+                          borderRadius: BorderRadius.circular(18),
                         ),
-                      )
-                    : productOffers.isEmpty
-                        ? const SizedBox()
-                        : CarouselSlider(
+                      ),
+                    )
+                  : productOffers.isEmpty
+                      ? const SizedBox()
+                      : NotificationListener<ScrollNotification>(
+                          onNotification: (notification) {
+                            if (notification.metrics.pixels >=
+                                    notification.metrics.maxScrollExtent -
+                                        100 &&
+                                offerProvider.hasMore &&
+                                !offerProvider.isLoading) {
+                              offerProvider.fetchActiveOffers(
+                                  showLoader: false);
+                            }
+                            return false;
+                          },
+                          child: CarouselSlider(
                             options: CarouselOptions(
                               height: height * 0.20,
 
@@ -342,68 +363,54 @@ class _ShopScreenState extends State<ShopScreen> {
                                         productOffers.length == 1 ? 12 : 6,
                                   ),
                                   child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(18),
+                                    borderRadius: BorderRadius.circular(20),
                                     child: Image.network(
                                       imageUrl,
                                       width: double.infinity,
                                       fit: BoxFit.cover,
-                                      loadingBuilder:
-                                          (context, child, progress) {
-                                        if (progress == null) return child;
-                                        return const Center(
-                                          child: CircularProgressIndicator(
-                                            color: AppColors.rusticSunset,
-                                          ),
-                                        );
-                                      },
-                                      errorBuilder: (_, __, ___) => Container(
-                                        color: Colors.grey.shade200,
-                                        child: const Icon(
-                                          Icons.image_not_supported,
-                                          size: 40,
-                                        ),
-                                      ),
+                                      errorBuilder: (_, __, ___) =>
+                                          const Icon(Icons.image_not_supported),
                                     ),
                                   ),
                                 ),
                               );
                             }).toList(),
                           ),
-
-                offerProvider.isLoading || productOffers.isEmpty
-                    ? Container()
-                    : SizedBox(height: height * 0.035),
-
-                // Title
-                Padding(
-                  padding:
-                      EdgeInsetsGeometry.symmetric(horizontal: width * 0.035),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        l10n.shopSpecialOffers,
-                        style: TextStyle(
-                          fontFamily: "PoppinsSemiBold",
-                          fontSize: width * 0.048,
                         ),
-                      ),
-                      IconButton(
-                        onPressed: productProvider.fetchProducts,
-                        icon: const Icon(Icons.refresh),
-                      ),
-                    ],
-                  ),
-                ),
 
-                SizedBox(height: height * 0.015),
+              offerProvider.isLoading || productOffers.isEmpty
+                  ? Container()
+                  : SizedBox(height: height * 0.035),
 
-                SizedBox(
-                  height: height * 0.32,
-                  child: _buildSpecialOffersList(width),
+              // Title
+              Padding(
+                padding:
+                    EdgeInsetsGeometry.symmetric(horizontal: width * 0.035),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      l10n.shopSpecialOffers,
+                      style: TextStyle(
+                        fontFamily: "PoppinsSemiBold",
+                        fontSize: width * 0.048,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: productProvider.fetchProducts,
+                      icon: const Icon(Icons.refresh),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+
+              SizedBox(height: height * 0.015),
+
+              SizedBox(
+                height: height * 0.32,
+                child: _buildSpecialOffersList(width),
+              ),
+            ],
           ),
         ),
       ),
