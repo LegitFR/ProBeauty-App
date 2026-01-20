@@ -555,6 +555,7 @@ class ServiceModel {
   final int? durationMinutes;
   final double? price;
   final List<StaffModel> staff;
+  final String category;
 
   ServiceModel({
     required this.id,
@@ -562,6 +563,7 @@ class ServiceModel {
     this.durationMinutes,
     this.price,
     required this.staff,
+    required this.category,
   });
 
   factory ServiceModel.fromJson(Map<String, dynamic> json) {
@@ -575,6 +577,7 @@ class ServiceModel {
       price: json['price'] != null
           ? double.tryParse(json['price'].toString())
           : null,
+      category: json['category'] ?? "Featured", // 🔥 ADD
       staff: staffJson.map<StaffModel>((s) => StaffModel.fromJson(s)).toList(),
     );
   }
@@ -642,6 +645,15 @@ class _SalonCardState extends State<SalonCard> {
     _fetchSalonRating();
   }
 
+  String _findCategory(List services, String serviceId) {
+    for (final s in services) {
+      if (s["id"] == serviceId) {
+        return s["category"] ?? "Featured";
+      }
+    }
+    return "Featured";
+  }
+
   Future<void> openSelectServices(
     BuildContext context,
     String serviceId,
@@ -677,6 +689,7 @@ class _SalonCardState extends State<SalonCard> {
             salonName: data["name"],
             services: data["services"],
             salonStaffList: data["staff"],
+            initialCategory: _findCategory(data["services"], serviceId),
           ),
         ),
       );

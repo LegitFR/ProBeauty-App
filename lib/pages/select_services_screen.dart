@@ -8,6 +8,7 @@ class SelectServicesScreen extends StatefulWidget {
   final String salonName;
   final List<dynamic> services;
   final List<dynamic> salonStaffList;
+  final String? initialCategory;
 
   const SelectServicesScreen({
     super.key,
@@ -15,6 +16,7 @@ class SelectServicesScreen extends StatefulWidget {
     required this.salonName,
     required this.services,
     required this.salonStaffList,
+    required this.initialCategory,
   });
 
   @override
@@ -37,7 +39,12 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
         .toList();
 
     categories.sort((a, b) => a == "Featured" ? -1 : 1);
-    selectedCategory = categories.first;
+    if (widget.initialCategory != null &&
+        categories.contains(widget.initialCategory)) {
+      selectedCategory = widget.initialCategory!;
+    } else {
+      selectedCategory = categories.first;
+    }
   }
 
   Future<bool> _onBackPressed() async {

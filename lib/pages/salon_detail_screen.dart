@@ -383,6 +383,7 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                         subtitle:
                             l10n.salonServiceDuration(s["durationMinutes"]),
                         price: "₹${s["price"]}",
+                        category: s["category"] ?? "Featured",
                       ),
                       const SizedBox(height: 12),
                     ],
@@ -425,6 +426,7 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                               salonName: widget.name,
                               services: widget.services,
                               salonStaffList: widget.salonStaffList,
+                              initialCategory: "Featured",
                             ),
                           ),
                         );
@@ -464,6 +466,7 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
     required String title,
     required String subtitle,
     required String price,
+    required String category,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -501,6 +504,7 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                     salonName: widget.name,
                     services: widget.services,
                     salonStaffList: widget.salonStaffList,
+                    initialCategory: category,
                   ),
                 ),
               );
