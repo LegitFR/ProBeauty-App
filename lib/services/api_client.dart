@@ -58,6 +58,7 @@ class ApiClient {
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString("accessToken");
+    print("🔐 ACCESS TOKEN USED: $accessToken");
 
     final uri = Uri.parse("${ApiConfig.baseUrl}$path").replace(
       queryParameters: query,

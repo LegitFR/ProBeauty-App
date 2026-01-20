@@ -23,6 +23,8 @@ class OrderProvider with ChangeNotifier {
         _ordersEndpoint,
       );
 
+      print(resp.body);
+
       if (resp.statusCode == 200) {
         final json = jsonDecode(resp.body);
         final List data = json["data"] ?? [];
@@ -52,6 +54,7 @@ class OrderProvider with ChangeNotifier {
         error = "Failed to load orders";
       }
     } catch (e) {
+      print(error);
       error = "Error: $e";
     }
 

@@ -63,10 +63,9 @@ class _LoginScreenState extends State<LoginScreen> {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        // ApiClient already handles storing tokens via refresh logic,
-        // but we still store user profile data
         final prefs = await SharedPreferences.getInstance();
-
+        await prefs.setString("accessToken", data["accessToken"]);
+        await prefs.setString("refreshToken", data["refreshToken"]);
         await prefs.setString("userId", data["user"]["id"]);
         await prefs.setString("userName", data["user"]["name"]);
         await prefs.setString("userEmail", data["user"]["email"]);
