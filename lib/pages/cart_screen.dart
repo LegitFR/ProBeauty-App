@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:probeauty_app/models/cart_item.dart';
+import 'package:probeauty_app/widgets/success_animation.dart';
 import 'package:provider/provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:probeauty_app/providers/cart_provider.dart';
@@ -25,6 +26,44 @@ class _CartScreenState extends State<CartScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<CartProvider>(context, listen: false).fetchCart();
     });
+  }
+
+  Future<void> _showSuccessOverlay() async {
+    await showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierLabel: "Success",
+      barrierColor: Colors.black.withOpacity(0.1),
+      transitionDuration: const Duration(milliseconds: 600),
+      pageBuilder: (_, __, ___) {
+        return AnimatedSuccessScreen(
+          title: "Order Placed!",
+          buttonText: "Continue shopping",
+          successSvgPath: "assets/images/icons/success.svg",
+          onContinue: () {
+            Navigator.pop(context); // close overlay
+            Navigator.popUntil(context, (route) => route.isFirst);
+          },
+        );
+      },
+      transitionBuilder: (_, animation, __, child) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+        );
+
+        return FadeTransition(
+          opacity: curved,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 0.15),
+              end: Offset.zero,
+            ).animate(curved),
+            child: child,
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -109,12 +148,7 @@ class _CartScreenState extends State<CartScreen> {
                           }
 
                           if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Payment successful!"),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
+                            await _showSuccessOverlay();
                           }
 
                           await cart.fetchCart();

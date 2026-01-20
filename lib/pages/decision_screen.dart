@@ -6,6 +6,7 @@ import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:probeauty_app/services/google_auth_service.dart';
+import 'package:probeauty_app/widgets/success_animation.dart';
 
 class DecisionScreen extends StatefulWidget {
   const DecisionScreen({super.key});

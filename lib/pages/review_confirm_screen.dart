@@ -4,11 +4,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:probeauty_app/widgets/success_animation.dart';
 import 'package:probeauty_app/services/api_client.dart';
 
 class ReviewConfirmScreen extends StatefulWidget {
@@ -54,6 +53,44 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
     super.initState();
     _fetchSalonRating();
     _fetchApplicableOffers();
+  }
+
+  Future<void> _showSuccessOverlay() async {
+    await showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierLabel: "Success",
+      barrierColor: Colors.black.withOpacity(0.1),
+      transitionDuration: const Duration(milliseconds: 600),
+      pageBuilder: (_, __, ___) {
+        return AnimatedSuccessScreen(
+          title: "Appointment Booked!",
+          buttonText: "Continue booking",
+          successSvgPath: "assets/images/icons/success.svg",
+          onContinue: () {
+            Navigator.pop(context); // close overlay
+            Navigator.popUntil(context, (route) => route.isFirst);
+          },
+        );
+      },
+      transitionBuilder: (_, animation, __, child) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+        );
+
+        return FadeTransition(
+          opacity: curved,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 0.15),
+              end: Offset.zero,
+            ).animate(curved),
+            child: child,
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _fetchApplicableOffers() async {
@@ -378,14 +415,7 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
         final status = json["data"]["status"];
 
         if (status == "CONFIRMED") {
-          Navigator.popUntil(context, (route) => route.isFirst);
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Booking confirmed 🎉"),
-              backgroundColor: Colors.green,
-            ),
-          );
+          await _showSuccessOverlay();
           return;
         }
       }
@@ -413,14 +443,8 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
       }
 
       // ✅ SUCCESS → HOME
-      Navigator.popUntil(context, (route) => route.isFirst);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Booking confirmed 🎉"),
-          backgroundColor: Colors.green,
-        ),
-      );
+      await _showSuccessOverlay();
+      return;
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
