@@ -410,6 +410,8 @@ class _ShopScreenState extends State<ShopScreen> {
                 height: height * 0.32,
                 child: _buildSpecialOffersList(width),
               ),
+
+              SizedBox(height: height * 0.015),
             ],
           ),
         ),

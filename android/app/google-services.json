@@ -12,7 +12,20 @@
           "package_name": "com.example.probeauty_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "568953432506-vi46iukhlvkm3n660ec4hiovo99pdmoi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.probeauty_app",
+            "certificate_hash": "c3e308e066f7f48cffac17f9a046daec19317c3d"
+          }
+        },
+        {
+          "client_id": "568953432506-8vkn7qn586nl6fq9m2qshr027u8luji1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDiKJTqISvi0fN1jdqqROPp0mXe4pMNd8w"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "568953432506-8vkn7qn586nl6fq9m2qshr027u8luji1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "568953432506-eru8s6vtqvdsej1bi250rk26tbjdc522.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.probeautyApp"
+              }
+            }
+          ]
         }
       }
     }

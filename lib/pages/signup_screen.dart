@@ -2,11 +2,13 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:probeauty_app/config/api_config.dart';
 import 'package:probeauty_app/services/api_client.dart';
+import 'package:probeauty_app/services/google_auth_service.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -291,6 +293,111 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                         ),
                       ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          "Already a member? ",
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontFamily: "PoppinsSemiBold",
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushReplacementNamed(context, '/login');
+                          },
+                          child: const Text(
+                            "login",
+                            style: TextStyle(
+                              color: AppColors.rusticSunset,
+                              fontFamily: "PoppinsBold",
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+
+// -------- Already a member + OR Divider --------
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Divider(
+                            color: Colors.grey.shade400,
+                            thickness: 1,
+                            endIndent: 10,
+                          ),
+                        ),
+                        const Text(
+                          "OR",
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontFamily: "PoppinsBold",
+                          ),
+                        ),
+                        Expanded(
+                          child: Divider(
+                            color: Colors.grey.shade400,
+                            thickness: 1,
+                            indent: 10,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 30),
+                    Text(
+                      AppLocalizations.of(context)!.signInWith,
+                      style: TextStyle(
+                        color: AppColors.rusticSunset,
+                        fontSize: size.width * 0.03,
+                        fontFamily: "PoppinsBold",
+                      ),
+                    ),
+                    SizedBox(height: size.height * 0.015),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () async {
+                            try {
+                              await GoogleAuthService.signInWithGoogle();
+
+                              if (!mounted) return;
+                              Navigator.pushReplacementNamed(context, '/home');
+                            } catch (e) {
+                              debugPrint("GOOGLE SIGN IN ERROR: $e");
+
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(e.toString())),
+                              );
+                            }
+                          },
+                          child: SvgPicture.asset(
+                            "assets/images/icons/google.svg",
+                            width: 25,
+                            height: 25,
+                          ),
+                        ),
+                        // SvgPicture.asset(
+                        //   "assets/images/icons/facebook.svg",
+                        //   width: 25,
+                        //   height: 25,
+                        // ),
+                        // const SizedBox(width: 40),
+                        // SvgPicture.asset(
+                        //   "assets/images/icons/apple.svg",
+                        //   width: 25,
+                        //   height: 25,
+                        // ),
+                      ],
                     ),
                   ],
                 ),

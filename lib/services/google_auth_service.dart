@@ -1,19 +1,17 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:probeauty_app/services/api_client.dart';
 
 class GoogleAuthService {
-  static final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: ['email', 'profile'],
-    serverClientId: dotenv.env['GOOGLE_WEB_CLIENT_ID'],
-  );
+  static final GoogleSignIn _googleSignIn = GoogleSignIn.standard();
 
   static Future<void> signInWithGoogle() async {
     try {
+      // Force fresh session
+      await _googleSignIn.signOut();
+
       final account = await _googleSignIn.signIn();
       if (account == null) return;
 
@@ -24,7 +22,6 @@ class GoogleAuthService {
         throw Exception("Google ID token missing");
       }
 
-      // 🔥 Use ApiClient instead of raw http
       final response = await ApiClient.post(
         "/api/v1/auth/google",
         body: {
@@ -32,7 +29,8 @@ class GoogleAuthService {
         },
       );
 
-      final data = jsonDecode(response.body);
+      final Map<String, dynamic> data =
+          response.body.isNotEmpty ? jsonDecode(response.body) : {};
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final prefs = await SharedPreferences.getInstance();
