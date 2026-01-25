@@ -519,422 +519,426 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
 
     final grandTotal = discountedTotal + taxes;
 
-    return Scaffold(
-      backgroundColor: AppColors.softIvory,
-      appBar: AppBar(
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
         backgroundColor: AppColors.softIvory,
-        elevation: 0,
-        leading: const BackButton(color: Colors.black),
-        centerTitle: true,
-        title: Text(
-          l10n.reviewConfirmTitle,
-          style: const TextStyle(
-              fontFamily: "PoppinsSemiBold", color: Colors.black),
-        ),
-        actions: [
-          GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: const Padding(
-              padding: EdgeInsets.only(right: 16),
-              child: Icon(Icons.close, color: Colors.black),
-            ),
-          )
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // SALON HEADER
-            Row(
-              children: [
-                Container(
-                  width: 80,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Center(
-                    child: Text("LOGO",
-                        style: TextStyle(color: Colors.white, fontSize: 10)),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.salonName,
-                        style: const TextStyle(
-                            fontFamily: "PoppinsSemiBold", fontSize: 15),
-                      ),
-                      _ratingLoading
-                          ? const SizedBox(
-                              height: 16,
-                              width: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: AppColors.rusticSunset,
-                              ),
-                            )
-                          : Row(
-                              children: [
-                                _buildStars(_avgRating),
-                                const SizedBox(width: 6),
-                                Text(
-                                  "($_totalReviews)",
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                              ],
-                            ),
-                      const Text("Anna Nagar, Chennai",
-                          style: TextStyle(color: Colors.black54)),
-                    ],
-                  ),
-                )
-              ],
-            ),
-
-            const SizedBox(height: 18),
-
-            Row(
-              children: [
-                const Icon(Icons.schedule, size: 16),
-                const SizedBox(width: 6),
-                Text(_buildTimeRange()),
-              ],
-            ),
-
-            Row(
-              children: [
-                const Icon(Icons.calendar_today, size: 16),
-                const SizedBox(width: 6),
-                Text(dateText),
-              ],
-            ),
-
-            const SizedBox(height: 15),
-            const Divider(thickness: 1),
-            const SizedBox(height: 15),
-
-            const Text(
-              "Services",
-              style: TextStyle(
-                fontFamily: "PoppinsSemiBold",
-                fontSize: 16,
+        appBar: AppBar(
+          backgroundColor: AppColors.softIvory,
+          elevation: 0,
+          leading: const BackButton(color: Colors.black),
+          centerTitle: true,
+          title: Text(
+            l10n.reviewConfirmTitle,
+            style: const TextStyle(
+                fontFamily: "PoppinsSemiBold", color: Colors.black),
+          ),
+          actions: [
+            GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: const Padding(
+                padding: EdgeInsets.only(right: 16),
+                child: Icon(Icons.close, color: Colors.black),
               ),
-            ),
-            const SizedBox(height: 8),
-
-            ...widget.selectedServices.map((s) {
-              final price = _parsePrice(s["price"]);
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
+            )
+          ],
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // SALON HEADER
+              Row(
+                children: [
+                  Container(
+                    width: 80,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Center(
+                      child: Text("LOGO",
+                          style: TextStyle(color: Colors.white, fontSize: 10)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(s["title"],
-                            style:
-                                const TextStyle(fontFamily: "PoppinsSemiBold")),
                         Text(
-                          l10n.reviewConfirmServiceDuration(
-                              s["durationMinutes"]),
+                          widget.salonName,
+                          style: const TextStyle(
+                              fontFamily: "PoppinsSemiBold", fontSize: 15),
                         ),
+                        _ratingLoading
+                            ? const SizedBox(
+                                height: 16,
+                                width: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.rusticSunset,
+                                ),
+                              )
+                            : Row(
+                                children: [
+                                  _buildStars(_avgRating),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    "($_totalReviews)",
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                        const Text("Anna Nagar, Chennai",
+                            style: TextStyle(color: Colors.black54)),
                       ],
                     ),
-                    Text("₹$price",
-                        style: const TextStyle(fontFamily: "PoppinsSemiBold")),
-                  ],
-                ),
-              );
-            }),
-
-            const SizedBox(
-              height: 15,
-            ),
-            _priceRow("Subtotal", total),
-            if (_selectedOffer != null)
-              _priceRow(
-                "Discount",
-                -discount,
-                green: true,
+                  )
+                ],
               ),
 
-            _priceRow("Taxes", taxes),
+              const SizedBox(height: 18),
 
-            const Divider(),
+              Row(
+                children: [
+                  const Icon(Icons.schedule, size: 16),
+                  const SizedBox(width: 6),
+                  Text(_buildTimeRange()),
+                ],
+              ),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "Total",
-                  style: TextStyle(fontFamily: "PoppinsSemiBold"),
+              Row(
+                children: [
+                  const Icon(Icons.calendar_today, size: 16),
+                  const SizedBox(width: 6),
+                  Text(dateText),
+                ],
+              ),
+
+              const SizedBox(height: 15),
+              const Divider(thickness: 1),
+              const SizedBox(height: 15),
+
+              const Text(
+                "Services",
+                style: TextStyle(
+                  fontFamily: "PoppinsSemiBold",
+                  fontSize: 16,
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    if (_selectedOffer != null)
+              ),
+              const SizedBox(height: 8),
+
+              ...widget.selectedServices.map((s) {
+                final price = _parsePrice(s["price"]);
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(s["title"],
+                              style: const TextStyle(
+                                  fontFamily: "PoppinsSemiBold")),
+                          Text(
+                            l10n.reviewConfirmServiceDuration(
+                                s["durationMinutes"]),
+                          ),
+                        ],
+                      ),
+                      Text("₹$price",
+                          style:
+                              const TextStyle(fontFamily: "PoppinsSemiBold")),
+                    ],
+                  ),
+                );
+              }),
+
+              const SizedBox(
+                height: 15,
+              ),
+              _priceRow("Subtotal", total),
+              if (_selectedOffer != null)
+                _priceRow(
+                  "Discount",
+                  -discount,
+                  green: true,
+                ),
+
+              _priceRow("Taxes", taxes),
+
+              const Divider(),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Total",
+                    style: TextStyle(fontFamily: "PoppinsSemiBold"),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (_selectedOffer != null)
+                        Text(
+                          "₹${total + taxes}",
+                          style: const TextStyle(
+                            decoration: TextDecoration.lineThrough,
+                            color: Colors.black45,
+                          ),
+                        ),
                       Text(
-                        "₹${total + taxes}",
+                        "₹$grandTotal",
                         style: const TextStyle(
-                          decoration: TextDecoration.lineThrough,
-                          color: Colors.black45,
+                          fontFamily: "PoppinsSemiBold",
+                          fontSize: 16,
                         ),
                       ),
+                    ],
+                  ),
+                ],
+              ),
+
+              const Divider(thickness: 1),
+              const SizedBox(height: 15),
+
+              if (_offersLoading) ...[
+                const SizedBox(height: 12),
+                const Text(
+                  "Available offers",
+                  style: TextStyle(fontFamily: "PoppinsSemiBold", fontSize: 15),
+                ),
+                const SizedBox(height: 10),
+                _pulseOfferLoader(),
+              ] else if (_availableOffers.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                const Text(
+                  "Available offers",
+                  style: TextStyle(fontFamily: "PoppinsSemiBold", fontSize: 15),
+                ),
+                const SizedBox(height: 8),
+                ..._availableOffers.map((offer) {
+                  final bool isSelected = _selectedOffer?["id"] == offer["id"];
+                  final bool disabled = _selectedOffer != null && !isSelected;
+
+                  return Opacity(
+                    opacity: disabled ? 0.4 : 1,
+                    child: GestureDetector(
+                      onTap: disabled
+                          ? null
+                          : () {
+                              if (isSelected) {
+                                _removeOffer();
+                              } else {
+                                _applyOffer(offer, total);
+                              }
+                            },
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isSelected
+                                ? AppColors.rusticSunset
+                                : disabled
+                                    ? Colors.black12
+                                    : Colors.black26,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    offer["title"],
+                                    style: const TextStyle(
+                                      fontFamily: "PoppinsSemiBold",
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    offer["description"] ?? "",
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              offer["discountType"] == "percentage"
+                                  ? "${offer["discountValue"]}% OFF"
+                                  : "₹${offer["discountValue"]} OFF",
+                              style: const TextStyle(
+                                fontFamily: "PoppinsSemiBold",
+                                color: AppColors.rusticSunset,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ],
+
+              const SizedBox(height: 15),
+
+              const Text(
+                "Payment method",
+                style: TextStyle(
+                  fontFamily: "PoppinsSemiBold",
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    payAtVenue = !payAtVenue;
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: payAtVenue ? Colors.black : Colors.black26,
+                      width: 1.5,
+                    ),
+                    color: AppColors.softIvory,
+                  ),
+                  child: Row(
+                    children: [
+                      // 🔹 SVG ICON
+                      SvgPicture.asset(
+                        "assets/images/icons/pay_at_venue.svg",
+                        width: 30,
+                        height: 30,
+                        colorFilter: const ColorFilter.mode(
+                          Colors.black,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+
+                      const SizedBox(width: 12),
+
+                      const Expanded(
+                        child: Text(
+                          "Pay at venue",
+                          style: TextStyle(
+                            fontFamily: "PoppinsMedium",
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+
+                      // 🔹 SELECTION INDICATOR
+                      Container(
+                        width: 25,
+                        height: 25,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: payAtVenue
+                                ? AppColors.rusticSunset
+                                : Colors.black26,
+                            width: 1.6,
+                          ),
+                        ),
+                        child: payAtVenue
+                            ? Center(
+                                child: Container(
+                                  width: 10,
+                                  height: 10,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: AppColors.rusticSunset,
+                                  ),
+                                ),
+                              )
+                            : null,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 90),
+            ],
+          ),
+        ),
+        bottomNavigationBar: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: const BoxDecoration(
+            border: Border(top: BorderSide(color: Colors.black12)),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                     Text(
                       "₹$grandTotal",
                       style: const TextStyle(
                         fontFamily: "PoppinsSemiBold",
-                        fontSize: 16,
+                        fontSize: 15,
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
-
-            const Divider(thickness: 1),
-            const SizedBox(height: 15),
-
-            if (_offersLoading) ...[
-              const SizedBox(height: 12),
-              const Text(
-                "Available offers",
-                style: TextStyle(fontFamily: "PoppinsSemiBold", fontSize: 15),
-              ),
-              const SizedBox(height: 10),
-              _pulseOfferLoader(),
-            ] else if (_availableOffers.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              const Text(
-                "Available offers",
-                style: TextStyle(fontFamily: "PoppinsSemiBold", fontSize: 15),
-              ),
-              const SizedBox(height: 8),
-              ..._availableOffers.map((offer) {
-                final bool isSelected = _selectedOffer?["id"] == offer["id"];
-                final bool disabled = _selectedOffer != null && !isSelected;
-
-                return Opacity(
-                  opacity: disabled ? 0.4 : 1,
-                  child: GestureDetector(
-                    onTap: disabled
-                        ? null
-                        : () {
-                            if (isSelected) {
-                              _removeOffer();
-                            } else {
-                              _applyOffer(offer, total);
-                            }
-                          },
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isSelected
-                              ? AppColors.rusticSunset
-                              : disabled
-                                  ? Colors.black12
-                                  : Colors.black26,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  offer["title"],
-                                  style: const TextStyle(
-                                    fontFamily: "PoppinsSemiBold",
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  offer["description"] ?? "",
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Text(
-                            offer["discountType"] == "percentage"
-                                ? "${offer["discountValue"]}% OFF"
-                                : "₹${offer["discountValue"]} OFF",
-                            style: const TextStyle(
-                              fontFamily: "PoppinsSemiBold",
-                              color: AppColors.rusticSunset,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              }),
-            ],
-
-            const SizedBox(height: 15),
-
-            const Text(
-              "Payment method",
-              style: TextStyle(
-                fontFamily: "PoppinsSemiBold",
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  payAtVenue = !payAtVenue;
-                });
-              },
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: payAtVenue ? Colors.black : Colors.black26,
-                    width: 1.5,
-                  ),
-                  color: AppColors.softIvory,
-                ),
-                child: Row(
-                  children: [
-                    // 🔹 SVG ICON
-                    SvgPicture.asset(
-                      "assets/images/icons/pay_at_venue.svg",
-                      width: 30,
-                      height: 30,
-                      colorFilter: const ColorFilter.mode(
-                        Colors.black,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-
-                    const SizedBox(width: 12),
-
-                    const Expanded(
-                      child: Text(
-                        "Pay at venue",
-                        style: TextStyle(
-                          fontFamily: "PoppinsMedium",
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-
-                    // 🔹 SELECTION INDICATOR
-                    Container(
-                      width: 25,
-                      height: 25,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: payAtVenue
-                              ? AppColors.rusticSunset
-                              : Colors.black26,
-                          width: 1.6,
-                        ),
-                      ),
-                      child: payAtVenue
-                          ? Center(
-                              child: Container(
-                                width: 10,
-                                height: 10,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: AppColors.rusticSunset,
-                                ),
-                              ),
-                            )
-                          : null,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 90),
-          ],
-        ),
-      ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.black12)),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "₹$grandTotal",
-                    style: const TextStyle(
-                      fontFamily: "PoppinsSemiBold",
-                      fontSize: 15,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    "${widget.selectedServices.length} "
-                    "${widget.selectedServices.length > 1 ? "services" : "service"} • "
-                    "${_formatTotalDuration()}",
-                    style: const TextStyle(
-                      fontFamily: "PoppinsRegular",
-                      fontSize: 12,
-                      color: Colors.black54,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ElevatedButton(
-              onPressed: _isProcessing
-                  ? null
-                  : () {
-                      if (payAtVenue) {
-                        _confirmPayAtVenue(context);
-                      } else {
-                        _startStripeCheckout(context);
-                      }
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.rusticSunset,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: _isProcessing
-                  ? const LoadingDots() // 🔥 YOUR ANIMATION
-                  : Text(
-                      l10n.reviewConfirmConfirmButton,
+                    const SizedBox(height: 2),
+                    Text(
+                      "${widget.selectedServices.length} "
+                      "${widget.selectedServices.length > 1 ? "services" : "service"} • "
+                      "${_formatTotalDuration()}",
                       style: const TextStyle(
-                        fontFamily: "PoppinsSemiBold",
-                        color: Colors.white,
+                        fontFamily: "PoppinsRegular",
+                        fontSize: 12,
+                        color: Colors.black54,
                       ),
                     ),
-            ),
-          ],
+                  ],
+                ),
+              ),
+              ElevatedButton(
+                onPressed: _isProcessing
+                    ? null
+                    : () {
+                        if (payAtVenue) {
+                          _confirmPayAtVenue(context);
+                        } else {
+                          _startStripeCheckout(context);
+                        }
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.rusticSunset,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: _isProcessing
+                    ? const LoadingDots() // 🔥 YOUR ANIMATION
+                    : Text(
+                        l10n.reviewConfirmConfirmButton,
+                        style: const TextStyle(
+                          fontFamily: "PoppinsSemiBold",
+                          color: Colors.white,
+                        ),
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );

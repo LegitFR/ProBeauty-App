@@ -20,6 +20,8 @@ class SelectProfessionalScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    print("STAFF LIST");
+    print(staffList);
 
     return SafeArea(
       bottom: true,
