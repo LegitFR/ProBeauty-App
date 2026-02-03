@@ -21,6 +21,8 @@ class ShopScreen extends StatefulWidget {
 }
 
 class _ShopScreenState extends State<ShopScreen> {
+  int _currentProductOfferIndex = 0;
+
   @override
   void initState() {
     super.initState();
@@ -40,95 +42,6 @@ class _ShopScreenState extends State<ShopScreen> {
       }
     });
   }
-
-  // ---------------- Fetch Products ----------------
-  // Future<void> _fetchProducts() async {
-  //   if (!mounted) return;
-
-  //   setState(() {
-  //     _loading = true;
-  //     _error = null;
-  //   });
-
-  //   try {
-  //     final res = await http.get(
-  //       Uri.parse(_productsEndpoint),
-  //       headers: {'Content-Type': 'application/json'},
-  //     );
-
-  //     if (!mounted) return;
-
-  //     if (res.statusCode == 200) {
-  //       final Map<String, dynamic> body = json.decode(res.body);
-  //       final data = body['data'];
-
-  //       if (data is List) {
-  //         _products = data.map((e) => Product.fromJson(e)).toList();
-
-  //         if (!mounted) return;
-  //         setState(() {});
-
-  //         // fetch salon names
-  //         await _fetchAllSalonNames();
-  //       } else {
-  //         if (!mounted) return;
-  //         setState(() => _error = 'Unexpected response shape');
-  //       }
-  //     } else {
-  //       if (!mounted) return;
-  //       setState(() => _error = 'Server responded with ${res.statusCode}');
-  //     }
-  //   } catch (e) {
-  //     if (!mounted) return;
-  //     setState(() => _error = 'Failed to fetch products');
-  //   } finally {
-  //     if (!mounted) return;
-  //     setState(() => _loading = false);
-  //   }
-  // }
-
-  // ---------------- Fetch All Unique Salon Names ----------------
-  // Future<void> _fetchAllSalonNames() async {
-  //   final uniqueSalonIds = _products
-  //       .map((p) => p.salonId)
-  //       .where((id) => id != null && id.isNotEmpty)
-  //       .toSet();
-
-  //   for (final salonId in uniqueSalonIds) {
-  //     if (!mounted) return;
-
-  //     if (!salonNames.containsKey(salonId)) {
-  //       await _fetchSalonName(salonId!);
-  //     }
-  //   }
-
-  //   if (!mounted) return;
-  //   setState(() {}); // refresh UI
-  // }
-
-  // ---------------- Fetch Single Salon Name ----------------
-  // Future<void> _fetchSalonName(String salonId) async {
-  //   try {
-  //     final res = await http.get(
-  //       Uri.parse('$_baseUrl/api/v1/salons/$salonId'),
-  //       headers: {'Content-Type': 'application/json'},
-  //     );
-
-  //     if (!mounted) return;
-
-  //     if (res.statusCode == 200) {
-  //       final body = json.decode(res.body);
-  //       salonNames[salonId] = body['data']?['name'] ?? 'Salon';
-  //     } else {
-  //       salonNames[salonId] = 'Salon';
-  //     }
-  //   } catch (_) {
-  //     if (!mounted) return;
-  //     salonNames[salonId] = 'Salon';
-  //   }
-  // }
-
-  // ---------------------- UI ----------------------
 
   Future<void> _openProductFromOffer(
     BuildContext context,
@@ -337,6 +250,12 @@ class _ShopScreenState extends State<ShopScreen> {
                           },
                           child: CarouselSlider(
                             options: CarouselOptions(
+                              onPageChanged: (index, reason) {
+                                setState(() {
+                                  _currentProductOfferIndex = index;
+                                });
+                              },
+
                               height: height * 0.20,
 
                               // 🔥 prevent duplication
@@ -378,6 +297,9 @@ class _ShopScreenState extends State<ShopScreen> {
                           ),
                         ),
 
+              const SizedBox(height: 12),
+              _buildProductOfferIndicator(productOffers.length),
+
               offerProvider.isLoading || productOffers.isEmpty
                   ? Container()
                   : SizedBox(height: height * 0.035),
@@ -396,10 +318,10 @@ class _ShopScreenState extends State<ShopScreen> {
                         fontSize: width * 0.048,
                       ),
                     ),
-                    IconButton(
-                      onPressed: productProvider.fetchProducts,
-                      icon: const Icon(Icons.refresh),
-                    ),
+                    // IconButton(
+                    //   onPressed: productProvider.fetchProducts,
+                    //   icon: const Icon(Icons.refresh),
+                    // ),
                   ],
                 ),
               ),
@@ -416,6 +338,39 @@ class _ShopScreenState extends State<ShopScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildProductOfferIndicator(int count) {
+    if (count <= 1) {
+      return Center(
+        child: Container(
+          width: 24,
+          height: 6,
+          decoration: BoxDecoration(
+            color: AppColors.rusticSunset,
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(count, (index) {
+        final bool isActive = index == _currentProductOfferIndex;
+
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          width: isActive ? 22 : 8,
+          height: 6,
+          decoration: BoxDecoration(
+            color: isActive ? AppColors.rusticSunset : Colors.black26,
+            borderRadius: BorderRadius.circular(10),
+          ),
+        );
+      }),
     );
   }
 

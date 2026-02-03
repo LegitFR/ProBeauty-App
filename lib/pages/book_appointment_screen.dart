@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/first_visit_screen.dart';
+import 'package:probeauty_app/pages/home_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:probeauty_app/config/api_config.dart';
 import 'package:probeauty_app/services/api_client.dart';
@@ -39,6 +40,109 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
   void initState() {
     super.initState();
     _fetchSlotsForDate(selectedDate);
+  }
+
+  Future<bool> _confirmExit() async {
+    final shouldExit = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.softIvory,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        final height = MediaQuery.of(context).size.height;
+
+        return SafeArea(
+          child: SizedBox(
+            height: height * 0.92,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 44,
+                      height: 5,
+                      margin: const EdgeInsets.only(bottom: 24),
+                      decoration: BoxDecoration(
+                        color: Colors.black26,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const Text(
+                    "Are you sure you want to\nleave this booking",
+                    style: TextStyle(
+                      fontFamily: "PoppinsSemiBold",
+                      fontSize: 24,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "All selections will be lost",
+                    style: TextStyle(
+                      fontFamily: "PoppinsRegular",
+                      fontSize: 15,
+                      color: Colors.black54,
+                    ),
+                  ),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.black),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: const Text(
+                            "Cancel",
+                            style: TextStyle(
+                              fontFamily: "PoppinsSemiBold",
+                              fontSize: 16,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: const Text(
+                            "Yes, Exit",
+                            style: TextStyle(
+                              fontFamily: "PoppinsSemiBold",
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    return shouldExit == true;
   }
 
   // --------------------------------------------------
@@ -137,6 +241,127 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
   String displayTime(String iso) {
     final utc = DateTime.parse(iso).toUtc();
     return DateFormat("hh:mm a").format(utc).toLowerCase();
+  }
+
+  Widget _buildSelectedServicesCard() {
+    if (widget.selectedServices.isEmpty) return const SizedBox();
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // SERVICES LIST
+          ListView.separated(
+            itemCount: widget.selectedServices.length,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            separatorBuilder: (_, __) => Divider(
+              height: 1,
+              color: Colors.grey.shade300,
+            ),
+            itemBuilder: (context, index) {
+              final service = widget.selectedServices[index];
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // LEFT SIDE
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            service["title"] ?? "Service",
+                            style: const TextStyle(
+                              fontFamily: "PoppinsSemiBold",
+                              fontSize: 15,
+                              color: Colors.black,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            widget.staff?["name"] ?? "Top stylist",
+                            style: const TextStyle(
+                              fontFamily: "PoppinsRegular",
+                              fontSize: 13,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                        ],
+                      ),
+                    ),
+
+                    // RIGHT SIDE (PRICE)
+                    Text(
+                      "₹${service["price"] ?? "--"}",
+                      style: const TextStyle(
+                        fontFamily: "PoppinsSemiBold",
+                        fontSize: 15,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+
+          // ADD SERVICE BUTTON
+          InkWell(
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(18),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(18),
+                ),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: const [
+                  Icon(
+                    Icons.add,
+                    color: AppColors.rusticSunset,
+                    size: 20,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    "Add another service",
+                    style: TextStyle(
+                      fontFamily: "PoppinsSemiBold",
+                      fontSize: 14,
+                      color: AppColors.rusticSunset,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   // --------------------------------------------------
@@ -241,6 +466,24 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
           l10n.bookAppointmentTitle,
           style: const TextStyle(fontFamily: "PoppinsSemiBold"),
         ),
+        actions: [
+          GestureDetector(
+            onTap: () async {
+              final shouldExit = await _confirmExit();
+              if (shouldExit) {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HomeScreen()),
+                  (route) => false, // 🔥 clears all previous pages
+                );
+              }
+            },
+            child: const Padding(
+              padding: EdgeInsets.only(right: 16),
+              child: Icon(Icons.close, color: Colors.black),
+            ),
+          )
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -320,7 +563,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 12),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(25),
                           border: Border.all(
                             color: isAvailable ? Colors.black : Colors.black26,
                           ),
@@ -346,6 +589,10 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                   },
                 ),
               ),
+            const SizedBox(
+              height: 10,
+            ),
+            _buildSelectedServicesCard(),
           ],
         ),
       ),

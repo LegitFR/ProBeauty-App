@@ -7,6 +7,7 @@ import 'package:probeauty_app/app_locale.dart';
 import 'package:probeauty_app/firebase_options.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/splash_screen.dart';
+import 'package:probeauty_app/providers/address_provider.dart';
 import 'package:probeauty_app/providers/appointment_provider.dart';
 import 'package:probeauty_app/providers/cart_provider.dart';
 import 'package:probeauty_app/providers/explore_provider.dart';
@@ -123,6 +124,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AppointmentProvider()),
         ChangeNotifierProvider(create: (_) => ExploreProvider()),
         ChangeNotifierProvider(create: (_) => OfferProvider()),
+        ChangeNotifierProvider(create: (_) => AddressProvider()),
         ChangeNotifierProvider(create: (_) => AppLocale(code)),
       ],
       child: const MyApp(),
@@ -144,6 +146,24 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
+        snackBarTheme: SnackBarThemeData(
+          backgroundColor: AppColors.rusticSunset,
+          behavior: SnackBarBehavior.floating,
+          elevation: 6,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          contentTextStyle: const TextStyle(
+            fontFamily: "PoppinsSemiBold",
+            color: Colors.white,
+            fontSize: 14,
+          ),
+        ),
+        textSelectionTheme: const TextSelectionThemeData(
+          selectionHandleColor: Colors.transparent,
+          selectionColor: Color.fromARGB(255, 252, 138, 89),
+          cursorColor: AppColors.rusticSunset,
+        ),
         appBarTheme: const AppBarTheme(
           backgroundColor: AppColors.softIvory,
           surfaceTintColor: Colors.transparent,

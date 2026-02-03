@@ -21,6 +21,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  int _currentOfferIndex = 0;
+
   @override
   void initState() {
     super.initState();
@@ -76,15 +78,48 @@ class _HomeScreenState extends State<HomeScreen> {
                       'assets/images/logos/probeauty_app_logo.svg',
                       height: height * 0.04,
                     ),
-                    GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, "/notification");
-                        },
-                        child: SvgPicture.asset(
-                          'assets/images/icons/notification.svg',
-                          width: width * 0.05,
-                          height: width * 0.05,
-                        )),
+                    Row(
+                      children: [
+                        GestureDetector(
+                            onTap: () {
+                              Navigator.pushNamed(context, "/notification");
+                            },
+                            child: SvgPicture.asset(
+                              'assets/images/icons/notification.svg',
+                              width: width * 0.05,
+                              height: width * 0.05,
+                            )),
+                        const SizedBox(
+                          width: 12,
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                backgroundColor: AppColors.rusticSunset,
+                                content: const Text(
+                                  "Coming soon! 🚀",
+                                  style: TextStyle(
+                                      fontFamily: "PoppinsSemiBold",
+                                      color: Colors.white),
+                                ),
+                                behavior: SnackBarBehavior.floating,
+                                margin: const EdgeInsets.all(12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          },
+                          child: SvgPicture.asset(
+                            'assets/images/icons/qr.svg',
+                            width: width * 0.07,
+                            height: width * 0.07,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -163,6 +198,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                       child: CarouselSlider(
                         options: CarouselOptions(
+                          onPageChanged: (index, reason) {
+                            setState(() {
+                              _currentOfferIndex = index;
+                            });
+                          },
+
                           height: height * 0.20,
 
                           // 🔥 prevent duplication
@@ -233,6 +274,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         }).toList(),
                       ),
                     ),
+
+              const SizedBox(height: 12),
+
+              _buildOfferIndicator(offers.length),
 
               SizedBox(height: height * 0.035),
 
@@ -567,7 +612,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             'assets/images/icons/discount_tag.png',
                                             width: width * 0.035,
                                           ),
-                                          SizedBox(width: width * 0.045),
+                                          SizedBox(width: width * 0.018),
                                           Expanded(
                                             child: Text(
                                               l10n.homeSaveUpto("10"),
@@ -597,6 +642,40 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildOfferIndicator(int count) {
+    if (count <= 1) {
+      // 🔥 Single image → show one orange pill
+      return Center(
+        child: Container(
+          width: 24,
+          height: 6,
+          decoration: BoxDecoration(
+            color: AppColors.rusticSunset,
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(count, (index) {
+        final bool isActive = index == _currentOfferIndex;
+
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          width: isActive ? 22 : 8,
+          height: 6,
+          decoration: BoxDecoration(
+            color: isActive ? AppColors.rusticSunset : Colors.black26,
+            borderRadius: BorderRadius.circular(10),
+          ),
+        );
+      }),
     );
   }
 

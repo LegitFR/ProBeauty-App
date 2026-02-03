@@ -6,6 +6,7 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
+import 'package:probeauty_app/pages/home_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:probeauty_app/widgets/success_animation.dart';
 import 'package:probeauty_app/services/api_client.dart';
@@ -53,6 +54,109 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
     super.initState();
     _fetchSalonRating();
     _fetchApplicableOffers();
+  }
+
+  Future<bool> _confirmExit() async {
+    final shouldExit = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.softIvory,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        final height = MediaQuery.of(context).size.height;
+
+        return SafeArea(
+          child: SizedBox(
+            height: height * 0.92,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 44,
+                      height: 5,
+                      margin: const EdgeInsets.only(bottom: 24),
+                      decoration: BoxDecoration(
+                        color: Colors.black26,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const Text(
+                    "Are you sure you want to\nleave this booking",
+                    style: TextStyle(
+                      fontFamily: "PoppinsSemiBold",
+                      fontSize: 24,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "Your booking progress will be lost",
+                    style: TextStyle(
+                      fontFamily: "PoppinsRegular",
+                      fontSize: 15,
+                      color: Colors.black54,
+                    ),
+                  ),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.black),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: const Text(
+                            "Cancel",
+                            style: TextStyle(
+                              fontFamily: "PoppinsSemiBold",
+                              fontSize: 16,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: const Text(
+                            "Yes, Exit",
+                            style: TextStyle(
+                              fontFamily: "PoppinsSemiBold",
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    return shouldExit == true;
   }
 
   Future<void> _showSuccessOverlay() async {
@@ -535,8 +639,15 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
           ),
           actions: [
             GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
+              onTap: () async {
+                final shouldExit = await _confirmExit();
+                if (shouldExit) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const HomeScreen()),
+                    (route) => false,
+                  );
+                }
               },
               child: const Padding(
                 padding: EdgeInsets.only(right: 16),

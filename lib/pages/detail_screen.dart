@@ -258,11 +258,17 @@ class DetailScreen extends StatelessWidget {
       final open = dayData?["open"] ?? "--";
       final close = dayData?["close"] ?? "--";
 
+      final isClosed = open == "--" || close == "--";
+
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),
         child: Row(
           children: [
-            const Icon(Icons.circle, size: 10, color: Colors.green),
+            Icon(
+              Icons.circle,
+              size: 10,
+              color: isClosed ? Colors.red : Colors.green,
+            ),
             const SizedBox(width: 10),
             SizedBox(
               width: 90,
@@ -275,7 +281,7 @@ class DetailScreen extends StatelessWidget {
               ),
             ),
             Text(
-              "$open – $close",
+              isClosed ? "Closed" : "$open – $close",
               style: const TextStyle(
                 fontFamily: "PoppinsRegular",
                 fontSize: 14,

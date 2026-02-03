@@ -45,6 +45,19 @@ class ApiClient {
     );
   }
 
+  static Future<http.Response> patch(
+    String path, {
+    Map<String, dynamic>? body,
+    Map<String, String>? query,
+  }) {
+    return _send(
+      method: "PATCH",
+      path: path,
+      body: body,
+      query: query,
+    );
+  }
+
   // =====================
   // CORE ENGINE
   // =====================
@@ -58,7 +71,6 @@ class ApiClient {
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString("accessToken");
-    print("🔐 ACCESS TOKEN USED: $accessToken");
 
     final uri = Uri.parse("${ApiConfig.baseUrl}$path").replace(
       queryParameters: query,
@@ -84,6 +96,16 @@ class ApiClient {
               .timeout(_timeout);
           break;
 
+        case "PATCH":
+          response = await http
+              .patch(
+                uri,
+                headers: headers,
+                body: body != null ? jsonEncode(body) : null,
+              )
+              .timeout(_timeout);
+          break;
+
         case "DELETE":
           response = await http
               .delete(
@@ -93,7 +115,7 @@ class ApiClient {
               .timeout(_timeout);
           break;
 
-        default:
+        default: // GET
           response = await http
               .get(
                 uri,

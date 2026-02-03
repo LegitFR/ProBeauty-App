@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:probeauty_app/models/cart_item.dart';
+import 'package:probeauty_app/pages/address_picker_screen.dart';
+import 'package:probeauty_app/providers/address_provider.dart';
+import 'package:probeauty_app/routes/app_routes.dart';
 import 'package:probeauty_app/widgets/success_animation.dart';
 import 'package:provider/provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
@@ -25,6 +28,7 @@ class _CartScreenState extends State<CartScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<CartProvider>(context, listen: false).fetchCart();
+      Provider.of<AddressProvider>(context, listen: false).fetchAddresses();
     });
   }
 
@@ -301,7 +305,42 @@ class _CartScreenState extends State<CartScreen> {
                       ),
                       const SizedBox(height: 12),
                       _paymentTile(),
-                      const SizedBox(height: 50),
+                      const SizedBox(height: 12),
+                      InkWell(
+                        borderRadius: const BorderRadius.vertical(
+                          bottom: Radius.circular(18),
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.vertical(
+                              bottom: Radius.circular(18),
+                            ),
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: const [
+                              Icon(
+                                Icons.add,
+                                color: Colors.black,
+                                size: 20,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                "Add another service",
+                                style: TextStyle(
+                                  fontFamily: "PoppinsRegular",
+                                  fontSize: 14,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -450,45 +489,260 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
+  Future<void> _showAddressPickerDialog() async {
+    final addressProvider =
+        Provider.of<AddressProvider>(context, listen: false);
+
+    await addressProvider.fetchAddresses();
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.softIvory,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return Consumer<AddressProvider>(
+          builder: (context, provider, _) {
+            return SafeArea(
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height * 0.75,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // =====================
+                    // DRAG HANDLE
+                    // =====================
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 5,
+                        margin: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.black26,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Text(
+                        "Select Delivery Address",
+                        style: TextStyle(
+                          fontFamily: "PoppinsSemiBold",
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // =====================
+                    // ADDRESS LIST
+                    // =====================
+                    Expanded(
+                      child: provider.isLoading
+                          ? const Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.rusticSunset,
+                              ),
+                            )
+                          : provider.addresses.isEmpty
+                              ? const Center(
+                                  child: Text(
+                                    "No saved addresses",
+                                    style: TextStyle(
+                                      fontFamily: "PoppinsRegular",
+                                    ),
+                                  ),
+                                )
+                              : ListView.separated(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                                  itemCount: provider.addresses.length,
+                                  separatorBuilder: (_, __) =>
+                                      const SizedBox(height: 12),
+                                  itemBuilder: (context, index) {
+                                    final address = provider.addresses[index];
+
+                                    return InkWell(
+                                      borderRadius: BorderRadius.circular(16),
+                                      onTap: () async {
+                                        await provider.setDefault(address.id);
+                                        if (mounted) {
+                                          Navigator.pop(context);
+                                        }
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.all(14),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.softIvory,
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                          border: Border.all(
+                                            color: address.isDefault
+                                                ? AppColors.rusticSunset
+                                                : Colors.black12,
+                                            width: 2,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Icon(
+                                              Icons.location_on,
+                                              color: address.isDefault
+                                                  ? AppColors.rusticSunset
+                                                  : Colors.black45,
+                                            ),
+                                            const SizedBox(width: 10),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    address.addressType,
+                                                    style: const TextStyle(
+                                                      fontFamily:
+                                                          "PoppinsSemiBold",
+                                                      fontSize: 15,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    address.shortAddress,
+                                                    maxLines: 2,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                      fontFamily:
+                                                          "PoppinsRegular",
+                                                      fontSize: 13,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            if (address.isDefault)
+                                              const Icon(
+                                                Icons.check_circle,
+                                                color: AppColors.rusticSunset,
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                    ),
+
+                    // =====================
+                    // ADD NEW ADDRESS
+                    // =====================
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: AppColors.rusticSunset),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 14, horizontal: 14),
+                        ),
+                        onPressed: () async {
+                          final rootContext = Navigator.of(context).context;
+
+                          Navigator.pop(context);
+
+                          await Navigator.pushNamed(
+                            rootContext,
+                            AppRoutes.savedAddress,
+                          );
+
+                          if (mounted) {
+                            Provider.of<AddressProvider>(rootContext,
+                                    listen: false)
+                                .fetchAddresses();
+                          }
+                        },
+                        icon: const Icon(Icons.add,
+                            color: AppColors.rusticSunset),
+                        label: const Text(
+                          "Add New Address",
+                          style: TextStyle(
+                            fontFamily: "PoppinsSemiBold",
+                            color: AppColors.rusticSunset,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget _addressTile() {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      child: Row(
-        children: [
-          SvgPicture.asset(
-            "assets/images/icons/location_icon.svg",
-            width: 22,
-            height: 22,
-            colorFilter: const ColorFilter.mode(
-              AppColors.rusticSunset,
-              BlendMode.srcIn,
+    return Consumer<AddressProvider>(
+      builder: (context, addressProvider, _) {
+        final address = addressProvider.defaultAddress;
+
+        return InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () {
+            _showAddressPickerDialog();
+          },
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppColors.softIvory,
+              borderRadius: BorderRadius.circular(14),
             ),
-          ),
-          const SizedBox(width: 10),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Text(
-                  "Home",
-                  maxLines: 2,
-                  style: TextStyle(
-                    fontFamily: "PoppinsRegular",
-                    fontSize: 16,
-                    color: AppColors.rusticSunset,
+                const Icon(Icons.location_on, color: AppColors.rusticSunset),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        address?.addressType ?? "Add Address",
+                        style: const TextStyle(
+                          fontFamily: "PoppinsSemiBold",
+                          fontSize: 16,
+                          color: AppColors.rusticSunset,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        address?.shortAddress ??
+                            "Tap to add your delivery address",
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontFamily: "PoppinsRegular",
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  "38/38 Guruvappa st, Ayanavaram...",
-                  maxLines: 2,
-                  style: TextStyle(fontFamily: "PoppinsRegular", fontSize: 14),
-                ),
+                const Icon(Icons.arrow_forward_ios, size: 16),
               ],
             ),
           ),
-          const Icon(Icons.arrow_forward_ios, size: 16),
-        ],
-      ),
+        );
+      },
     );
   }
 
