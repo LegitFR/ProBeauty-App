@@ -4,9 +4,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:probeauty_app/providers/cart_provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:probeauty_app/services/api_client.dart';
+import 'package:provider/provider.dart';
 
 import '../models/product.dart';
 
@@ -45,6 +47,7 @@ class _ProductScreenState extends State<ProductScreen> {
   @override
   void initState() {
     super.initState();
+
     _loadInitialCartQuantity();
     _checkFavouriteStatus();
     _fetchApplicableOffers();
@@ -193,22 +196,13 @@ class _ProductScreenState extends State<ProductScreen> {
 
   Future<void> _incrementQuantity() async {
     if (_cartUpdating) return;
+
     final productId = widget.product.id;
-    if (productId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Product ID missing"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+    if (productId == null) return;
 
     final newQty = quantity + 1;
 
-    setState(() {
-      _cartUpdating = true;
-    });
+    setState(() => _cartUpdating = true);
 
     try {
       if (quantity == 0) {
@@ -228,25 +222,21 @@ class _ProductScreenState extends State<ProductScreen> {
         );
       }
 
-      if (mounted) {
-        setState(() {
-          quantity = newQty;
-        });
-      }
+      if (!mounted) return;
+
+      setState(() {
+        quantity = newQty;
+      });
+
+      /// 🔥 UPDATE BADGE COUNT
+      await context.read<CartProvider>().fetchCart();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error updating cart: $e"),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text("Error updating cart: $e")),
       );
     }
 
-    if (mounted) {
-      setState(() {
-        _cartUpdating = false;
-      });
-    }
+    if (mounted) setState(() => _cartUpdating = false);
   }
 
   Future<void> _decrementQuantity() async {
@@ -254,21 +244,11 @@ class _ProductScreenState extends State<ProductScreen> {
     if (quantity == 0) return;
 
     final productId = widget.product.id;
-    if (productId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Product ID missing"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+    if (productId == null) return;
 
     final newQty = quantity - 1;
 
-    setState(() {
-      _cartUpdating = true;
-    });
+    setState(() => _cartUpdating = true);
 
     try {
       if (newQty > 0) {
@@ -279,30 +259,24 @@ class _ProductScreenState extends State<ProductScreen> {
           },
         );
       } else {
-        await ApiClient.delete(
-          "/api/v1/cart/items/$productId",
-        );
+        await ApiClient.delete("/api/v1/cart/items/$productId");
       }
 
-      if (mounted) {
-        setState(() {
-          quantity = newQty;
-        });
-      }
+      if (!mounted) return;
+
+      setState(() {
+        quantity = newQty;
+      });
+
+      /// 🔥 UPDATE BADGE COUNT
+      await context.read<CartProvider>().fetchCart();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error updating cart: $e"),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text("Error updating cart: $e")),
       );
     }
 
-    if (mounted) {
-      setState(() {
-        _cartUpdating = false;
-      });
-    }
+    if (mounted) setState(() => _cartUpdating = false);
   }
 
   @override
@@ -415,20 +389,52 @@ class _ProductScreenState extends State<ProductScreen> {
             onPressed: () => Navigator.pop(context),
           ),
           actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 25),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, "/cart");
-                },
-                child: SvgPicture.asset(
-                  'assets/images/icons/cart_icon.svg',
-                  width: 24,
-                  height: 24,
-                  colorFilter:
-                      const ColorFilter.mode(Colors.black, BlendMode.srcIn),
-                ),
-              ),
+            Consumer<CartProvider>(
+              builder: (context, cartProvider, child) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 20),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, "/cart");
+                    },
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        SvgPicture.asset(
+                          "assets/images/icons/cart_icon.svg",
+                          width: 26,
+                          colorFilter: const ColorFilter.mode(
+                            Colors.black,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+
+                        // 🔥 Cart Count Badge
+                        if (cartProvider.totalItems > 0)
+                          Positioned(
+                            right: -6,
+                            top: -6,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppColors.rusticSunset,
+                              ),
+                              child: Text(
+                                cartProvider.totalItems.toString(),
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.white,
+                                  fontFamily: "PoppinsSemiBold",
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         ),

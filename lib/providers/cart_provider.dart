@@ -25,16 +25,13 @@ class CartProvider with ChangeNotifier {
   double get subtotal => _subtotal;
   int get totalItems => _totalItems;
 
-  void _setLoading(bool v) {
-    _isLoading = v;
-    notifyListeners();
-  }
-
   // ==========================================================
   // GET CART
   // ==========================================================
   Future<void> fetchCart() async {
-    _setLoading(true);
+    _isLoading = true;
+    notifyListeners();
+
     _error = null;
 
     try {
@@ -77,7 +74,10 @@ class CartProvider with ChangeNotifier {
       _error = e.toString();
     }
 
-    _setLoading(false);
+    _isLoading = false;
+
+    /// 🔥 SINGLE NOTIFY
+    notifyListeners();
   }
 
   // ==========================================================

@@ -14,6 +14,7 @@ import 'package:probeauty_app/services/api_client.dart';
 class ReviewConfirmScreen extends StatefulWidget {
   final String salonId;
   final Map<String, dynamic>? staff;
+  final Map<String, dynamic>? staffMapping;
 
   final String salonName;
   final DateTime selectedDate;
@@ -25,6 +26,7 @@ class ReviewConfirmScreen extends StatefulWidget {
     super.key,
     required this.salonId,
     required this.staff,
+    required this.staffMapping,
     required this.salonName,
     required this.selectedDate,
     required this.selectedTime,
@@ -54,6 +56,11 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
     super.initState();
     _fetchSalonRating();
     _fetchApplicableOffers();
+  }
+
+  Map<String, dynamic>? _staffForService(String serviceId) {
+    if (widget.staffMapping == null) return widget.staff;
+    return widget.staffMapping![serviceId];
   }
 
   Future<bool> _confirmExit() async {
@@ -243,14 +250,8 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
       if (offer["offerType"] == "salon") {
         payload["salonId"] = widget.salonId;
       } else if (offer["offerType"] == "service") {
-        // use selected service (context of booking, not from offer list)
-        final String? selectedServiceId = widget.selectedServices.isNotEmpty
-            ? widget.selectedServices.first["id"]
-            : null;
-
-        if (selectedServiceId == null) return;
-
-        payload["serviceId"] = selectedServiceId;
+        payload["serviceIds"] =
+            widget.selectedServices.map((s) => s["id"]).toList();
       }
 
       final res = await ApiClient.post(
@@ -397,30 +398,34 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
   }
 
   // --------------------------------------------------
-  Future<void> _createBooking({
-    required String serviceId,
-    required String startTime,
-  }) async {
-    final Map<String, dynamic> body = {
+  Future<void> _createBookingMulti() async {
+    final startTime = _buildStartTimeISO();
+
+    final serviceIds =
+        widget.selectedServices.map((s) => s["id"].toString()).toList();
+
+    // 🔥 map correct staff per service
+    final List<String?> staffIds = widget.selectedServices.map((s) {
+      final staff = _staffForService(s["id"]);
+      return staff?["id"]?.toString(); // can be null = any staff
+    }).toList();
+
+    final body = {
       "salonId": widget.salonId,
-      "serviceId": serviceId,
+      "serviceIds": serviceIds,
+      "staffIds": staffIds, // always send
       "startTime": startTime,
     };
 
-    // 🔥 Add staffId ONLY if a specific staff was chosen
-    if (widget.staff != null) {
-      body["staffId"] = widget.staff!["id"];
-    }
     final response = await ApiClient.post(
       "/api/v1/bookings",
       body: body,
     );
 
-    final bodyJson = jsonDecode(response.body);
+    final json = jsonDecode(response.body);
 
     if (response.statusCode != 201) {
-      final message = bodyJson["message"] ?? "Booking failed";
-      throw BookingException(message);
+      throw BookingException(json["message"] ?? "Booking failed");
     }
   }
 
@@ -448,14 +453,21 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
     try {
       setState(() => _isProcessing = true);
 
-      final service = widget.selectedServices.first;
       final startTime = _buildStartTimeISO();
+
+      final serviceIds =
+          widget.selectedServices.map((s) => s["id"].toString()).toList();
+
+      final List<String?> staffIds = widget.selectedServices.map((s) {
+        final staff = _staffForService(s["id"]);
+        return staff?["id"]?.toString();
+      }).toList();
 
       final body = {
         "salonId": widget.salonId,
-        "serviceId": service["id"],
+        "serviceIds": serviceIds,
+        "staffIds": staffIds,
         "startTime": startTime,
-        if (widget.staff != null) "staffId": widget.staff!["id"],
       };
 
       final res = await ApiClient.post(
@@ -482,7 +494,6 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
 
       await Stripe.instance.presentPaymentSheet();
 
-      // 🔥 SUCCESS → poll & redirect
       await _pollBookingStatus(context, bookingId);
     } on StripeException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -537,24 +548,12 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
     try {
       setState(() => _isProcessing = true);
 
-      final startTime = _buildStartTimeISO();
+      await _createBookingMulti();
 
-      for (final service in widget.selectedServices) {
-        await _createBooking(
-          serviceId: service["id"],
-          startTime: startTime,
-        );
-      }
-
-      // ✅ SUCCESS → HOME
       await _showSuccessOverlay();
-      return;
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
       );
     } finally {
       if (mounted) setState(() => _isProcessing = false);

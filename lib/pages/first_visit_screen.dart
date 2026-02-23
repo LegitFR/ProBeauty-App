@@ -7,6 +7,8 @@ class FirstVisitScreen extends StatelessWidget {
   final String salonId;
   final String salonName;
   final Map<String, dynamic>? staff;
+  final Map<String, dynamic>? staffMapping;
+
   final DateTime date;
   final String time;
   final List<Map<String, dynamic>> selectedServices;
@@ -16,6 +18,7 @@ class FirstVisitScreen extends StatelessWidget {
     required this.salonId,
     required this.salonName,
     required this.staff,
+    required this.staffMapping,
     required this.date,
     required this.time,
     required this.selectedServices,
@@ -29,6 +32,7 @@ class FirstVisitScreen extends StatelessWidget {
           salonId: salonId,
           salonName: salonName,
           staff: staff,
+          staffMapping: staffMapping,
           selectedDate: date,
           selectedTime: time,
           selectedServices: selectedServices,

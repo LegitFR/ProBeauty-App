@@ -110,237 +110,235 @@ class _LoginScreenState extends State<LoginScreen> {
     final width = size.width;
     final height = size.height;
 
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: AppColors.rusticSunset,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: AppColors.rusticSunset,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
         ),
-        backgroundColor: AppColors.softIvory,
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              // 🔶 ORANGE HEADER (NOW SCROLLS WITH PAGE)
-              Container(
-                width: double.infinity,
-                height: height * 0.25,
-                padding: EdgeInsets.symmetric(
-                  horizontal: width * 0.08,
-                  vertical: height * 0.05,
-                ),
-                decoration: const BoxDecoration(
-                  color: AppColors.rusticSunset,
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(40),
-                    bottomRight: Radius.circular(40),
-                  ),
-                ),
-                alignment: Alignment.bottomLeft,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.loginWelcomeBack,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: width * 0.08,
-                        fontFamily: "PlayfairDisplayBold",
-                      ),
-                    ),
-                    SizedBox(height: height * 0.005),
-                    Text(
-                      l10n.loginSubtitle,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: width * 0.05,
-                        fontFamily: "PoppinsRegular",
-                      ),
-                    ),
-                  ],
+      ),
+      backgroundColor: AppColors.softIvory,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // 🔶 ORANGE HEADER (NOW SCROLLS WITH PAGE)
+            Container(
+              width: double.infinity,
+              height: height * 0.25,
+              padding: EdgeInsets.symmetric(
+                horizontal: width * 0.08,
+                vertical: height * 0.05,
+              ),
+              decoration: const BoxDecoration(
+                color: AppColors.rusticSunset,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(40),
+                  bottomRight: Radius.circular(40),
                 ),
               ),
+              alignment: Alignment.bottomLeft,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.loginWelcomeBack,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: width * 0.08,
+                      fontFamily: "PlayfairDisplayBold",
+                    ),
+                  ),
+                  SizedBox(height: height * 0.005),
+                  Text(
+                    l10n.loginSubtitle,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: width * 0.05,
+                      fontFamily: "PoppinsRegular",
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
-              // 🔹 FORM SECTION
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: width * 0.08,
-                  vertical: height * 0.06,
-                ),
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: _emailController,
-                      focusNode: _emailFocus,
-                      cursorColor: AppColors.rusticSunset,
-                      decoration: _inputDecoration(
-                        icon: Icons.call,
-                        hint: l10n.loginEmailHint,
-                        isActive: _emailFocus.hasFocus ||
-                            _emailController.text.isNotEmpty,
+            // 🔹 FORM SECTION
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: width * 0.08,
+                vertical: height * 0.06,
+              ),
+              child: Column(
+                children: [
+                  TextField(
+                    controller: _emailController,
+                    focusNode: _emailFocus,
+                    cursorColor: AppColors.rusticSunset,
+                    decoration: _inputDecoration(
+                      icon: Icons.call,
+                      hint: l10n.loginEmailHint,
+                      isActive: _emailFocus.hasFocus ||
+                          _emailController.text.isNotEmpty,
+                    ),
+                  ),
+                  SizedBox(height: height * 0.025),
+                  TextField(
+                    controller: _passwordController,
+                    focusNode: _passwordFocus,
+                    obscureText: _obscurePassword,
+                    cursorColor: AppColors.rusticSunset,
+                    decoration: _inputDecoration(
+                      icon: Icons.lock_outline,
+                      hint: l10n.loginPasswordHint,
+                      isActive: _passwordFocus.hasFocus ||
+                          _passwordController.text.isNotEmpty,
+                      suffix: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword),
                       ),
                     ),
-                    SizedBox(height: height * 0.025),
-                    TextField(
-                      controller: _passwordController,
-                      focusNode: _passwordFocus,
-                      obscureText: _obscurePassword,
-                      cursorColor: AppColors.rusticSunset,
-                      decoration: _inputDecoration(
-                        icon: Icons.lock_outline,
-                        hint: l10n.loginPasswordHint,
-                        isActive: _passwordFocus.hasFocus ||
-                            _passwordController.text.isNotEmpty,
-                        suffix: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                          ),
-                          onPressed: () => setState(
-                              () => _obscurePassword = !_obscurePassword),
+                  ),
+                  SizedBox(height: height * 0.05),
+                  SizedBox(
+                    width: width * 0.65,
+                    height: 45,
+                    child: ElevatedButton(
+                      onPressed: _login,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.rusticSunset,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
                         ),
                       ),
-                    ),
-                    SizedBox(height: height * 0.05),
-                    SizedBox(
-                      width: width * 0.65,
-                      height: 45,
-                      child: ElevatedButton(
-                        onPressed: _login,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.rusticSunset,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
-                        child: _isLoading
-                            ? const LoadingDots()
-                            : Text(
-                                l10n.loginButton,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: width * 0.04,
-                                ),
+                      child: _isLoading
+                          ? const LoadingDots()
+                          : Text(
+                              l10n.loginButton,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: width * 0.04,
                               ),
-                      ),
+                            ),
                     ),
-                    const SizedBox(height: 10),
+                  ),
+                  const SizedBox(height: 10),
 
-                    const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-// -------- Already a member + OR Divider --------
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Divider(
-                            color: Colors.grey.shade400,
-                            thickness: 1,
-                            endIndent: 10,
-                          ),
+                  // -------- Already a member + OR Divider --------
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Divider(
+                          color: Colors.grey.shade400,
+                          thickness: 1,
+                          endIndent: 10,
                         ),
-                        const Text(
-                          "OR",
+                      ),
+                      const Text(
+                        "OR",
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontFamily: "PoppinsBold",
+                        ),
+                      ),
+                      Expanded(
+                        child: Divider(
+                          color: Colors.grey.shade400,
+                          thickness: 1,
+                          indent: 10,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 25),
+                  Text(
+                    AppLocalizations.of(context)!.signInWith,
+                    style: TextStyle(
+                      color: AppColors.rusticSunset,
+                      fontSize: size.width * 0.03,
+                      fontFamily: "PoppinsBold",
+                    ),
+                  ),
+                  SizedBox(height: size.height * 0.015),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () async {
+                          try {
+                            await GoogleAuthService.signInWithGoogle();
+
+                            if (!mounted) return;
+                            Navigator.pushReplacementNamed(context, '/home');
+                          } catch (e) {
+                            debugPrint("GOOGLE SIGN IN ERROR: $e");
+
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(e.toString())),
+                            );
+                          }
+                        },
+                        child: SvgPicture.asset(
+                          "assets/images/icons/google.svg",
+                          width: 25,
+                          height: 25,
+                        ),
+                      ),
+                      // SvgPicture.asset(
+                      //   "assets/images/icons/facebook.svg",
+                      //   width: 25,
+                      //   height: 25,
+                      // ),
+                      // const SizedBox(width: 40),
+                      // SvgPicture.asset(
+                      //   "assets/images/icons/apple.svg",
+                      //   width: 25,
+                      //   height: 25,
+                      // ),
+                    ],
+                  ),
+                  SizedBox(height: size.height * 0.018),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Don't have a account ",
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontFamily: "PoppinsSemiBold",
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushReplacementNamed(context, '/signup');
+                        },
+                        child: const Text(
+                          "Sign up",
                           style: TextStyle(
-                            color: Colors.grey,
+                            color: AppColors.rusticSunset,
                             fontFamily: "PoppinsBold",
                           ),
                         ),
-                        Expanded(
-                          child: Divider(
-                            color: Colors.grey.shade400,
-                            thickness: 1,
-                            indent: 10,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 25),
-                    Text(
-                      AppLocalizations.of(context)!.signInWith,
-                      style: TextStyle(
-                        color: AppColors.rusticSunset,
-                        fontSize: size.width * 0.03,
-                        fontFamily: "PoppinsBold",
                       ),
-                    ),
-                    SizedBox(height: size.height * 0.015),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () async {
-                            try {
-                              await GoogleAuthService.signInWithGoogle();
-
-                              if (!mounted) return;
-                              Navigator.pushReplacementNamed(context, '/home');
-                            } catch (e) {
-                              debugPrint("GOOGLE SIGN IN ERROR: $e");
-
-                              if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(e.toString())),
-                              );
-                            }
-                          },
-                          child: SvgPicture.asset(
-                            "assets/images/icons/google.svg",
-                            width: 25,
-                            height: 25,
-                          ),
-                        ),
-                        // SvgPicture.asset(
-                        //   "assets/images/icons/facebook.svg",
-                        //   width: 25,
-                        //   height: 25,
-                        // ),
-                        // const SizedBox(width: 40),
-                        // SvgPicture.asset(
-                        //   "assets/images/icons/apple.svg",
-                        //   width: 25,
-                        //   height: 25,
-                        // ),
-                      ],
-                    ),
-                    SizedBox(height: size.height * 0.018),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          "Don't have a account ",
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontFamily: "PoppinsSemiBold",
-                          ),
-                        ),
-                        const SizedBox(height: 30),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushReplacementNamed(context, '/signup');
-                          },
-                          child: const Text(
-                            "Sign up",
-                            style: TextStyle(
-                              color: AppColors.rusticSunset,
-                              fontFamily: "PoppinsBold",
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

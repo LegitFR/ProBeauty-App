@@ -1,18 +1,18 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/first_visit_screen.dart';
 import 'package:probeauty_app/pages/home_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
-import 'package:probeauty_app/config/api_config.dart';
 import 'package:probeauty_app/services/api_client.dart';
 
 class BookAppointmentScreen extends StatefulWidget {
   final String salonId;
   final String salonName;
-  final Map<String, dynamic>? staff;
+  final Map<String, dynamic>? staff; // keep for compatibility
+  final Map<String, dynamic>? staffMapping; // 🔥 ADD
+
   final List<Map<String, dynamic>> selectedServices;
 
   const BookAppointmentScreen({
@@ -20,6 +20,7 @@ class BookAppointmentScreen extends StatefulWidget {
     required this.salonId,
     required this.salonName,
     required this.staff,
+    required this.staffMapping,
     required this.selectedServices,
   });
 
@@ -40,6 +41,11 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
   void initState() {
     super.initState();
     _fetchSlotsForDate(selectedDate);
+  }
+
+  Map<String, dynamic>? _staffForService(String serviceId) {
+    if (widget.staffMapping == null) return widget.staff;
+    return widget.staffMapping![serviceId];
   }
 
   Future<bool> _confirmExit() async {
@@ -252,7 +258,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withOpacity(0.01),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -260,7 +266,6 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       ),
       child: Column(
         children: [
-          // SERVICES LIST
           ListView.separated(
             itemCount: widget.selectedServices.length,
             shrinkWrap: true,
@@ -272,6 +277,9 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
             itemBuilder: (context, index) {
               final service = widget.selectedServices[index];
 
+              // 🔥 get correct staff for THIS service
+              final staff = _staffForService(service["id"]);
+
               return Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -280,7 +288,6 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // LEFT SIDE
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -294,20 +301,19 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                             ),
                           ),
                           const SizedBox(height: 4),
+
+                          // 🔥 correct staff per service
                           Text(
-                            widget.staff?["name"] ?? "Top stylist",
+                            staff?["name"] ?? "Any staff",
                             style: const TextStyle(
                               fontFamily: "PoppinsRegular",
                               fontSize: 13,
                               color: Colors.black54,
                             ),
                           ),
-                          const SizedBox(height: 2),
                         ],
                       ),
                     ),
-
-                    // RIGHT SIDE (PRICE)
                     Text(
                       "₹${service["price"] ?? "--"}",
                       style: const TextStyle(
@@ -321,14 +327,15 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
               );
             },
           ),
-
-          // ADD SERVICE BUTTON
           InkWell(
             borderRadius: const BorderRadius.vertical(
               bottom: Radius.circular(18),
             ),
             onTap: () {
-              Navigator.pop(context);
+              int count = 0;
+              Navigator.popUntil(context, (route) {
+                return count++ == 2;
+              });
             },
             child: Container(
               width: double.infinity,
@@ -340,7 +347,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
               ),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.start,
-                children: const [
+                children: [
                   Icon(
                     Icons.add,
                     color: AppColors.rusticSunset,
@@ -553,6 +560,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                                     staff: widget.staff,
                                     date: selectedDate,
                                     time: formattedTime,
+                                    staffMapping: widget.staffMapping,
                                     selectedServices: widget.selectedServices,
                                   ),
                                 ),

@@ -513,9 +513,8 @@ class _ShopScreenState extends State<ShopScreen> {
             const SizedBox(height: 6),
             Text(
               title,
-              style: const TextStyle(
-                fontFamily: "PoppinsRegular",
-              ),
+              style:
+                  const TextStyle(fontFamily: "PoppinsRegular", fontSize: 12.5),
             ),
           ],
         ),

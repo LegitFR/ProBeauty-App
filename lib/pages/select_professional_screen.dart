@@ -3,7 +3,7 @@ import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/book_appointment_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 
-class SelectProfessionalScreen extends StatelessWidget {
+class SelectProfessionalScreen extends StatefulWidget {
   final String salonId;
   final String salonName;
   final List<dynamic> staffList;
@@ -18,10 +18,22 @@ class SelectProfessionalScreen extends StatelessWidget {
   });
 
   @override
+  State<SelectProfessionalScreen> createState() =>
+      _SelectProfessionalScreenState();
+}
+
+class _SelectProfessionalScreenState extends State<SelectProfessionalScreen> {
+  int selectedServiceIndex = 0;
+
+  /// serviceId -> staff
+  final Map<String, dynamic> selectedStaffPerService = {};
+
+  Map<String, dynamic> get currentService =>
+      widget.selectedServices[selectedServiceIndex];
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    print("STAFF LIST");
-    print(staffList);
 
     return SafeArea(
       bottom: true,
@@ -44,89 +56,165 @@ class SelectProfessionalScreen extends StatelessWidget {
             ),
           ),
         ),
+        body: Column(
+          children: [
+            const SizedBox(height: 12),
 
-        // ---------------- STAFF GRID ----------------
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: GridView.builder(
-            itemCount: staffList.length + 1, // 🔥 +1 for Any staff
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 18,
-              crossAxisSpacing: 18,
-              childAspectRatio: 0.85,
-            ),
-            itemBuilder: (context, index) {
-              // 🟢 FIRST CARD → ANY STAFF
-              if (index == 0) {
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => BookAppointmentScreen(
-                          salonId: salonId,
-                          salonName: salonName,
-                          staff: null, // 🔥 indicates any staff
-                          selectedServices: selectedServices,
-                        ),
+            // ---------------- SERVICE SELECTOR ----------------
+            SizedBox(
+              height: 50,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: widget.selectedServices.length,
+                itemBuilder: (context, index) {
+                  final service = widget.selectedServices[index];
+                  final isSelected = index == selectedServiceIndex;
+
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedServiceIndex = index;
+                      });
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppColors.rusticSunset
+                            : AppColors.softIvory,
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                    );
-                  },
-                  child: _anyStaffCard(context),
-                );
-              }
-
-              // 🔵 NORMAL STAFF CARDS
-              final staff = staffList[index - 1];
-
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => BookAppointmentScreen(
-                        salonId: salonId,
-                        salonName: salonName,
-                        staff: staff,
-                        selectedServices: selectedServices,
+                      child: Center(
+                        child: Text(
+                          service["title"],
+                          style: TextStyle(
+                            fontFamily: "PoppinsSemiBold",
+                            fontSize: 13,
+                            color: isSelected ? Colors.white : Colors.black87,
+                          ),
+                        ),
                       ),
                     ),
                   );
                 },
-                child: _professionalCard(staff, context),
-              );
-            },
-          ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // ---------------- STAFF GRID ----------------
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: GridView.builder(
+                  itemCount: widget.staffList.length + 1,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 18,
+                    crossAxisSpacing: 18,
+                    childAspectRatio: 0.85,
+                  ),
+                  itemBuilder: (context, index) {
+                    final serviceId = currentService["id"];
+
+                    // 🟢 ANY STAFF
+                    if (index == 0) {
+                      final isSelected =
+                          selectedStaffPerService[serviceId] == null &&
+                              selectedStaffPerService.containsKey(serviceId);
+
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            selectedStaffPerService[serviceId] = null;
+                          });
+                        },
+                        child: _anyStaffCard(isSelected),
+                      );
+                    }
+
+                    final staff = widget.staffList[index - 1];
+                    final isSelected = selectedStaffPerService[serviceId]
+                            ?["id"] ==
+                        staff["id"];
+
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedStaffPerService[serviceId] = staff;
+                        });
+                      },
+                      child: _professionalCard(staff, isSelected),
+                    );
+                  },
+                ),
+              ),
+            ),
+
+            // ---------------- CONTINUE BUTTON ----------------
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.rusticSunset,
+                  minimumSize: const Size.fromHeight(52),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BookAppointmentScreen(
+                        salonId: widget.salonId,
+                        salonName: widget.salonName,
+                        staff: null,
+                        selectedServices: widget.selectedServices,
+                        staffMapping: selectedStaffPerService, // 🔥 pass map
+                      ),
+                    ),
+                  );
+                },
+                child: const Text(
+                  "Continue",
+                  style: TextStyle(
+                    fontFamily: "PoppinsSemiBold",
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            )
+          ],
         ),
       ),
     );
   }
 
   // ---------------- ANY STAFF CARD ----------------
-  Widget _anyStaffCard(BuildContext context) {
+  Widget _anyStaffCard(bool isSelected) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.rusticSunset.withOpacity(0.1),
+        color: isSelected
+            ? AppColors.rusticSunset.withOpacity(0.15)
+            : AppColors.rusticSunset.withOpacity(0.08),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.rusticSunset,
+          color: isSelected ? AppColors.rusticSunset : Colors.black26,
           width: 2.5,
         ),
       ),
       child: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.groups_2_outlined,
-            size: 34,
-            color: AppColors.rusticSunset,
-          ),
-          const SizedBox(height: 12),
+          Icon(Icons.groups_2_outlined,
+              size: 34, color: AppColors.rusticSunset),
+          SizedBox(height: 12),
           Text(
             "Any Staff",
-            textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: "PoppinsSemiBold",
               fontSize: 15,
               color: AppColors.rusticSunset,
@@ -137,13 +225,18 @@ class SelectProfessionalScreen extends StatelessWidget {
     );
   }
 
-  // ---------------- NORMAL STAFF CARD ----------------
-  Widget _professionalCard(Map<String, dynamic> staff, BuildContext context) {
+  // ---------------- STAFF CARD ----------------
+  Widget _professionalCard(Map<String, dynamic> staff, bool isSelected) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.softIvory,
+        color: isSelected
+            ? AppColors.rusticSunset.withOpacity(0.15)
+            : AppColors.softIvory,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black, width: 2.5),
+        border: Border.all(
+          color: isSelected ? AppColors.rusticSunset : Colors.black,
+          width: 2.5,
+        ),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -151,8 +244,7 @@ class SelectProfessionalScreen extends StatelessWidget {
           const Icon(Icons.person, size: 30),
           const SizedBox(height: 12),
           Text(
-            staff["name"] ??
-                AppLocalizations.of(context)!.selectProfessionalFallbackName,
+            staff["name"] ?? "Staff",
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontFamily: "PoppinsSemiBold",

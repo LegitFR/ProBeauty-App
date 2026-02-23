@@ -227,15 +227,15 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           ),
                         ),
                         SizedBox(width: width * 0.04),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: _selectTimeSlot,
-                            child: _buildChip(
-                              svgIcon: "assets/images/icons/time_icon.svg",
-                              label: selectedTimeSlot ?? l10n.exploreAnyTime,
-                            ),
-                          ),
-                        ),
+                        // Expanded(
+                        //   child: GestureDetector(
+                        //     onTap: _selectTimeSlot,
+                        //     child: _buildChip(
+                        //       svgIcon: "assets/images/icons/time_icon.svg",
+                        //       label: selectedTimeSlot ?? l10n.exploreAnyTime,
+                        //     ),
+                        //   ),
+                        // ),
                       ],
                     ),
                     SizedBox(height: height * 0.03),

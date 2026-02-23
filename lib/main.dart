@@ -6,6 +6,7 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:probeauty_app/app_locale.dart';
 import 'package:probeauty_app/firebase_options.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
+import 'package:probeauty_app/pages/onboarding_screen.dart';
 import 'package:probeauty_app/pages/splash_screen.dart';
 import 'package:probeauty_app/providers/address_provider.dart';
 import 'package:probeauty_app/providers/appointment_provider.dart';
