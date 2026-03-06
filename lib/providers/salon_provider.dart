@@ -25,7 +25,7 @@ class SalonProvider with ChangeNotifier {
 
     try {
       final response = await ApiClient.get(
-        "/api/v1/reviews/salon/$salonId?page=1&limit=1",
+        "/api/v1/reviews/salon/$salonId?page=1&limit=1?",
       );
 
       if (response.statusCode == 200) {
@@ -64,7 +64,7 @@ class SalonProvider with ChangeNotifier {
       // 🔥 Keep fetching until backend sends empty page
       while (_hasMore) {
         final response = await ApiClient.get(
-          "/api/v1/salons?page=$_currentPage",
+          "/api/v1/salons?page=$_currentPage&verified=true",
         );
 
         if (response.statusCode != 200) {

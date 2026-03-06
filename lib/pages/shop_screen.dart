@@ -544,95 +544,102 @@ class _ShopScreenState extends State<ShopScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ---------------- IMAGE + HEART ----------------
+          /// IMAGE
           Padding(
             padding: const EdgeInsets.all(12),
-            child: Container(
-              height: width * 0.32,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(14),
-                child: imageUrl != null
-                    ? Image.network(
-                        imageUrl,
-                        fit: BoxFit.cover, // 🔥 fills the container
-                        errorBuilder: (_, __, ___) =>
-                            const Icon(Icons.image_not_supported),
-                      )
-                    : const Icon(Icons.image, size: 60),
+            child: AspectRatio(
+              aspectRatio: 1.3,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: imageUrl != null
+                      ? Image.network(
+                          imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) =>
+                              const Icon(Icons.image_not_supported),
+                        )
+                      : const Icon(Icons.image, size: 60),
+                ),
               ),
             ),
           ),
 
-          // ---------------- TEXT CONTENT ----------------
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  brand,
-                  maxLines: 1,
-                  style: const TextStyle(
-                    fontFamily: "PoppinsMedium",
-                    fontSize: 13,
-                    color: AppColors.rusticSunset,
+          /// CONTENT AREA
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    brand,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontFamily: "PoppinsMedium",
+                      fontSize: 13,
+                      color: AppColors.rusticSunset,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  productName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontFamily: "PoppinsRegular",
-                    fontSize: 14,
+                  const SizedBox(height: 4),
+                  Text(
+                    productName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontFamily: "PoppinsRegular",
+                      fontSize: 14,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
-
-                // ---------------- PRICE ROW ----------------
-                Row(
-                  children: [
-                    Text(
-                      price,
-                      style: const TextStyle(
-                        fontFamily: "PoppinsSemiBold",
-                        fontSize: 16,
+                  const Spacer(),
+                  Row(
+                    children: [
+                      Text(
+                        price,
+                        style: const TextStyle(
+                          fontFamily: "PoppinsSemiBold",
+                          fontSize: 16,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      oldPrice,
-                      style: const TextStyle(
-                        fontFamily: "PoppinsRegular",
-                        fontSize: 13,
-                        decoration: TextDecoration.lineThrough,
-                        color: Colors.black45,
+                      const SizedBox(width: 6),
+                      Text(
+                        oldPrice,
+                        style: const TextStyle(
+                          fontFamily: "PoppinsRegular",
+                          fontSize: 13,
+                          decoration: TextDecoration.lineThrough,
+                          color: Colors.black45,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      discount,
-                      style: const TextStyle(
-                        fontFamily: "PoppinsMedium",
-                        fontSize: 13,
-                        color: AppColors.rusticSunset,
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          discount,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontFamily: "PoppinsMedium",
+                            fontSize: 13,
+                            color: AppColors.rusticSunset,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
 
-          const Spacer(),
+          const SizedBox(
+            height: 5,
+          ),
 
-          // ---------------- SHOP BUTTON ----------------
+          /// SHOP BUTTON
           Container(
             height: 40,
             width: double.infinity,
@@ -646,7 +653,7 @@ class _ShopScreenState extends State<ShopScreen> {
             child: const Center(
               child: Text(
                 "Shop",
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: "PoppinsSemiBold",
                   color: Colors.white,
                   fontSize: 14,

@@ -105,114 +105,111 @@ class _OrdersScreenState extends State<OrdersScreen> {
     final l10n = AppLocalizations.of(context)!;
     final ordersProvider = context.watch<OrderProvider>();
 
-    return SafeArea(
-      bottom: true,
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: AppColors.softIvory,
+      appBar: AppBar(
         backgroundColor: AppColors.softIvory,
-        appBar: AppBar(
-          backgroundColor: AppColors.softIvory,
-          elevation: 0,
-          leading: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+        elevation: 0,
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+        ),
+        centerTitle: true,
+        title: Text(
+          l10n.ordersTitle,
+          style: const TextStyle(
+            fontFamily: "PoppinsSemiBold",
+            color: Colors.black,
+            fontSize: 20,
           ),
-          centerTitle: true,
-          title: Text(
-            l10n.ordersTitle,
-            style: const TextStyle(
-              fontFamily: "PoppinsSemiBold",
-              color: Colors.black,
-              fontSize: 20,
-            ),
-          ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 20),
-              child: Stack(
-                children: [
-                  SvgPicture.asset(
-                    "assets/images/icons/cart_icon.svg",
-                    width: 26,
-                    colorFilter: const ColorFilter.mode(
-                      Colors.black,
-                      BlendMode.srcIn,
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: Stack(
+              children: [
+                SvgPicture.asset(
+                  "assets/images/icons/cart_icon.svg",
+                  width: 26,
+                  colorFilter: const ColorFilter.mode(
+                    Colors.black,
+                    BlendMode.srcIn,
+                  ),
+                ),
+                if (ordersProvider.orders.isNotEmpty)
+                  Positioned(
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.rusticSunset,
+                      ),
+                      child: Text(
+                        ordersProvider.orders.length.toString(),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.white,
+                          fontFamily: "PoppinsSemiBold",
+                        ),
+                      ),
                     ),
                   ),
-                  if (ordersProvider.orders.isNotEmpty)
-                    Positioned(
-                      right: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(3),
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.rusticSunset,
-                        ),
-                        child: Text(
-                          ordersProvider.orders.length.toString(),
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: Colors.white,
-                            fontFamily: "PoppinsSemiBold",
-                          ),
-                        ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        bottom: true,
+        child: ordersProvider.isLoading
+            ? _buildOrdersSkeleton(context) // 1️⃣ LOADING FIRST
+            : ordersProvider.error != null
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 20, top: 20),
+                    child: Text(
+                      ordersProvider.error!,
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontFamily: "PoppinsRegular",
+                        fontSize: 14,
                       ),
                     ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        body: SafeArea(
-          bottom: true,
-          child: ordersProvider.isLoading
-              ? _buildOrdersSkeleton(context) // 1️⃣ LOADING FIRST
-              : ordersProvider.error != null
-                  ? Padding(
-                      padding: const EdgeInsets.only(left: 20, top: 20),
-                      child: Text(
-                        ordersProvider.error!,
-                        style: const TextStyle(
-                          color: Colors.red,
-                          fontFamily: "PoppinsRegular",
-                          fontSize: 14,
-                        ),
-                      ),
-                    )
-                  : ordersProvider.orders.isEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.only(left: 20, top: 20),
-                          child: Text(
-                            l10n.ordersEmpty,
-                            style: const TextStyle(
-                              fontFamily: "PoppinsRegular",
-                              fontSize: 14,
-                              color: Colors.black,
-                            ),
+                  )
+                : ordersProvider.orders.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.only(left: 20, top: 20),
+                        child: Text(
+                          l10n.ordersEmpty,
+                          style: const TextStyle(
+                            fontFamily: "PoppinsRegular",
+                            fontSize: 14,
+                            color: Colors.black,
                           ),
-                        )
-                      : SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 12),
-                                child: Text(
-                                  l10n.ordersActiveTitle,
-                                  style: const TextStyle(
-                                    fontFamily: "PoppinsSemiBold",
-                                    fontSize: 16,
-                                    color: Colors.black,
-                                  ),
+                        ),
+                      )
+                    : SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 12),
+                              child: Text(
+                                l10n.ordersActiveTitle,
+                                style: const TextStyle(
+                                  fontFamily: "PoppinsSemiBold",
+                                  fontSize: 16,
+                                  color: Colors.black,
                                 ),
                               ),
-                              for (final order in ordersProvider.orders)
-                                _orderCard(order),
-                              const SizedBox(height: 25),
-                            ],
-                          ),
+                            ),
+                            for (final order in ordersProvider.orders)
+                              _orderCard(order),
+                            const SizedBox(height: 25),
+                          ],
                         ),
-        ),
+                      ),
       ),
     );
   }

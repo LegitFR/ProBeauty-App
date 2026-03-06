@@ -263,13 +263,42 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
             ? _buildSkeleton(context) // 1️⃣ LOADING FIRST
             : appointmentProvider.bookings.isEmpty
                 ? Center(
-                    // 2️⃣ EMPTY AFTER LOAD
-                    child: Text(
-                      l10n.appointmentsEmpty,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontFamily: "PoppinsMedium",
-                      ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(24),
+                            color: AppColors.rusticSunset.withOpacity(0.08),
+                          ),
+                          child: const Icon(
+                            Icons.calendar_month_rounded,
+                            size: 48,
+                            color: AppColors.rusticSunset,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        const Text(
+                          "No appointments yet",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontFamily: "PoppinsSemiBold",
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          "When you book a session,\nit will appear here.",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black45,
+                            fontFamily: "PoppinsRegular",
+                          ),
+                        ),
+                      ],
                     ),
                   )
                 : _buildContent(context), // 3️⃣ DATA

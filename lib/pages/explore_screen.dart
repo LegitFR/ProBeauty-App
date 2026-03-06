@@ -40,9 +40,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
   void initState() {
     super.initState();
 
-    Future.microtask(() {
-      context.read<ExploreProvider>().fetchServices();
-    });
+    // Future.microtask(() {
+    //   context.read<ExploreProvider>().fetchServices();
+    // });
 
     _filterScrollController.addListener(() {
       final offset = _filterScrollController.offset;
@@ -227,15 +227,15 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           ),
                         ),
                         SizedBox(width: width * 0.04),
-                        // Expanded(
-                        //   child: GestureDetector(
-                        //     onTap: _selectTimeSlot,
-                        //     child: _buildChip(
-                        //       svgIcon: "assets/images/icons/time_icon.svg",
-                        //       label: selectedTimeSlot ?? l10n.exploreAnyTime,
-                        //     ),
-                        //   ),
-                        // ),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: _selectTimeSlot,
+                            child: _buildChip(
+                              svgIcon: "assets/images/icons/time_icon.svg",
+                              label: selectedTimeSlot ?? l10n.exploreAnyTime,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                     SizedBox(height: height * 0.03),
@@ -349,8 +349,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 child: GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount:
-                      provider.isLoadingServices ? 4 : provider.services.length,
+                  itemCount: provider.services.length,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 14,
@@ -358,9 +357,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     childAspectRatio: 1.25,
                   ),
                   itemBuilder: (context, index) {
-                    if (provider.isLoadingServices) {
-                      return _buildServiceShimmer(width);
-                    }
+                    // if (provider.isLoadingServices) {
+                    //   return _buildServiceShimmer(width);
+                    // }
 
                     final item = provider.services[index];
 

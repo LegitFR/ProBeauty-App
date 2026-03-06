@@ -175,110 +175,106 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
             (s) => (s["category"] ?? "Featured").toString() == selectedCategory)
         .toList();
 
-    return SafeArea(
-      bottom: true,
-      child: WillPopScope(
-        onWillPop: _onBackPressed,
-        child: Scaffold(
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: Scaffold(
+        backgroundColor: AppColors.softIvory,
+        appBar: AppBar(
           backgroundColor: AppColors.softIvory,
-          appBar: AppBar(
-            backgroundColor: AppColors.softIvory,
-            elevation: 0,
-            leading: GestureDetector(
-              onTap: _onBackPressed,
-              child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-            ),
-            centerTitle: true,
-            title: Text(
-              l10n.selectServicesTitle,
-              style: const TextStyle(
-                fontFamily: "PoppinsSemiBold",
-                color: Colors.black,
-              ),
+          elevation: 0,
+          leading: GestureDetector(
+            onTap: _onBackPressed,
+            child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          ),
+          centerTitle: true,
+          title: Text(
+            l10n.selectServicesTitle,
+            style: const TextStyle(
+              fontFamily: "PoppinsSemiBold",
+              color: Colors.black,
             ),
           ),
-          body: Column(
-            children: [
-              Container(
-                height: 50,
-                padding: const EdgeInsets.only(left: 16, top: 6),
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: categories.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 16),
-                  itemBuilder: (_, index) {
-                    final cat = categories[index];
-                    final isActive = selectedCategory == cat;
+        ),
+        body: Column(
+          children: [
+            Container(
+              height: 50,
+              padding: const EdgeInsets.only(left: 16, top: 6),
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: categories.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 16),
+                itemBuilder: (_, index) {
+                  final cat = categories[index];
+                  final isActive = selectedCategory == cat;
 
-                    return GestureDetector(
-                      onTap: () => setState(() => selectedCategory = cat),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: isActive ? Colors.black : Colors.transparent,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Center(
-                          child: Text(
-                            cat,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontFamily: "PoppinsSemiBold",
-                              fontSize: 14,
-                              color: isActive
-                                  ? AppColors.softIvory
-                                  : Colors.black87,
-                            ),
+                  return GestureDetector(
+                    onTap: () => setState(() => selectedCategory = cat),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: isActive ? Colors.black : Colors.transparent,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Center(
+                        child: Text(
+                          cat,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: "PoppinsSemiBold",
+                            fontSize: 14,
+                            color:
+                                isActive ? AppColors.softIvory : Colors.black87,
                           ),
                         ),
                       ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const Divider(thickness: 1),
+            Expanded(
+              child: ListView.separated(
+                itemCount: filtered.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (_, index) {
+                  return _serviceTile(filtered[index]);
+                },
+              ),
+            ),
+          ],
+        ),
+        bottomNavigationBar: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          child: ElevatedButton(
+            onPressed: selectedServices.isEmpty
+                ? null
+                : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => SelectProfessionalScreen(
+                                salonId: widget.salonId,
+                                salonName: widget.salonName,
+                                staffList: widget.salonStaffList,
+                                selectedServices: selectedServices,
+                              )),
                     );
                   },
-                ),
-              ),
-              const Divider(thickness: 1),
-              Expanded(
-                child: ListView.separated(
-                  itemCount: filtered.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (_, index) {
-                    return _serviceTile(filtered[index]);
-                  },
-                ),
-              ),
-            ],
-          ),
-          bottomNavigationBar: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-            child: ElevatedButton(
-              onPressed: selectedServices.isEmpty
-                  ? null
-                  : () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => SelectProfessionalScreen(
-                                  salonId: widget.salonId,
-                                  salonName: widget.salonName,
-                                  staffList: widget.salonStaffList,
-                                  selectedServices: selectedServices,
-                                )),
-                      );
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.rusticSunset,
-                disabledBackgroundColor: Colors.grey,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-              ),
-              child: Text(
-                l10n.selectServicesContinue,
-                style: const TextStyle(
-                    fontFamily: "PoppinsSemiBold",
-                    fontSize: 14,
-                    color: Colors.white),
-              ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.rusticSunset,
+              disabledBackgroundColor: Colors.grey,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+            ),
+            child: Text(
+              l10n.selectServicesContinue,
+              style: const TextStyle(
+                  fontFamily: "PoppinsSemiBold",
+                  fontSize: 14,
+                  color: Colors.white),
             ),
           ),
         ),

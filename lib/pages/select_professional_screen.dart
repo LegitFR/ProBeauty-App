@@ -35,160 +35,156 @@ class _SelectProfessionalScreenState extends State<SelectProfessionalScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return SafeArea(
-      bottom: true,
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: AppColors.softIvory,
+      appBar: AppBar(
         backgroundColor: AppColors.softIvory,
-        appBar: AppBar(
-          backgroundColor: AppColors.softIvory,
-          elevation: 0,
-          leading: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-          ),
-          centerTitle: true,
-          title: Text(
-            l10n.selectProfessionalTitle,
-            style: const TextStyle(
-              fontFamily: "PoppinsSemiBold",
-              color: Colors.black,
-              fontSize: 18,
-            ),
+        elevation: 0,
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+        ),
+        centerTitle: true,
+        title: Text(
+          l10n.selectProfessionalTitle,
+          style: const TextStyle(
+            fontFamily: "PoppinsSemiBold",
+            color: Colors.black,
+            fontSize: 18,
           ),
         ),
-        body: Column(
-          children: [
-            const SizedBox(height: 12),
+      ),
+      body: Column(
+        children: [
+          const SizedBox(height: 12),
 
-            // ---------------- SERVICE SELECTOR ----------------
-            SizedBox(
-              height: 50,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: widget.selectedServices.length,
-                itemBuilder: (context, index) {
-                  final service = widget.selectedServices[index];
-                  final isSelected = index == selectedServiceIndex;
+          // ---------------- SERVICE SELECTOR ----------------
+          SizedBox(
+            height: 50,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: widget.selectedServices.length,
+              itemBuilder: (context, index) {
+                final service = widget.selectedServices[index];
+                final isSelected = index == selectedServiceIndex;
 
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedServiceIndex = index;
-                      });
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.only(right: 10),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.rusticSunset
-                            : AppColors.softIvory,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Center(
-                        child: Text(
-                          service["title"],
-                          style: TextStyle(
-                            fontFamily: "PoppinsSemiBold",
-                            fontSize: 13,
-                            color: isSelected ? Colors.white : Colors.black87,
-                          ),
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      selectedServiceIndex = index;
+                    });
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.rusticSunset
+                          : AppColors.softIvory,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Center(
+                      child: Text(
+                        service["title"],
+                        style: TextStyle(
+                          fontFamily: "PoppinsSemiBold",
+                          fontSize: 13,
+                          color: isSelected ? Colors.white : Colors.black87,
                         ),
                       ),
                     ),
-                  );
-                },
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // ---------------- STAFF GRID ----------------
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: GridView.builder(
-                  itemCount: widget.staffList.length + 1,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 18,
-                    crossAxisSpacing: 18,
-                    childAspectRatio: 0.85,
                   ),
-                  itemBuilder: (context, index) {
-                    final serviceId = currentService["id"];
+                );
+              },
+            ),
+          ),
 
-                    // 🟢 ANY STAFF
-                    if (index == 0) {
-                      final isSelected =
-                          selectedStaffPerService[serviceId] == null &&
-                              selectedStaffPerService.containsKey(serviceId);
+          const SizedBox(height: 20),
 
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedStaffPerService[serviceId] = null;
-                          });
-                        },
-                        child: _anyStaffCard(isSelected),
-                      );
-                    }
+          // ---------------- STAFF GRID ----------------
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: GridView.builder(
+                itemCount: widget.staffList.length + 1,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 18,
+                  crossAxisSpacing: 18,
+                  childAspectRatio: 0.85,
+                ),
+                itemBuilder: (context, index) {
+                  final serviceId = currentService["id"];
 
-                    final staff = widget.staffList[index - 1];
-                    final isSelected = selectedStaffPerService[serviceId]
-                            ?["id"] ==
-                        staff["id"];
+                  // 🟢 ANY STAFF
+                  if (index == 0) {
+                    final isSelected =
+                        selectedStaffPerService[serviceId] == null &&
+                            selectedStaffPerService.containsKey(serviceId);
 
                     return GestureDetector(
                       onTap: () {
                         setState(() {
-                          selectedStaffPerService[serviceId] = staff;
+                          selectedStaffPerService[serviceId] = null;
                         });
                       },
-                      child: _professionalCard(staff, isSelected),
+                      child: _anyStaffCard(isSelected),
                     );
-                  },
+                  }
+
+                  final staff = widget.staffList[index - 1];
+                  final isSelected =
+                      selectedStaffPerService[serviceId]?["id"] == staff["id"];
+
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedStaffPerService[serviceId] = staff;
+                      });
+                    },
+                    child: _professionalCard(staff, isSelected),
+                  );
+                },
+              ),
+            ),
+          ),
+
+          // ---------------- CONTINUE BUTTON ----------------
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.rusticSunset,
+                minimumSize: const Size.fromHeight(52),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BookAppointmentScreen(
+                      salonId: widget.salonId,
+                      salonName: widget.salonName,
+                      staff: null,
+                      selectedServices: widget.selectedServices,
+                      staffMapping: selectedStaffPerService, // 🔥 pass map
+                    ),
+                  ),
+                );
+              },
+              child: const Text(
+                "Continue",
+                style: TextStyle(
+                  fontFamily: "PoppinsSemiBold",
+                  color: Colors.white,
                 ),
               ),
             ),
-
-            // ---------------- CONTINUE BUTTON ----------------
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.rusticSunset,
-                  minimumSize: const Size.fromHeight(52),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => BookAppointmentScreen(
-                        salonId: widget.salonId,
-                        salonName: widget.salonName,
-                        staff: null,
-                        selectedServices: widget.selectedServices,
-                        staffMapping: selectedStaffPerService, // 🔥 pass map
-                      ),
-                    ),
-                  );
-                },
-                child: const Text(
-                  "Continue",
-                  style: TextStyle(
-                    fontFamily: "PoppinsSemiBold",
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            )
-          ],
-        ),
+          )
+        ],
       ),
     );
   }

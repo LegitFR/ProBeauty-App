@@ -114,57 +114,52 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return SafeArea(
-      bottom: true,
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: AppColors.softIvory,
+      appBar: AppBar(
         backgroundColor: AppColors.softIvory,
-        appBar: AppBar(
-          backgroundColor: AppColors.softIvory,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-            onPressed: () => Navigator.pop(context, true),
-          ),
-          title: Text(
-            l10n.profileEditTitle,
-            style: const TextStyle(
-                color: Colors.black,
-                fontSize: 18,
-                fontFamily: "PoppinsSemiBold"),
-          ),
-          centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          onPressed: () => Navigator.pop(context, true),
         ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildLabel(l10n.profileFirstNameLabel),
-              const SizedBox(height: 8),
-              _buildTextField(_firstNameController),
-              const SizedBox(height: 20),
-              _buildLabel(l10n.profileLastNameLabel),
-              const SizedBox(height: 8),
-              _buildTextField(_lastNameController),
-              const SizedBox(height: 20),
-              _buildLabel(l10n.profileMobileLabel),
-              const SizedBox(height: 8),
-              _buildPhoneField(),
-              const SizedBox(height: 20),
-              _buildLabel(l10n.profileEmailLabel),
-              const SizedBox(height: 8),
-              _buildTextField(_emailController),
-              const SizedBox(height: 20),
-              _buildLabel(l10n.profileDobLabel),
-              const SizedBox(height: 8),
-              _buildDateFields(),
-              const SizedBox(height: 20),
-              // _buildLabel(l10n.profileEmailLabel),
-              // const SizedBox(height: 8),
-              // _buildDropdownField(),
-              // const SizedBox(height: 40),
-              _buildSaveButton(),
-            ],
-          ),
+        title: Text(
+          l10n.profileEditTitle,
+          style: const TextStyle(
+              color: Colors.black, fontSize: 18, fontFamily: "PoppinsSemiBold"),
+        ),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildLabel(l10n.profileFirstNameLabel),
+            const SizedBox(height: 8),
+            _buildTextField(_firstNameController),
+            const SizedBox(height: 20),
+            _buildLabel(l10n.profileLastNameLabel),
+            const SizedBox(height: 8),
+            _buildTextField(_lastNameController),
+            const SizedBox(height: 20),
+            _buildLabel(l10n.profileMobileLabel),
+            const SizedBox(height: 8),
+            _buildPhoneField(),
+            const SizedBox(height: 20),
+            _buildLabel(l10n.profileEmailLabel),
+            const SizedBox(height: 8),
+            _buildTextField(_emailController),
+            const SizedBox(height: 20),
+            _buildLabel(l10n.profileDobLabel),
+            const SizedBox(height: 8),
+            _buildDateFields(),
+            const SizedBox(height: 20),
+            // _buildLabel(l10n.profileEmailLabel),
+            // const SizedBox(height: 8),
+            // _buildDropdownField(),
+            // const SizedBox(height: 40),
+            _buildSaveButton(),
+          ],
         ),
       ),
     );

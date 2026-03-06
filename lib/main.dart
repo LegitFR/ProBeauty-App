@@ -6,7 +6,6 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:probeauty_app/app_locale.dart';
 import 'package:probeauty_app/firebase_options.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
-import 'package:probeauty_app/pages/onboarding_screen.dart';
 import 'package:probeauty_app/pages/splash_screen.dart';
 import 'package:probeauty_app/providers/address_provider.dart';
 import 'package:probeauty_app/providers/appointment_provider.dart';
@@ -23,6 +22,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:probeauty_app/routes/app_routes.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/services.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -67,6 +67,18 @@ Future<void> initializeLocalNotifications() async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: "assets/.env"); //
+
+  SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.edgeToEdge,
+  );
+
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark, // Android
+      statusBarBrightness: Brightness.light, // iOS
+    ),
+  );
 
   final prefs = await SharedPreferences.getInstance();
   final code = prefs.getString('languageCode') ?? 'en';

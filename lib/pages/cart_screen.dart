@@ -78,276 +78,272 @@ class _CartScreenState extends State<CartScreen> {
     double totalAmount = cart.subtotal;
     String totalText = "₹${totalAmount.toStringAsFixed(0)}";
 
-    return SafeArea(
-      bottom: true,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            "My Cart",
-            style: TextStyle(fontFamily: "PoppinsSemiBold"),
-          ),
-          leading: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: const Icon(Icons.arrow_back_ios),
-          ),
-          centerTitle: true,
-          backgroundColor: AppColors.softIvory,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "My Cart",
+          style: TextStyle(fontFamily: "PoppinsSemiBold"),
         ),
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: const Icon(Icons.arrow_back_ios),
+        ),
+        centerTitle: true,
         backgroundColor: AppColors.softIvory,
+      ),
+      backgroundColor: AppColors.softIvory,
 
-        // ======================
-        // FIXED BOTTOM BAR
-        // ======================
-        bottomNavigationBar: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          decoration: const BoxDecoration(color: AppColors.softIvory),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    totalText,
-                    style: const TextStyle(
-                      fontFamily: "PoppinsSemiBold",
-                      fontSize: 22,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  const Text(
-                    "Inclusive Of All Taxes",
-                    style: TextStyle(
-                      fontFamily: "PoppinsRegular",
-                      fontSize: 12,
-                      color: Colors.black54,
-                    ),
-                  ),
-                ],
-              ),
-              ElevatedButton(
-                onPressed: cart.items.isEmpty || _isPaying
-                    ? null
-                    : () async {
-                        setState(() => _isPaying = true);
-
-                        try {
-                          // 1️⃣ Create order + payment intent
-                          final result = await cart.checkoutWithStripe();
-                          if (result == null) {
-                            throw Exception(cart.error ?? "Checkout failed");
-                          }
-
-                          final clientSecret = result['clientSecret'] as String;
-
-                          // 2️⃣ Confirm payment USING PROVIDER
-                          final success = await cart.confirmStripePayment(
-                            clientSecret,
-                          );
-
-                          if (!success) {
-                            throw Exception(cart.error ?? "Payment failed");
-                          }
-
-                          if (mounted) {
-                            await _showSuccessOverlay();
-                          }
-
-                          await cart.fetchCart();
-                        } on StripeException catch (e) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  e.error.message ?? "Payment cancelled",
-                                ),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          }
-                        } catch (e) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(e.toString()),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          }
-                        } finally {
-                          if (mounted) {
-                            setState(() => _isPaying = false);
-                          }
-                        }
-                      },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.rusticSunset,
-                  disabledBackgroundColor: Colors.grey.shade400,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 26,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  "Checkout",
-                  style: TextStyle(
-                    color: Colors.white,
+      // ======================
+      // FIXED BOTTOM BAR
+      // ======================
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        decoration: const BoxDecoration(color: AppColors.softIvory),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  totalText,
+                  style: const TextStyle(
                     fontFamily: "PoppinsSemiBold",
-                    fontSize: 16,
+                    fontSize: 22,
+                    color: Colors.black,
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
+                const SizedBox(height: 3),
+                const Text(
+                  "Inclusive Of All Taxes",
+                  style: TextStyle(
+                    fontFamily: "PoppinsRegular",
+                    fontSize: 12,
+                    color: Colors.black54,
+                  ),
+                ),
+              ],
+            ),
+            ElevatedButton(
+              onPressed: cart.items.isEmpty || _isPaying
+                  ? null
+                  : () async {
+                      setState(() => _isPaying = true);
 
-        // ======================
-        // MAIN CONTENT (UNCHANGED)
-        // ======================
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight - 20,
+                      try {
+                        // 1️⃣ Create order + payment intent
+                        final result = await cart.checkoutWithStripe();
+                        if (result == null) {
+                          throw Exception(cart.error ?? "Checkout failed");
+                        }
+
+                        final clientSecret = result['clientSecret'] as String;
+
+                        // 2️⃣ Confirm payment USING PROVIDER
+                        final success = await cart.confirmStripePayment(
+                          clientSecret,
+                        );
+
+                        if (!success) {
+                          throw Exception(cart.error ?? "Payment failed");
+                        }
+
+                        if (mounted) {
+                          await _showSuccessOverlay();
+                        }
+
+                        await cart.fetchCart();
+                      } on StripeException catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                e.error.message ?? "Payment cancelled",
+                              ),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(e.toString()),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      } finally {
+                        if (mounted) {
+                          setState(() => _isPaying = false);
+                        }
+                      }
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.rusticSunset,
+                disabledBackgroundColor: Colors.grey.shade400,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 26,
+                  vertical: 12,
                 ),
-                child: IntrinsicHeight(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: height * 0.03),
-                      if (cart.isLoading)
-                        const Center(
-                          child: Padding(
-                            padding: EdgeInsets.only(top: 40),
-                            child: CircularProgressIndicator(
-                              color: AppColors.rusticSunset,
-                            ),
-                          ),
-                        )
-                      else if (cart.error != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 20),
-                          child: Text(
-                            cart.error!,
-                            style: const TextStyle(
-                              color: Colors.red,
-                              fontFamily: "PoppinsRegular",
-                            ),
-                          ),
-                        )
-                      else if (cart.items.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.only(top: 20),
-                          child: Text(
-                            "Your cart is empty",
-                            style: TextStyle(
-                              fontFamily: "PoppinsRegular",
-                              fontSize: 16,
-                            ),
-                          ),
-                        )
-                      else ...[
-                        for (int i = 0; i < cart.items.length; i++) ...[
-                          _productQtyTile(cart.items[i], cart),
-                          if (i != cart.items.length - 1)
-                            const SizedBox(height: 12),
-                        ],
-                      ],
-                      const SizedBox(height: 22),
-                      const Text(
-                        "Order Summary",
-                        style: TextStyle(
-                          fontFamily: "PoppinsSemiBold",
-                          fontSize: 17,
-                          color: Colors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      for (final item in cart.items)
-                        _summaryRow(
-                          item.title,
-                          "${item.quantity} × ${item.price.toStringAsFixed(0)}",
-                        ),
-                      if (cart.items.isNotEmpty) const SizedBox(height: 4),
-                      if (cart.items.isNotEmpty)
-                        _summaryRow("Discount", "-₹0", green: true),
-                      if (cart.items.isNotEmpty) const SizedBox(height: 4),
-                      if (cart.items.isNotEmpty)
-                        _summaryRow("Shipping", "Free"),
-                      if (cart.items.isNotEmpty) const Divider(thickness: 1),
-                      _summaryRow("Total", totalText, bold: true),
-                      SizedBox(height: height * 0.03),
-                      const Text(
-                        "Delivery Address",
-                        style: TextStyle(
-                          fontFamily: "PoppinsSemiBold",
-                          fontSize: 17,
-                          color: Colors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      _addressTile(),
-                      SizedBox(height: height * 0.03),
-                      const Text(
-                        "Payment Method",
-                        style: TextStyle(
-                          fontFamily: "PoppinsSemiBold",
-                          fontSize: 17,
-                          color: Colors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      _paymentTile(),
-                      const SizedBox(height: 12),
-                      InkWell(
-                        borderRadius: const BorderRadius.vertical(
-                          bottom: Radius.circular(18),
-                        ),
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                          width: double.infinity,
-                          decoration: const BoxDecoration(
-                            borderRadius: BorderRadius.vertical(
-                              bottom: Radius.circular(18),
-                            ),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: const [
-                              Icon(
-                                Icons.add,
-                                color: Colors.black,
-                                size: 20,
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                "Add another service",
-                                style: TextStyle(
-                                  fontFamily: "PoppinsRegular",
-                                  fontSize: 14,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
-            );
-          },
+              child: const Text(
+                "Checkout",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: "PoppinsSemiBold",
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ],
         ),
+      ),
+
+      // ======================
+      // MAIN CONTENT (UNCHANGED)
+      // ======================
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight - 20,
+              ),
+              child: IntrinsicHeight(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: height * 0.03),
+                    if (cart.isLoading)
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 40),
+                          child: CircularProgressIndicator(
+                            color: AppColors.rusticSunset,
+                          ),
+                        ),
+                      )
+                    else if (cart.error != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20),
+                        child: Text(
+                          cart.error!,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontFamily: "PoppinsRegular",
+                          ),
+                        ),
+                      )
+                    else if (cart.items.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 20),
+                        child: Text(
+                          "Your cart is empty",
+                          style: TextStyle(
+                            fontFamily: "PoppinsRegular",
+                            fontSize: 16,
+                          ),
+                        ),
+                      )
+                    else ...[
+                      for (int i = 0; i < cart.items.length; i++) ...[
+                        _productQtyTile(cart.items[i], cart),
+                        if (i != cart.items.length - 1)
+                          const SizedBox(height: 12),
+                      ],
+                    ],
+                    const SizedBox(height: 22),
+                    const Text(
+                      "Order Summary",
+                      style: TextStyle(
+                        fontFamily: "PoppinsSemiBold",
+                        fontSize: 17,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    for (final item in cart.items)
+                      _summaryRow(
+                        item.title,
+                        "${item.quantity} × ${item.price.toStringAsFixed(0)}",
+                      ),
+                    if (cart.items.isNotEmpty) const SizedBox(height: 4),
+                    if (cart.items.isNotEmpty)
+                      _summaryRow("Discount", "-₹0", green: true),
+                    if (cart.items.isNotEmpty) const SizedBox(height: 4),
+                    if (cart.items.isNotEmpty) _summaryRow("Shipping", "Free"),
+                    if (cart.items.isNotEmpty) const Divider(thickness: 1),
+                    _summaryRow("Total", totalText, bold: true),
+                    SizedBox(height: height * 0.03),
+                    const Text(
+                      "Delivery Address",
+                      style: TextStyle(
+                        fontFamily: "PoppinsSemiBold",
+                        fontSize: 17,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _addressTile(),
+                    SizedBox(height: height * 0.03),
+                    const Text(
+                      "Payment Method",
+                      style: TextStyle(
+                        fontFamily: "PoppinsSemiBold",
+                        fontSize: 17,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _paymentTile(),
+                    const SizedBox(height: 12),
+                    InkWell(
+                      borderRadius: const BorderRadius.vertical(
+                        bottom: Radius.circular(18),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.vertical(
+                            bottom: Radius.circular(18),
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: const [
+                            Icon(
+                              Icons.add,
+                              color: Colors.black,
+                              size: 20,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              "Add another product",
+                              style: TextStyle(
+                                fontFamily: "PoppinsRegular",
+                                fontSize: 14,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -766,7 +762,7 @@ class _CartScreenState extends State<CartScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Cash On Delivery",
+                  "Online Payment",
                   maxLines: 2,
                   style: TextStyle(
                     fontFamily: "PoppinsRegular",
@@ -775,7 +771,7 @@ class _CartScreenState extends State<CartScreen> {
                   ),
                 ),
                 Text(
-                  "Cash will be collected after delivery",
+                  "Supports Online Payment",
                   maxLines: 2,
                   style: TextStyle(fontFamily: "PoppinsRegular", fontSize: 14),
                 ),

@@ -166,77 +166,75 @@ class _NotificationScreenState extends State<NotificationScreen> {
     final l10n = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: AppColors.softIvory,
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(120),
-          child: _buildAppBar(l10n, screenWidth),
-        ),
-        body: _loading
-            ? _buildNotificationsSkeleton(context)
-            : Padding(
-                padding: const EdgeInsets.all(16),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // ---------- UNREAD HEADER ----------
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            l10n.notificationsUnreadCount(_unread.length),
-                            style: TextStyle(
-                              fontSize: screenWidth * 0.05,
-                              fontFamily: "PoppinsSemiBold",
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              if (_unread.isNotEmpty)
-                                IconButton(
-                                  icon: const Icon(Icons.done_all,
-                                      color: AppColors.rusticSunset),
-                                  onPressed: _markAllAsRead,
-                                ),
-                              if (_unread.isNotEmpty || _read.isNotEmpty)
-                                TextButton(
-                                  onPressed: _clearAllNotifications,
-                                  child: const Text(
-                                    "Clear all",
-                                    style: TextStyle(
-                                      fontFamily: "PoppinsSemiBold",
-                                      color: AppColors.rusticSunset,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-
-                      ..._unread.map(_buildDismissibleTile),
-
-                      // ---------- READ SECTION ----------
-                      if (_read.isNotEmpty) ...[
-                        const SizedBox(height: 24),
+    return Scaffold(
+      backgroundColor: AppColors.softIvory,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(120),
+        child: _buildAppBar(l10n, screenWidth),
+      ),
+      body: _loading
+          ? _buildNotificationsSkeleton(context)
+          : Padding(
+              padding: const EdgeInsets.all(16),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ---------- UNREAD HEADER ----------
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
                         Text(
-                          "Read (${_read.length})",
+                          l10n.notificationsUnreadCount(_unread.length),
                           style: TextStyle(
                             fontSize: screenWidth * 0.05,
                             fontFamily: "PoppinsSemiBold",
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        ..._read.map(_buildDismissibleTile),
+                        Row(
+                          children: [
+                            if (_unread.isNotEmpty)
+                              IconButton(
+                                icon: const Icon(Icons.done_all,
+                                    color: AppColors.rusticSunset),
+                                onPressed: _markAllAsRead,
+                              ),
+                            if (_unread.isNotEmpty || _read.isNotEmpty)
+                              TextButton(
+                                onPressed: _clearAllNotifications,
+                                child: const Text(
+                                  "Clear all",
+                                  style: TextStyle(
+                                    fontFamily: "PoppinsSemiBold",
+                                    color: AppColors.rusticSunset,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       ],
+                    ),
+                    const SizedBox(height: 12),
+
+                    ..._unread.map(_buildDismissibleTile),
+
+                    // ---------- READ SECTION ----------
+                    if (_read.isNotEmpty) ...[
+                      const SizedBox(height: 24),
+                      Text(
+                        "Read (${_read.length})",
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.05,
+                          fontFamily: "PoppinsSemiBold",
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      ..._read.map(_buildDismissibleTile),
                     ],
-                  ),
+                  ],
                 ),
               ),
-      ),
+            ),
     );
   }
 

@@ -1,70 +1,26 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:probeauty_app/services/api_client.dart';
 
 class ExploreProvider with ChangeNotifier {
-  // ================= ENDPOINT =================
-  static const String _servicesEndpoint = "/api/v1/services";
-
-  bool isLoadingServices = false;
-  String? error;
-
-  List<Map<String, String>> services = [];
-
-  bool _hasFetchedOnce = false;
-
-  Future<void> fetchServices() async {
-    if (_hasFetchedOnce) return;
-
-    isLoadingServices = true;
-    error = null;
-    notifyListeners();
-
-    const fallbackImages = [
-      "assets/images/services/hair_styling.png",
-      "assets/images/services/ayurvedic.png",
-      "assets/images/services/eyebrow.png",
-      "assets/images/services/makeup.png",
-    ];
-
-    try {
-      final resp = await ApiClient.get(_servicesEndpoint);
-
-      if (resp.statusCode == 200) {
-        final json = jsonDecode(resp.body);
-        final List data = json["data"] ?? [];
-
-        services = data.asMap().entries.map<Map<String, String>>((entry) {
-          final index = entry.key;
-          final s = entry.value;
-
-          final apiImage = s["image"];
-
-          return {
-            "id": s["id"],
-            "title": s["title"] ?? "Service",
-            "img": (apiImage != null && apiImage.toString().isNotEmpty)
-                ? apiImage.toString()
-                : fallbackImages[index % fallbackImages.length],
-          };
-        }).toList();
-
-        _hasFetchedOnce = true;
-      } else {
-        error = "Failed to load services";
-      }
-    } catch (e) {
-      error = "Error: $e";
-    } finally {
-      isLoadingServices = false;
-      notifyListeners();
-    }
-  }
-
-  /// Optional: manual refresh
-  Future<void> refreshServices() async {
-    _hasFetchedOnce = false;
-    services.clear();
-    await fetchServices();
-  }
+  List<Map<String, String>> services = [
+    {
+      "id": "1",
+      "title": "Haircut",
+      "img": "assets/images/services/haircut.png",
+    },
+    {
+      "id": "2",
+      "title": "Hair Spa",
+      "img": "assets/images/services/spa.png",
+    },
+    {
+      "id": "3",
+      "title": "Facial",
+      "img": "assets/images/services/facial.png",
+    },
+    {
+      "id": "4",
+      "title": "Manicure",
+      "img": "assets/images/services/nail.png",
+    },
+  ];
 }

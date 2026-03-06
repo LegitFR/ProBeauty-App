@@ -156,304 +156,299 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
     final height = size.height;
     final bool hasServices = widget.services.isNotEmpty;
 
-    return SafeArea(
-      bottom: true,
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: AppColors.softIvory,
+      appBar: AppBar(
         backgroundColor: AppColors.softIvory,
-        appBar: AppBar(
-          backgroundColor: AppColors.softIvory,
-          elevation: 0,
-          leading: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          ),
-          centerTitle: true,
-          title: Text(
-            widget.name,
-            style: const TextStyle(
-              fontFamily: "PoppinsSemiBold",
-              color: Colors.black,
-              fontSize: 18,
-            ),
+        elevation: 0,
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: const Icon(Icons.arrow_back_ios, color: Colors.black),
+        ),
+        centerTitle: true,
+        title: Text(
+          widget.name,
+          style: const TextStyle(
+            fontFamily: "PoppinsSemiBold",
+            color: Colors.black,
+            fontSize: 18,
           ),
         ),
+      ),
 
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              // -------------------------------
-              // TOP IMAGE
-              // -------------------------------
-              SizedBox(
-                height: height * 0.25,
-                width: double.infinity,
-                child: Stack(
-                  children: [
-                    Image(
-                      image: widget.image.startsWith('http')
-                          ? NetworkImage(widget.image)
-                          : AssetImage(widget.image) as ImageProvider,
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
-                          const Icon(Icons.broken_image),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // -------------------------------
+            // TOP IMAGE
+            // -------------------------------
+            SizedBox(
+              height: height * 0.25,
+              width: double.infinity,
+              child: Stack(
+                children: [
+                  Image(
+                    image: widget.image.startsWith('http')
+                        ? NetworkImage(widget.image)
+                        : AssetImage(widget.image) as ImageProvider,
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) =>
+                        const Icon(Icons.broken_image),
+                  ),
+                  Positioned(
+                    right: 16,
+                    top: 16,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.black.withOpacity(0.4),
+                      ),
+                      child: const Icon(Icons.share, color: Colors.white),
                     ),
-                    Positioned(
-                      right: 16,
-                      top: 16,
-                      child: Container(
+                  )
+                ],
+              ),
+            ),
+
+            // -------------------------------
+            // DETAILS
+            // -------------------------------
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // TITLE + HEART
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.name,
+                          style: const TextStyle(
+                            fontFamily: "PoppinsSemiBold",
+                            fontSize: 18,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.black.withOpacity(0.4),
-                        ),
-                        child: const Icon(Icons.share, color: Colors.white),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-
-              // -------------------------------
-              // DETAILS
-              // -------------------------------
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // TITLE + HEART
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            widget.name,
-                            style: const TextStyle(
-                              fontFamily: "PoppinsSemiBold",
-                              fontSize: 18,
-                              color: Colors.black,
+                          border: Border.all(color: Colors.black26),
+                          color: AppColors.softIvory,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.15),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
                             ),
-                          ),
+                          ],
                         ),
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.black26),
-                            color: AppColors.softIvory,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.15),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
+                        child: const Icon(Icons.favorite_border),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  // RATINGS
+                  _ratingLoading
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.rusticSunset,
+                          ),
+                        )
+                      : Row(
+                          children: [
+                            Text(
+                              _avgRating.toStringAsFixed(1),
+                              style: const TextStyle(
+                                fontFamily: "PoppinsSemiBold",
+                                fontSize: 15,
                               ),
-                            ],
-                          ),
-                          child: const Icon(Icons.favorite_border),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 6),
-
-                    // RATINGS
-                    _ratingLoading
-                        ? const SizedBox(
-                            height: 18,
-                            width: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.rusticSunset,
                             ),
-                          )
-                        : Row(
-                            children: [
-                              Text(
-                                _avgRating.toStringAsFixed(1),
-                                style: const TextStyle(
-                                  fontFamily: "PoppinsSemiBold",
-                                  fontSize: 15,
-                                ),
+                            const SizedBox(width: 4),
+                            ...List.generate(
+                              5,
+                              (i) => Icon(
+                                Icons.star,
+                                size: 18,
+                                color: i < _avgRating.floor()
+                                    ? AppColors.rusticSunset
+                                    : AppColors.greyTone,
                               ),
-                              const SizedBox(width: 4),
-                              ...List.generate(
-                                5,
-                                (i) => Icon(
-                                  Icons.star,
-                                  size: 18,
-                                  color: i < _avgRating.floor()
-                                      ? AppColors.rusticSunset
-                                      : AppColors.greyTone,
-                                ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              "($_totalReviews)",
+                              style: const TextStyle(
+                                fontFamily: "PoppinsRegular",
+                                fontSize: 13,
+                                color: Colors.black54,
                               ),
-                              const SizedBox(width: 4),
-                              Text(
-                                "($_totalReviews)",
-                                style: const TextStyle(
-                                  fontFamily: "PoppinsRegular",
-                                  fontSize: 13,
-                                  color: Colors.black54,
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
+                        ),
 
-                    const SizedBox(height: 8),
+                  const SizedBox(height: 8),
 
-                    Text(
-                      widget.address,
-                      style: const TextStyle(
-                        fontFamily: "PoppinsRegular",
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
+                  Text(
+                    widget.address,
+                    style: const TextStyle(
+                      fontFamily: "PoppinsRegular",
+                      fontSize: 14,
+                      color: Colors.black87,
                     ),
+                  ),
 
-                    const SizedBox(height: 4),
-                    Text(
-                      _openStatusText(),
-                      style: TextStyle(
-                        fontFamily: "PoppinsRegular",
-                        fontSize: 14,
-                        color: _openStatusText() == "Closed today"
-                            ? Colors.red
-                            : Colors.green,
-                      ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _openStatusText(),
+                    style: TextStyle(
+                      fontFamily: "PoppinsRegular",
+                      fontSize: 14,
+                      color: _openStatusText() == "Closed today"
+                          ? Colors.red
+                          : Colors.green,
                     ),
+                  ),
 
-                    const SizedBox(height: 18),
+                  const SizedBox(height: 18),
 
-                    SalonTabBar(
-                      selectedIndex: 0,
-                      onTabTap: (index) {
-                        if (index == 0) return;
+                  SalonTabBar(
+                    selectedIndex: 0,
+                    onTabTap: (index) {
+                      if (index == 0) return;
 
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) {
-                              if (index == 1) {
-                                return ReviewsScreen(
-                                  salonId: widget.id,
-                                  salonName: widget.name,
-                                  staffList: widget.salonStaffList,
-                                  address: widget.address,
-                                  hours: widget.hours,
-                                  image: widget.image,
-                                  services: widget.services,
-                                );
-                              }
-                              if (index == 2) {
-                                return TeamScreen(
-                                  salonId: widget.id,
-                                  salonName: widget.name,
-                                  staffList: widget.salonStaffList,
-                                  address: widget.address,
-                                  hours: widget.hours,
-                                  image: widget.image,
-                                  services: widget.services,
-                                );
-                              }
-                              return DetailScreen(
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) {
+                            if (index == 1) {
+                              return ReviewsScreen(
                                 salonId: widget.id,
                                 salonName: widget.name,
-                                address: widget.address,
                                 staffList: widget.salonStaffList,
+                                address: widget.address,
                                 hours: widget.hours,
                                 image: widget.image,
                                 services: widget.services,
                               );
-                            },
-                          ),
-                        );
-                      },
-                    ),
-
-                    const Divider(thickness: 1),
-                    const SizedBox(height: 14),
-
-                    // ---------------------------
-                    // SERVICES LIST
-                    // ---------------------------
-                    for (var s in widget.services) ...[
-                      _serviceTile(
-                        title: s["title"] ?? "",
-                        subtitle:
-                            l10n.salonServiceDuration(s["durationMinutes"]),
-                        price: "₹${s["price"]}",
-                        category: s["category"] ?? "Featured",
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-
-                    const SizedBox(height: 80),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // ---------------------------
-        // FIXED BOTTOM BAR
-        // ---------------------------
-
-        bottomNavigationBar: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          color: AppColors.softIvory,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                l10n.salonServicesAvailable(widget.services.length),
-                // "${widget.services.length} services available",
-                style: const TextStyle(
-                  fontFamily: "PoppinsRegular",
-                  fontSize: 13,
-                  color: Colors.black87,
-                ),
-              ),
-              ElevatedButton(
-                onPressed: hasServices
-                    ? () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => SelectServicesScreen(
+                            }
+                            if (index == 2) {
+                              return TeamScreen(
+                                salonId: widget.id,
+                                salonName: widget.name,
+                                staffList: widget.salonStaffList,
+                                address: widget.address,
+                                hours: widget.hours,
+                                image: widget.image,
+                                services: widget.services,
+                              );
+                            }
+                            return DetailScreen(
                               salonId: widget.id,
                               salonName: widget.name,
+                              address: widget.address,
+                              staffList: widget.salonStaffList,
+                              hours: widget.hours,
+                              image: widget.image,
                               services: widget.services,
-                              salonStaffList: widget.salonStaffList,
-                              initialCategory: "Featured",
-                            ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+
+                  const Divider(thickness: 1),
+                  const SizedBox(height: 14),
+
+                  // ---------------------------
+                  // SERVICES LIST
+                  // ---------------------------
+                  for (var s in widget.services) ...[
+                    _serviceTile(
+                      title: s["title"] ?? "",
+                      subtitle: l10n.salonServiceDuration(s["durationMinutes"]),
+                      price: "₹${s["price"]}",
+                      category: s["category"] ?? "Featured",
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+
+                  const SizedBox(height: 80),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+
+      // ---------------------------
+      // FIXED BOTTOM BAR
+      // ---------------------------
+
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        color: AppColors.softIvory,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              l10n.salonServicesAvailable(widget.services.length),
+              // "${widget.services.length} services available",
+              style: const TextStyle(
+                fontFamily: "PoppinsRegular",
+                fontSize: 13,
+                color: Colors.black87,
+              ),
+            ),
+            ElevatedButton(
+              onPressed: hasServices
+                  ? () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => SelectServicesScreen(
+                            salonId: widget.id,
+                            salonName: widget.name,
+                            services: widget.services,
+                            salonStaffList: widget.salonStaffList,
+                            initialCategory: "Featured",
                           ),
-                        );
-                      }
-                    : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: hasServices
-                      ? AppColors.rusticSunset
-                      : Colors.grey.shade400,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  elevation: hasServices ? 2 : 0,
+                        ),
+                      );
+                    }
+                  : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    hasServices ? AppColors.rusticSunset : Colors.grey.shade400,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: Text(
-                  "Book now",
-                  style: TextStyle(
-                    fontFamily: "PoppinsSemiBold",
-                    color: hasServices ? Colors.white : Colors.black45,
-                    fontSize: 14,
-                  ),
+                elevation: hasServices ? 2 : 0,
+              ),
+              child: Text(
+                "Book now",
+                style: TextStyle(
+                  fontFamily: "PoppinsSemiBold",
+                  color: hasServices ? Colors.white : Colors.black45,
+                  fontSize: 14,
                 ),
-              )
-            ],
-          ),
+              ),
+            )
+          ],
         ),
       ),
     );
