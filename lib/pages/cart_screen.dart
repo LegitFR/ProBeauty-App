@@ -96,111 +96,113 @@ class _CartScreenState extends State<CartScreen> {
       // ======================
       // FIXED BOTTOM BAR
       // ======================
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        decoration: const BoxDecoration(color: AppColors.softIvory),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  totalText,
-                  style: const TextStyle(
-                    fontFamily: "PoppinsSemiBold",
-                    fontSize: 22,
-                    color: Colors.black,
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          decoration: const BoxDecoration(color: AppColors.softIvory),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    totalText,
+                    style: const TextStyle(
+                      fontFamily: "PoppinsSemiBold",
+                      fontSize: 22,
+                      color: Colors.black,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 3),
-                const Text(
-                  "Inclusive Of All Taxes",
-                  style: TextStyle(
-                    fontFamily: "PoppinsRegular",
-                    fontSize: 12,
-                    color: Colors.black54,
+                  const SizedBox(height: 3),
+                  const Text(
+                    "Inclusive Of All Taxes",
+                    style: TextStyle(
+                      fontFamily: "PoppinsRegular",
+                      fontSize: 12,
+                      color: Colors.black54,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            ElevatedButton(
-              onPressed: cart.items.isEmpty || _isPaying
-                  ? null
-                  : () async {
-                      setState(() => _isPaying = true);
+                ],
+              ),
+              ElevatedButton(
+                onPressed: cart.items.isEmpty || _isPaying
+                    ? null
+                    : () async {
+                        setState(() => _isPaying = true);
 
-                      try {
-                        // 1️⃣ Create order + payment intent
-                        final result = await cart.checkoutWithStripe();
-                        if (result == null) {
-                          throw Exception(cart.error ?? "Checkout failed");
-                        }
+                        try {
+                          // 1️⃣ Create order + payment intent
+                          final result = await cart.checkoutWithStripe();
+                          if (result == null) {
+                            throw Exception(cart.error ?? "Checkout failed");
+                          }
 
-                        final clientSecret = result['clientSecret'] as String;
+                          final clientSecret = result['clientSecret'] as String;
 
-                        // 2️⃣ Confirm payment USING PROVIDER
-                        final success = await cart.confirmStripePayment(
-                          clientSecret,
-                        );
+                          // 2️⃣ Confirm payment USING PROVIDER
+                          final success = await cart.confirmStripePayment(
+                            clientSecret,
+                          );
 
-                        if (!success) {
-                          throw Exception(cart.error ?? "Payment failed");
-                        }
+                          if (!success) {
+                            throw Exception(cart.error ?? "Payment failed");
+                          }
 
-                        if (mounted) {
-                          await _showSuccessOverlay();
-                        }
+                          if (mounted) {
+                            await _showSuccessOverlay();
+                          }
 
-                        await cart.fetchCart();
-                      } on StripeException catch (e) {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                e.error.message ?? "Payment cancelled",
+                          await cart.fetchCart();
+                        } on StripeException catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  e.error.message ?? "Payment cancelled",
+                                ),
+                                backgroundColor: Colors.red,
                               ),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
+                            );
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(e.toString()),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        } finally {
+                          if (mounted) {
+                            setState(() => _isPaying = false);
+                          }
                         }
-                      } catch (e) {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(e.toString()),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
-                      } finally {
-                        if (mounted) {
-                          setState(() => _isPaying = false);
-                        }
-                      }
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.rusticSunset,
-                disabledBackgroundColor: Colors.grey.shade400,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 26,
-                  vertical: 12,
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.rusticSunset,
+                  disabledBackgroundColor: Colors.grey.shade400,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 26,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                child: const Text(
+                  "Checkout",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: "PoppinsSemiBold",
+                    fontSize: 16,
+                  ),
                 ),
               ),
-              child: const Text(
-                "Checkout",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: "PoppinsSemiBold",
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
 

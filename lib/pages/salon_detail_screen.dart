@@ -397,58 +397,61 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
       // FIXED BOTTOM BAR
       // ---------------------------
 
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        color: AppColors.softIvory,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              l10n.salonServicesAvailable(widget.services.length),
-              // "${widget.services.length} services available",
-              style: const TextStyle(
-                fontFamily: "PoppinsRegular",
-                fontSize: 13,
-                color: Colors.black87,
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          color: AppColors.softIvory,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                l10n.salonServicesAvailable(widget.services.length),
+                // "${widget.services.length} services available",
+                style: const TextStyle(
+                  fontFamily: "PoppinsRegular",
+                  fontSize: 13,
+                  color: Colors.black87,
+                ),
               ),
-            ),
-            ElevatedButton(
-              onPressed: hasServices
-                  ? () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => SelectServicesScreen(
-                            salonId: widget.id,
-                            salonName: widget.name,
-                            services: widget.services,
-                            salonStaffList: widget.salonStaffList,
-                            initialCategory: "Featured",
+              ElevatedButton(
+                onPressed: hasServices
+                    ? () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => SelectServicesScreen(
+                              salonId: widget.id,
+                              salonName: widget.name,
+                              services: widget.services,
+                              salonStaffList: widget.salonStaffList,
+                              initialCategory: "Featured",
+                            ),
                           ),
-                        ),
-                      );
-                    }
-                  : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    hasServices ? AppColors.rusticSunset : Colors.grey.shade400,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                        );
+                      }
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: hasServices
+                      ? AppColors.rusticSunset
+                      : Colors.grey.shade400,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  elevation: hasServices ? 2 : 0,
                 ),
-                elevation: hasServices ? 2 : 0,
-              ),
-              child: Text(
-                "Book now",
-                style: TextStyle(
-                  fontFamily: "PoppinsSemiBold",
-                  color: hasServices ? Colors.white : Colors.black45,
-                  fontSize: 14,
+                child: Text(
+                  "Book now",
+                  style: TextStyle(
+                    fontFamily: "PoppinsSemiBold",
+                    color: hasServices ? Colors.white : Colors.black45,
+                    fontSize: 14,
+                  ),
                 ),
-              ),
-            )
-          ],
+              )
+            ],
+          ),
         ),
       ),
     );

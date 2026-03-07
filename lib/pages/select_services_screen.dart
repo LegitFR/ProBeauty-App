@@ -245,36 +245,38 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
             ),
           ],
         ),
-        bottomNavigationBar: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          child: ElevatedButton(
-            onPressed: selectedServices.isEmpty
-                ? null
-                : () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => SelectProfessionalScreen(
-                                salonId: widget.salonId,
-                                salonName: widget.salonName,
-                                staffList: widget.salonStaffList,
-                                selectedServices: selectedServices,
-                              )),
-                    );
-                  },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.rusticSunset,
-              disabledBackgroundColor: Colors.grey,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-            ),
-            child: Text(
-              l10n.selectServicesContinue,
-              style: const TextStyle(
-                  fontFamily: "PoppinsSemiBold",
-                  fontSize: 14,
-                  color: Colors.white),
+        bottomNavigationBar: SafeArea(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            child: ElevatedButton(
+              onPressed: selectedServices.isEmpty
+                  ? null
+                  : () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => SelectProfessionalScreen(
+                                  salonId: widget.salonId,
+                                  salonName: widget.salonName,
+                                  staffList: widget.salonStaffList,
+                                  selectedServices: selectedServices,
+                                )),
+                      );
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.rusticSunset,
+                disabledBackgroundColor: Colors.grey,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+              child: Text(
+                l10n.selectServicesContinue,
+                style: const TextStyle(
+                    fontFamily: "PoppinsSemiBold",
+                    fontSize: 14,
+                    color: Colors.white),
+              ),
             ),
           ),
         ),

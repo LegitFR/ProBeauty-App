@@ -290,93 +290,95 @@ class _ProductScreenState extends State<ProductScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.softIvory,
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-        decoration: const BoxDecoration(color: AppColors.softIvory),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "₹${product.price ?? ""}",
-                  style: const TextStyle(
-                    fontFamily: "PoppinsSemiBold",
-                    fontSize: 20,
-                    color: Colors.black,
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          decoration: const BoxDecoration(color: AppColors.softIvory),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "₹${product.price ?? ""}",
+                    style: const TextStyle(
+                      fontFamily: "PoppinsSemiBold",
+                      fontSize: 20,
+                      color: Colors.black,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 3),
-                const Text(
-                  "View price details",
-                  style: TextStyle(
-                    fontFamily: "PoppinsRegular",
-                    fontSize: 12,
-                    color: Colors.black54,
+                  const SizedBox(height: 3),
+                  const Text(
+                    "View price details",
+                    style: TextStyle(
+                      fontFamily: "PoppinsRegular",
+                      fontSize: 12,
+                      color: Colors.black54,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
 
-            // Right: Quantity selector + Cart icon
-            Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.rusticSunset,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        onPressed: _cartUpdating ? null : _decrementQuantity,
-                        icon: const Icon(
-                          Icons.remove,
-                          color: Colors.white,
-                          size: 15,
-                        ),
-                      ),
-                      Text(
-                        "$quantity",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontFamily: "PoppinsMedium",
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: _cartUpdating ? null : _incrementQuantity,
-                        icon: const Icon(
-                          Icons.add,
-                          color: Colors.white,
-                          size: 15,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 10),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamed(context, "/cart");
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
+              // Right: Quantity selector + Cart icon
+              Row(
+                children: [
+                  Container(
                     decoration: BoxDecoration(
                       color: AppColors.rusticSunset,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: SvgPicture.asset(
-                      "assets/images/icons/cart_icon.svg",
-                      color: Colors.white,
+                    child: Row(
+                      children: [
+                        IconButton(
+                          onPressed: _cartUpdating ? null : _decrementQuantity,
+                          icon: const Icon(
+                            Icons.remove,
+                            color: Colors.white,
+                            size: 15,
+                          ),
+                        ),
+                        Text(
+                          "$quantity",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontFamily: "PoppinsMedium",
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: _cartUpdating ? null : _incrementQuantity,
+                          icon: const Icon(
+                            Icons.add,
+                            color: Colors.white,
+                            size: 15,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                  const SizedBox(width: 10),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, "/cart");
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.rusticSunset,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: SvgPicture.asset(
+                        "assets/images/icons/cart_icon.svg",
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
       appBar: AppBar(

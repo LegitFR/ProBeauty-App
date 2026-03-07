@@ -983,68 +983,70 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.black12)),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "₹$grandTotal",
-                    style: const TextStyle(
-                      fontFamily: "PoppinsSemiBold",
-                      fontSize: 15,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    "${widget.selectedServices.length} "
-                    "${widget.selectedServices.length > 1 ? "services" : "service"} • "
-                    "${_formatTotalDuration()}",
-                    style: const TextStyle(
-                      fontFamily: "PoppinsRegular",
-                      fontSize: 12,
-                      color: Colors.black54,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ElevatedButton(
-              onPressed: _isProcessing
-                  ? null
-                  : () {
-                      if (payAtVenue) {
-                        _confirmPayAtVenue(context);
-                      } else {
-                        _startStripeCheckout(context);
-                      }
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.rusticSunset,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: _isProcessing
-                  ? const LoadingDots() // 🔥 YOUR ANIMATION
-                  : Text(
-                      l10n.reviewConfirmConfirmButton,
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: const BoxDecoration(
+            border: Border(top: BorderSide(color: Colors.black12)),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "₹$grandTotal",
                       style: const TextStyle(
                         fontFamily: "PoppinsSemiBold",
-                        color: Colors.white,
+                        fontSize: 15,
                       ),
                     ),
-            ),
-          ],
+                    const SizedBox(height: 2),
+                    Text(
+                      "${widget.selectedServices.length} "
+                      "${widget.selectedServices.length > 1 ? "services" : "service"} • "
+                      "${_formatTotalDuration()}",
+                      style: const TextStyle(
+                        fontFamily: "PoppinsRegular",
+                        fontSize: 12,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ElevatedButton(
+                onPressed: _isProcessing
+                    ? null
+                    : () {
+                        if (payAtVenue) {
+                          _confirmPayAtVenue(context);
+                        } else {
+                          _startStripeCheckout(context);
+                        }
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.rusticSunset,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: _isProcessing
+                    ? const LoadingDots() // 🔥 YOUR ANIMATION
+                    : Text(
+                        l10n.reviewConfirmConfirmButton,
+                        style: const TextStyle(
+                          fontFamily: "PoppinsSemiBold",
+                          color: Colors.white,
+                        ),
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );

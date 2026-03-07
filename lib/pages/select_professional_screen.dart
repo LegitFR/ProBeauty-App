@@ -152,39 +152,42 @@ class _SelectProfessionalScreenState extends State<SelectProfessionalScreen> {
           ),
 
           // ---------------- CONTINUE BUTTON ----------------
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.rusticSunset,
-                minimumSize: const Size.fromHeight(52),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BookAppointmentScreen(
-                      salonId: widget.salonId,
-                      salonName: widget.salonName,
-                      staff: null,
-                      selectedServices: widget.selectedServices,
-                      staffMapping: selectedStaffPerService, // 🔥 pass map
-                    ),
-                  ),
-                );
-              },
-              child: const Text(
-                "Continue",
-                style: TextStyle(
-                  fontFamily: "PoppinsSemiBold",
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          )
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BookAppointmentScreen(
+                    salonId: widget.salonId,
+                    salonName: widget.salonName,
+                    staff: null,
+                    selectedServices: widget.selectedServices,
+                    staffMapping: selectedStaffPerService, // 🔥 pass map
+                  ),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.rusticSunset,
+              disabledBackgroundColor: Colors.grey,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+            ),
+            child: Text(
+              l10n.selectServicesContinue,
+              style: const TextStyle(
+                  fontFamily: "PoppinsSemiBold",
+                  fontSize: 14,
+                  color: Colors.white),
+            ),
+          ),
+        ),
       ),
     );
   }
