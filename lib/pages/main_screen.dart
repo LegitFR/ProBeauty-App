@@ -108,72 +108,74 @@ class _MainScreenState extends State<MainScreen> {
       child: Scaffold(
         extendBody: true,
         body: _screens[_selectedIndex],
-        bottomNavigationBar: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            CurvedNavigationBar(
-              backgroundColor: AppColors.softIvory,
-              color: AppColors.softIvory2,
-              buttonBackgroundColor: AppColors.rusticSunset,
-              height: 70,
-              index: _selectedIndex,
-              items: List.generate(_iconPaths.length, (index) {
-                bool isSelected = index == _selectedIndex;
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: SvgPicture.asset(
-                    _iconPaths[index],
-                    height: isSelected ? 25 : 22,
-                    colorFilter: ColorFilter.mode(
-                      isSelected ? Colors.white : Colors.black87,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                );
-              }),
-              animationDuration: const Duration(milliseconds: 300),
-              animationCurve: Curves.easeInOut,
-              onTap: (index) {
-                setState(() {
-                  _selectedIndex = index;
-                });
-              },
-            ),
-            // Label for selected item
-            Positioned(
-              bottom: 7,
-              left: 0,
-              right: 0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: List.generate(labels.length, (index) {
+        bottomNavigationBar: SafeArea(
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              CurvedNavigationBar(
+                backgroundColor: AppColors.softIvory,
+                color: AppColors.softIvory2,
+                buttonBackgroundColor: AppColors.rusticSunset,
+                height: 70,
+                index: _selectedIndex,
+                items: List.generate(_iconPaths.length, (index) {
                   bool isSelected = index == _selectedIndex;
-                  return Expanded(
-                    child: Center(
-                      child: AnimatedOpacity(
-                        opacity: isSelected ? 1.0 : 0.0,
-                        duration: const Duration(milliseconds: 200),
-                        child: isSelected
-                            ? Text(
-                                labels[index],
-                                maxLines: 1, // ✅ force single line
-                                overflow: TextOverflow.ellipsis, // ✅ show ...
-                                softWrap: false,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: AppColors.rusticSunset,
-                                  fontFamily: "PoppinsRegular",
-                                ),
-                              )
-                            : const SizedBox.shrink(),
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SvgPicture.asset(
+                      _iconPaths[index],
+                      height: isSelected ? 25 : 22,
+                      colorFilter: ColorFilter.mode(
+                        isSelected ? Colors.white : Colors.black87,
+                        BlendMode.srcIn,
                       ),
                     ),
                   );
                 }),
+                animationDuration: const Duration(milliseconds: 300),
+                animationCurve: Curves.easeInOut,
+                onTap: (index) {
+                  setState(() {
+                    _selectedIndex = index;
+                  });
+                },
               ),
-            ),
-          ],
+              // Label for selected item
+              Positioned(
+                bottom: 7,
+                left: 0,
+                right: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: List.generate(labels.length, (index) {
+                    bool isSelected = index == _selectedIndex;
+                    return Expanded(
+                      child: Center(
+                        child: AnimatedOpacity(
+                          opacity: isSelected ? 1.0 : 0.0,
+                          duration: const Duration(milliseconds: 200),
+                          child: isSelected
+                              ? Text(
+                                  labels[index],
+                                  maxLines: 1, // ✅ force single line
+                                  overflow: TextOverflow.ellipsis, // ✅ show ...
+                                  softWrap: false,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.rusticSunset,
+                                    fontFamily: "PoppinsRegular",
+                                  ),
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
