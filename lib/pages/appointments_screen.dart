@@ -253,7 +253,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   @override
   Widget build(BuildContext context) {
     final appointmentProvider = context.watch<AppointmentProvider>();
-    final l10n = AppLocalizations.of(context)!;
+    // final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: AppColors.softIvory,

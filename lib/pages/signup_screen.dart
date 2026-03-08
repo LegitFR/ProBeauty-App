@@ -3,10 +3,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:http/http.dart' as http;
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
-import 'package:probeauty_app/config/api_config.dart';
 import 'package:probeauty_app/services/api_client.dart';
 import 'package:probeauty_app/services/google_auth_service.dart';
 

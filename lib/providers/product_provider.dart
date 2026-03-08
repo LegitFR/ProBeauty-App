@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:probeauty_app/config/api_config.dart';
 import '../models/product.dart';
 import 'package:probeauty_app/services/api_client.dart';
 

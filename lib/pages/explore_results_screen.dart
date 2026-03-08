@@ -6,10 +6,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:http/http.dart' as http;
 import 'package:probeauty_app/pages/select_services_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
-import 'package:probeauty_app/config/api_config.dart';
 import 'package:probeauty_app/services/api_client.dart';
 
 class ExploreResultsScreen extends StatefulWidget {

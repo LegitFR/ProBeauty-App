@@ -440,29 +440,29 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   // ⭐ SHIMMER PLACEHOLDER
-  Widget _buildServiceShimmer(double width) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey.shade400,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.black, width: 2.87),
-      ),
-      child: Column(
-        children: [
-          Container(
-            height: width * 0.22,
-            color: Colors.grey.shade300,
-          ),
-          const SizedBox(height: 8),
-          Container(
-            height: 12,
-            width: 70,
-            color: Colors.grey.shade300,
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildServiceShimmer(double width) {
+  //   return Container(
+  //     decoration: BoxDecoration(
+  //       color: Colors.grey.shade400,
+  //       borderRadius: BorderRadius.circular(10),
+  //       border: Border.all(color: Colors.black, width: 2.87),
+  //     ),
+  //     child: Column(
+  //       children: [
+  //         Container(
+  //           height: width * 0.22,
+  //           color: Colors.grey.shade300,
+  //         ),
+  //         const SizedBox(height: 8),
+  //         Container(
+  //           height: 12,
+  //           width: 70,
+  //           color: Colors.grey.shade300,
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   // ---------------- UI BUILDERS ----------------
 

@@ -94,7 +94,6 @@ class _ShopScreenState extends State<ShopScreen> {
     final size = MediaQuery.of(context).size;
     final width = size.width;
     final height = size.height;
-    final productProvider = context.watch<ProductProvider>();
     final offerProvider = context.watch<OfferProvider>();
     final productOffers = offerProvider.productOffers;
 
