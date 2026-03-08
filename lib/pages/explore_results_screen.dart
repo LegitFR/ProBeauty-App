@@ -80,6 +80,7 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
     final p = <String, String>{
       'page': page.toString(),
       'limit': limit.toString(),
+      'verified': 'true', // added here
     };
 
     if ((widget.serviceText ?? '').isNotEmpty) {
@@ -527,7 +528,7 @@ class SalonModel {
       name: json['name'] ?? "Salon",
       address: json['address'],
       venueType: json['venueType'],
-      thumbnail: json['image'],
+      thumbnail: json['thumbnail'],
       averageRating: json['averageRating'] != null
           ? (json['averageRating'] as num).toDouble()
           : 0.0,
