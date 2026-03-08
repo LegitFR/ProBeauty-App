@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:probeauty_app/models/cart_item.dart';
 import 'package:probeauty_app/providers/cart_provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -30,9 +31,6 @@ class _ProductScreenState extends State<ProductScreen> {
   int selectedSize = 0;
   int selectedRating = 0;
 
-  // 🔥 Cart quantity synced with backend
-  int quantity = 0;
-
   final sizes = ["180ml", "250ml", "450ml", "1000ml"];
   int currentImageIndex = 0;
 
@@ -48,9 +46,8 @@ class _ProductScreenState extends State<ProductScreen> {
   void initState() {
     super.initState();
 
-    _loadInitialCartQuantity();
-    _checkFavouriteStatus();
     _fetchApplicableOffers();
+    _checkFavouriteStatus();
   }
 
   Future<void> _fetchApplicableOffers() async {
@@ -158,121 +155,59 @@ class _ProductScreenState extends State<ProductScreen> {
     }
   }
 
-  Future<void> _loadInitialCartQuantity() async {
-    try {
-      final resp = await ApiClient.get("/api/v1/cart");
-
-      if (resp.statusCode == 200) {
-        final jsonBody = jsonDecode(resp.body);
-        final data = jsonBody["data"];
-        if (data == null || data["cart"] == null) return;
-
-        final cart = data["cart"];
-        final List items = cart["cartItems"] ?? [];
-
-        final productId = widget.product.id;
-        if (productId == null) return;
-
-        int backendQty = 0;
-        for (final item in items) {
-          if (item["productId"] == productId) {
-            backendQty = (item["quantity"] ?? 0) as int;
-            break;
-          }
-        }
-
-        if (mounted) {
-          setState(() {
-            quantity = backendQty;
-          });
-        }
-      } else {
-        debugPrint("❌ Failed to load cart: ${resp.statusCode}");
-      }
-    } catch (e) {
-      debugPrint("❌ Error loading cart: $e");
-    }
-  }
-
-  Future<void> _incrementQuantity() async {
+  Future<void> _incrementQuantity(int quantity, int stock) async {
     if (_cartUpdating) return;
 
-    final productId = widget.product.id;
-    if (productId == null) return;
+    if (quantity >= stock) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No more stock available")),
+      );
+      return;
+    }
 
-    final newQty = quantity + 1;
+    final cart = context.read<CartProvider>();
+    final productId = widget.product.id;
+
+    if (productId == null) return;
 
     setState(() => _cartUpdating = true);
 
-    try {
-      if (quantity == 0) {
-        await ApiClient.post(
-          "/api/v1/cart/items",
-          body: {
-            "productId": productId,
-            "quantity": newQty,
-          },
-        );
-      } else {
-        await ApiClient.post(
-          "/api/v1/cart/items/$productId",
-          body: {
-            "quantity": newQty,
-          },
-        );
-      }
+    final msg = quantity == 0
+        ? await cart.addItem(productId: productId)
+        : await cart.increaseQty(
+            productId: productId,
+            currentQty: quantity,
+          );
 
-      if (!mounted) return;
-
-      setState(() {
-        quantity = newQty;
-      });
-
-      /// 🔥 UPDATE BADGE COUNT
-      await context.read<CartProvider>().fetchCart();
-    } catch (e) {
+    if (msg != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error updating cart: $e")),
+        SnackBar(content: Text(msg)),
       );
     }
 
     if (mounted) setState(() => _cartUpdating = false);
   }
 
-  Future<void> _decrementQuantity() async {
+  Future<void> _decrementQuantity(int quantity) async {
     if (_cartUpdating) return;
+
     if (quantity == 0) return;
 
+    final cart = context.read<CartProvider>();
     final productId = widget.product.id;
-    if (productId == null) return;
 
-    final newQty = quantity - 1;
+    if (productId == null) return;
 
     setState(() => _cartUpdating = true);
 
-    try {
-      if (newQty > 0) {
-        await ApiClient.post(
-          "/api/v1/cart/items/$productId",
-          body: {
-            "quantity": newQty,
-          },
-        );
-      } else {
-        await ApiClient.delete("/api/v1/cart/items/$productId");
-      }
+    final msg = await cart.decreaseQty(
+      productId: productId,
+      currentQty: quantity,
+    );
 
-      if (!mounted) return;
-
-      setState(() {
-        quantity = newQty;
-      });
-
-      /// 🔥 UPDATE BADGE COUNT
-      await context.read<CartProvider>().fetchCart();
-    } catch (e) {
+    if (msg != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error updating cart: $e")),
+        SnackBar(content: Text(msg)),
       );
     }
 
@@ -282,11 +217,30 @@ class _ProductScreenState extends State<ProductScreen> {
   @override
   Widget build(BuildContext context) {
     final Product product = widget.product;
+    final cart = context.watch<CartProvider>();
+
+    final item = cart.items.firstWhere(
+      (e) => e.productId == widget.product.id,
+      orElse: () => CartItemModel(
+        id: "",
+        productId: "",
+        title: "",
+        price: 0,
+        quantity: 0,
+      ),
+    );
+
+    final quantity = item.quantity;
+    final int stock = product.quantity ?? 0;
+
     final String salonName = widget.salonName;
 
     final size = MediaQuery.of(context).size;
     final width = size.width;
     final height = size.height;
+
+    final double price = (product.price ?? 0).toDouble();
+    final double totalPrice = price * quantity;
 
     return Scaffold(
       backgroundColor: AppColors.softIvory,
@@ -302,19 +256,23 @@ class _ProductScreenState extends State<ProductScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    "₹${product.price ?? ""}",
+                    quantity == 0
+                        ? "Add to Cart"
+                        : "₹${totalPrice.toStringAsFixed(2)}",
                     style: const TextStyle(
                       fontFamily: "PoppinsSemiBold",
-                      fontSize: 20,
+                      fontSize: 18,
                       color: Colors.black,
                     ),
                   ),
                   const SizedBox(height: 3),
-                  const Text(
-                    "View price details",
-                    style: TextStyle(
+                  Text(
+                    quantity == 0
+                        ? "Select quantity to see price"
+                        : "₹${price.toStringAsFixed(2)} × $quantity",
+                    style: const TextStyle(
                       fontFamily: "PoppinsRegular",
-                      fontSize: 12,
+                      fontSize: 11,
                       color: Colors.black54,
                     ),
                   ),
@@ -332,7 +290,9 @@ class _ProductScreenState extends State<ProductScreen> {
                     child: Row(
                       children: [
                         IconButton(
-                          onPressed: _cartUpdating ? null : _decrementQuantity,
+                          onPressed: _cartUpdating
+                              ? null
+                              : () => _decrementQuantity(quantity),
                           icon: const Icon(
                             Icons.remove,
                             color: Colors.white,
@@ -348,10 +308,14 @@ class _ProductScreenState extends State<ProductScreen> {
                           ),
                         ),
                         IconButton(
-                          onPressed: _cartUpdating ? null : _incrementQuantity,
-                          icon: const Icon(
+                          onPressed: (_cartUpdating || quantity >= stock)
+                              ? null
+                              : () => _incrementQuantity(quantity, stock),
+                          icon: Icon(
                             Icons.add,
-                            color: Colors.white,
+                            color: quantity >= stock
+                                ? Colors.white38
+                                : Colors.white,
                             size: 15,
                           ),
                         ),

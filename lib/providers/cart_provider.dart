@@ -91,7 +91,13 @@ class CartProvider with ChangeNotifier {
         return jsonDecode(resp.body)["message"];
       }
 
-      await fetchCart();
+      _items.removeWhere((item) => item.productId == productId);
+
+      _subtotal = _items.fold(0.0, (s, i) => s + (i.price * i.quantity));
+      _totalItems = _items.fold(0, (s, i) => s + i.quantity);
+
+      notifyListeners();
+
       return null;
     } catch (e) {
       return e.toString();
@@ -107,9 +113,11 @@ class CartProvider with ChangeNotifier {
     }
 
     try {
-      final resp = await ApiClient.post(
+      final resp = await ApiClient.patch(
         "$_cartItemEndpoint/$productId",
-        body: {"quantity": quantity},
+        body: {
+          "quantity": quantity,
+        },
       );
 
       if (resp.statusCode != 200) {
@@ -121,6 +129,74 @@ class CartProvider with ChangeNotifier {
     } catch (e) {
       return e.toString();
     }
+  }
+
+  Future<String?> clearCart() async {
+    try {
+      final resp = await ApiClient.delete(_cartEndpoint);
+
+      if (resp.statusCode != 200) {
+        return jsonDecode(resp.body)["message"];
+      }
+
+      _items.clear();
+      _subtotal = 0;
+      _totalItems = 0;
+
+      notifyListeners();
+      return null;
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  Future<String?> addItem({
+    required String productId,
+    int quantity = 1,
+  }) async {
+    try {
+      final resp = await ApiClient.post(
+        _cartItemEndpoint,
+        body: {
+          "productId": productId,
+          "quantity": quantity,
+        },
+      );
+
+      if (resp.statusCode != 200 && resp.statusCode != 201) {
+        return jsonDecode(resp.body)["message"];
+      }
+
+      await fetchCart();
+
+      return null;
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  Future<String?> increaseQty({
+    required String productId,
+    required int currentQty,
+  }) async {
+    return updateItemQuantity(
+      productId: productId,
+      quantity: currentQty + 1,
+    );
+  }
+
+  Future<String?> decreaseQty({
+    required String productId,
+    required int currentQty,
+  }) async {
+    if (currentQty <= 1) {
+      return removeItem(productId: productId);
+    }
+
+    return updateItemQuantity(
+      productId: productId,
+      quantity: currentQty - 1,
+    );
   }
 
   // ==========================================================
@@ -135,12 +211,12 @@ class CartProvider with ChangeNotifier {
       }
 
       final addresses = jsonDecode(addressResp.body)["data"] as List;
-      final defaultAddress = addresses.firstWhere(
-        (a) => a["isDefault"] == true,
-        orElse: () => null,
-      );
+      final defaultAddress = addresses.cast<Map<String, dynamic>>().firstWhere(
+            (a) => a["isDefault"] == true,
+            orElse: () => {},
+          );
 
-      if (defaultAddress == null) {
+      if (defaultAddress.isEmpty) {
         throw Exception("No default address found");
       }
       final resp = await ApiClient.post(

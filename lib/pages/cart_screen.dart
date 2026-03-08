@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:probeauty_app/models/cart_item.dart';
-import 'package:probeauty_app/pages/address_picker_screen.dart';
 import 'package:probeauty_app/providers/address_provider.dart';
 import 'package:probeauty_app/routes/app_routes.dart';
 import 'package:probeauty_app/widgets/success_animation.dart';
@@ -27,8 +26,8 @@ class _CartScreenState extends State<CartScreen> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<CartProvider>(context, listen: false).fetchCart();
-      Provider.of<AddressProvider>(context, listen: false).fetchAddresses();
+      context.read<CartProvider>().fetchCart();
+      context.read<AddressProvider>().fetchAddresses();
     });
   }
 
@@ -127,7 +126,7 @@ class _CartScreenState extends State<CartScreen> {
                 ],
               ),
               ElevatedButton(
-                onPressed: cart.items.isEmpty || _isPaying
+                onPressed: cart.items.isEmpty || _isPaying || cart.isLoading
                     ? null
                     : () async {
                         setState(() => _isPaying = true);
@@ -400,15 +399,14 @@ class _CartScreenState extends State<CartScreen> {
               children: [
                 GestureDetector(
                   onTap: () async {
-                    final newQty = item.quantity - 1;
-                    final msg = await cart.updateItemQuantity(
+                    final msg = await cart.decreaseQty(
                       productId: item.productId,
-                      quantity: newQty,
+                      currentQty: item.quantity,
                     );
+
                     if (msg != null && mounted) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text(msg)));
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(msg)));
                     }
                   },
                   child: const Padding(
