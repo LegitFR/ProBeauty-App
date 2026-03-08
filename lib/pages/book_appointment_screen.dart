@@ -10,6 +10,7 @@ import 'package:probeauty_app/services/api_client.dart';
 class BookAppointmentScreen extends StatefulWidget {
   final String salonId;
   final String salonName;
+  final String image;
   final Map<String, dynamic>? staff; // keep for compatibility
   final Map<String, dynamic>? staffMapping; // 🔥 ADD
 
@@ -19,6 +20,7 @@ class BookAppointmentScreen extends StatefulWidget {
     super.key,
     required this.salonId,
     required this.salonName,
+    required this.image,
     required this.staff,
     required this.staffMapping,
     required this.selectedServices,
@@ -557,6 +559,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                                   builder: (_) => FirstVisitScreen(
                                     salonId: widget.salonId,
                                     salonName: widget.salonName,
+                                    image: widget.image,
                                     staff: widget.staff,
                                     date: selectedDate,
                                     time: formattedTime,

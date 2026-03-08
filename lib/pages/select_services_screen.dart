@@ -7,6 +7,7 @@ class SelectServicesScreen extends StatefulWidget {
   final String salonId;
   final String salonName;
   final List<dynamic> services;
+  final String image;
   final List<dynamic> salonStaffList;
   final String? initialCategory;
 
@@ -15,6 +16,7 @@ class SelectServicesScreen extends StatefulWidget {
     required this.salonId,
     required this.salonName,
     required this.services,
+    required this.image,
     required this.salonStaffList,
     required this.initialCategory,
   });
@@ -259,6 +261,7 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
                                   salonId: widget.salonId,
                                   salonName: widget.salonName,
                                   staffList: widget.salonStaffList,
+                                  image: widget.image,
                                   selectedServices: selectedServices,
                                 )),
                       );

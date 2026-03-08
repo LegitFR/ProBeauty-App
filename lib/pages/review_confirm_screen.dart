@@ -15,6 +15,7 @@ class ReviewConfirmScreen extends StatefulWidget {
   final String salonId;
   final Map<String, dynamic>? staff;
   final Map<String, dynamic>? staffMapping;
+  final String image;
 
   final String salonName;
   final DateTime selectedDate;
@@ -26,6 +27,7 @@ class ReviewConfirmScreen extends StatefulWidget {
     super.key,
     required this.salonId,
     required this.staff,
+    required this.image,
     required this.staffMapping,
     required this.salonName,
     required this.selectedDate,
@@ -668,9 +670,23 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
                     color: Colors.black,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Center(
-                    child: Text("LOGO",
-                        style: TextStyle(color: Colors.white, fontSize: 10)),
+                  child: Image.network(
+                    widget.image, // your logo url variable
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: Colors.grey.shade300,
+                      child: const Icon(Icons.image_not_supported),
+                    ),
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return const Center(
+                        child: SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(width: 12),

@@ -678,6 +678,7 @@ class _SalonCardState extends State<SalonCard> {
             salonName: data["name"],
             services: data["services"],
             salonStaffList: data["staff"],
+            image: data["thumbnail"],
             initialCategory: _findCategory(data["services"], serviceId),
           ),
         ),

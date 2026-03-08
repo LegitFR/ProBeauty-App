@@ -6,6 +6,8 @@ import 'package:probeauty_app/resources/AppColors.dart';
 class SelectProfessionalScreen extends StatefulWidget {
   final String salonId;
   final String salonName;
+  final String image;
+
   final List<dynamic> staffList;
   final List<Map<String, dynamic>> selectedServices;
 
@@ -13,6 +15,7 @@ class SelectProfessionalScreen extends StatefulWidget {
     super.key,
     required this.salonId,
     required this.salonName,
+    required this.image,
     required this.staffList,
     required this.selectedServices,
   });
@@ -165,6 +168,7 @@ class _SelectProfessionalScreenState extends State<SelectProfessionalScreen> {
                   builder: (_) => BookAppointmentScreen(
                     salonId: widget.salonId,
                     salonName: widget.salonName,
+                    image: widget.image,
                     staff: null,
                     selectedServices: widget.selectedServices,
                     staffMapping: selectedStaffPerService, // 🔥 pass map
