@@ -277,7 +277,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.black26),
-              color: isSelected ? AppColors.rusticSunset : Colors.white,
+              color: isSelected ? AppColors.rusticSunset : AppColors.softIvory,
             ),
             child: Column(
               children: [
@@ -341,8 +341,6 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
             ),
             itemBuilder: (context, index) {
               final service = widget.selectedServices[index];
-
-              // 🔥 get correct staff for THIS service
               final staff = _staffForService(service["id"]);
 
               return Padding(
