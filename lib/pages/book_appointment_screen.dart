@@ -31,6 +31,7 @@ class BookAppointmentScreen extends StatefulWidget {
 }
 
 class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
+  DateTime currentMonth = DateTime.now();
   DateTime selectedDate = DateTime.now();
   int? selectedSlotIndex;
 
@@ -251,6 +252,68 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     return DateFormat("hh:mm a").format(utc).toLowerCase();
   }
 
+  Widget _buildQuickDates() {
+    final today = DateTime.now();
+    final tomorrow = today.add(const Duration(days: 1));
+
+    Widget button(String title, DateTime date) {
+      final isSelected = date.year == selectedDate.year &&
+          date.month == selectedDate.month &&
+          date.day == selectedDate.day;
+
+      return Expanded(
+        child: GestureDetector(
+          onTap: () {
+            setState(() {
+              selectedDate = date;
+              currentMonth = DateTime(date.year, date.month);
+            });
+
+            _fetchSlotsForDate(date);
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            margin: const EdgeInsets.symmetric(horizontal: 6),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.black26),
+              color: isSelected ? AppColors.rusticSunset : Colors.white,
+            ),
+            child: Column(
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontFamily: "PoppinsSemiBold",
+                    color: isSelected ? Colors.white : Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  DateFormat("d MMM yyyy").format(date),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isSelected ? Colors.white70 : Colors.black54,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          button("Today", today),
+          button("Tomorrow", tomorrow),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSelectedServicesCard() {
     if (widget.selectedServices.isEmpty) return const SizedBox();
 
@@ -378,19 +441,27 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
   // --------------------------------------------------
   Widget _buildCalendar() {
     final l10n = AppLocalizations.of(context)!;
-    final now = DateTime.now();
-    final firstDay = DateTime(now.year, now.month, 1);
-    final lastDay = DateTime(now.year, now.month + 1, 0);
+
+    final now = DateTime.now(); // 🔥 ADD THIS
+
+    final firstDay = DateTime(currentMonth.year, currentMonth.month, 1);
+    final lastDay = DateTime(currentMonth.year, currentMonth.month + 1, 0);
 
     List<Widget> tiles = [];
 
+    // Empty tiles before first weekday
     for (int i = 1; i < firstDay.weekday; i++) {
       tiles.add(const SizedBox());
     }
 
     for (int d = 1; d <= lastDay.day; d++) {
-      final date = DateTime(now.year, now.month, d);
-      final isPast = date.isBefore(DateTime(now.year, now.month, now.day));
+      final date = DateTime(currentMonth.year, currentMonth.month, d);
+
+      // 🔥 FIXED past check
+      final isPast = date.isBefore(
+        DateTime(now.year, now.month, now.day),
+      );
+
       final isSelected = date.year == selectedDate.year &&
           date.month == selectedDate.month &&
           date.day == selectedDate.day;
@@ -404,7 +475,11 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
               : () {
                   setState(() {
                     selectedDate = date;
+
+                    // 🔥 ensures month header updates correctly
+                    currentMonth = DateTime(date.year, date.month);
                   });
+
                   _fetchSlotsForDate(date);
                 },
           child: Container(
@@ -497,12 +572,41 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
+            _buildQuickDates(),
             Padding(
-              padding: const EdgeInsets.all(20),
-              child: Text(
-                DateFormat("MMMM yyyy", locale).format(selectedDate),
-                style: const TextStyle(
-                    fontFamily: "PoppinsSemiBold", fontSize: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.chevron_left),
+                    onPressed: currentMonth.month == DateTime.now().month &&
+                            currentMonth.year == DateTime.now().year
+                        ? null
+                        : () {
+                            setState(() {
+                              currentMonth = DateTime(
+                                  currentMonth.year, currentMonth.month - 1);
+                            });
+                          },
+                  ),
+                  Text(
+                    DateFormat("MMMM yyyy", locale).format(currentMonth),
+                    style: const TextStyle(
+                      fontFamily: "PoppinsSemiBold",
+                      fontSize: 20,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_right),
+                    onPressed: () {
+                      setState(() {
+                        currentMonth =
+                            DateTime(currentMonth.year, currentMonth.month + 1);
+                      });
+                    },
+                  ),
+                ],
               ),
             ),
             _buildCalendar(),
