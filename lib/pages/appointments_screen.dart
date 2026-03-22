@@ -260,48 +260,147 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       body: SafeArea(
         bottom: true,
         child: appointmentProvider.isLoading
-            ? _buildSkeleton(context) // 1️⃣ LOADING FIRST
+            ? _buildSkeleton(context)
+
+            /// ✅ EMPTY STATE UI (UPDATED)
             : appointmentProvider.bookings.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(24),
-                            color: AppColors.rusticSunset.withOpacity(0.08),
+                ? SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 20),
+
+                          /// TITLE
+                          const Text(
+                            "Appointments",
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontFamily: "PlayfairDisplayBold",
+                              color: Colors.black87,
+                            ),
                           ),
-                          child: const Icon(
-                            Icons.calendar_month_rounded,
-                            size: 48,
-                            color: AppColors.rusticSunset,
+
+                          const SizedBox(height: 30),
+
+                          /// UPCOMING
+                          const Text(
+                            "Upcoming",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontFamily: "PoppinsSemiBold",
+                              color: Colors.black87,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 24),
-                        const Text(
-                          "No appointments yet",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontFamily: "PoppinsSemiBold",
-                            color: Colors.black87,
+
+                          const SizedBox(height: 16),
+
+                          /// EMPTY CARD
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 30, horizontal: 20),
+                            decoration: BoxDecoration(
+                              color: AppColors.softIvory,
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(color: Colors.black12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.04),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                /// ICON (custom gradient box)
+                                Container(
+                                  width: 70,
+                                  height: 70,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(18),
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color.fromARGB(255, 236, 136, 93),
+                                        AppColors.rusticSunset,
+                                      ],
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.event_available_rounded,
+                                    color: Colors.white,
+                                    size: 32,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 20),
+
+                                const Text(
+                                  "No upcoming appointments",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontFamily: "PoppinsSemiBold",
+                                    color: Colors.black87,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 6),
+
+                                const Text(
+                                  "Your upcoming appointments will\nappear here when you book",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontFamily: "PoppinsRegular",
+                                    color: Colors.black54,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 20),
+
+                                /// BUTTON
+                                OutlinedButton(
+                                  onPressed: () {},
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20, vertical: 10),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                    side:
+                                        const BorderSide(color: Colors.black26),
+                                  ),
+                                  child: const Text(
+                                    "Search salons",
+                                    style: TextStyle(
+                                      fontFamily: "PoppinsMedium",
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 6),
-                        const Text(
-                          "When you book a session,\nit will appear here.",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.black45,
-                            fontFamily: "PoppinsRegular",
+
+                          const SizedBox(height: 30),
+
+                          /// PAST TITLE (optional placeholder)
+                          const Text(
+                            "Past",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontFamily: "PoppinsSemiBold",
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   )
-                : _buildContent(context), // 3️⃣ DATA
+
+                /// ✅ DATA STATE
+                : _buildContent(context),
       ),
     );
   }
