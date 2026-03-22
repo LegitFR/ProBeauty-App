@@ -362,56 +362,56 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           ),
                         );
                       },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.softIvory,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.black, width: 2.87),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 8),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: item['img']!.startsWith('http')
-                                    ? Image.network(
-                                        item['img']!,
-                                        height: width * 0.22,
-                                        width: double.infinity,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) =>
-                                            Image.asset(
-                                          "assets/images/services/hair_styling.png",
-                                          height: width * 0.22,
-                                          width: double.infinity,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      )
-                                    : Image.asset(
-                                        item['img']!,
-                                        height: width * 0.22,
-                                        width: double.infinity,
-                                        fit: BoxFit.cover,
-                                      ),
-                              ),
-                              const SizedBox(height: 5),
-                              Flexible(
-                                child: Text(
-                                  item['title']!,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontFamily: "PoppinsMedium",
-                                    fontSize: 13,
-                                    color: Colors.black,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Stack(
+                          children: [
+                            // 🖼️ IMAGE
+                            Positioned.fill(
+                              child: item['img']!.startsWith('http')
+                                  ? Image.network(
+                                      item['img']!,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.asset(
+                                      item['img']!,
+                                      fit: BoxFit.cover,
+                                    ),
+                            ),
+
+                            // 🌑 GRADIENT OVERLAY (important for text visibility)
+                            Positioned.fill(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.bottomCenter,
+                                    end: Alignment.center,
+                                    colors: [
+                                      Colors.black.withOpacity(0.7),
+                                      Colors.transparent,
+                                    ],
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+
+                            // 🏷️ TEXT
+                            Positioned(
+                              left: 10,
+                              bottom: 10,
+                              right: 10,
+                              child: Text(
+                                item['title']!,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontFamily: "PoppinsSemiBold",
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     );
