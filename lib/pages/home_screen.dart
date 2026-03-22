@@ -613,15 +613,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                             width: width * 0.035,
                                           ),
                                           SizedBox(width: width * 0.018),
-                                          Expanded(
-                                            child: Text(
-                                              l10n.homeSaveUpto("10"),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontSize: width * 0.03,
-                                                fontFamily: "PoppinsRegular",
-                                              ),
+                                          Text(
+                                            l10n.homeSaveUpto("10"),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: width * 0.03,
+                                              fontFamily: "PoppinsRegular",
                                             ),
                                           ),
                                         ],

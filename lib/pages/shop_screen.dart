@@ -328,7 +328,7 @@ class _ShopScreenState extends State<ShopScreen> {
               SizedBox(height: height * 0.015),
 
               SizedBox(
-                height: height * 0.32,
+                height: width * 0.74,
                 child: _buildSpecialOffersList(width),
               ),
 
@@ -380,7 +380,7 @@ class _ShopScreenState extends State<ShopScreen> {
 
     if (provider.isLoading && provider.products.isEmpty) {
       return SizedBox(
-        height: MediaQuery.of(context).size.height * 0.32,
+        height: 300,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           padding: EdgeInsets.only(left: width * 0.035),
@@ -512,8 +512,10 @@ class _ShopScreenState extends State<ShopScreen> {
             const SizedBox(height: 6),
             Text(
               title,
-              style:
-                  const TextStyle(fontFamily: "PoppinsRegular", fontSize: 12.5),
+              style: TextStyle(
+                fontFamily: "PoppinsRegular",
+                fontSize: width * 0.03,
+              ),
             ),
           ],
         ),
@@ -541,121 +543,111 @@ class _ShopScreenState extends State<ShopScreen> {
         border: Border.all(color: Colors.black, width: 2),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           /// IMAGE
           Padding(
             padding: const EdgeInsets.all(12),
             child: AspectRatio(
-              aspectRatio: 1.3,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
-                  child: imageUrl != null
-                      ? Image.network(
-                          imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) =>
-                              const Icon(Icons.image_not_supported),
-                        )
-                      : const Icon(Icons.image, size: 60),
-                ),
+              aspectRatio: 1.4,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: imageUrl != null
+                    ? Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) =>
+                            const Icon(Icons.image_not_supported),
+                      )
+                    : const Icon(Icons.image, size: 60),
               ),
             ),
           ),
 
-          /// CONTENT AREA
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    brand,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: "PoppinsMedium",
-                      fontSize: 13,
-                      color: AppColors.rusticSunset,
-                    ),
+          /// CONTENT
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  brand,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: "PoppinsMedium",
+                    fontSize: 13,
+                    color: AppColors.rusticSunset,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    productName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: "PoppinsRegular",
-                      fontSize: 14,
-                    ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  productName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: "PoppinsRegular",
+                    fontSize: 14,
                   ),
-                  const Spacer(),
-                  Row(
-                    children: [
-                      Text(
-                        price,
-                        style: const TextStyle(
-                          fontFamily: "PoppinsSemiBold",
-                          fontSize: 16,
-                        ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Text(
+                      price,
+                      style: const TextStyle(
+                        fontFamily: "PoppinsSemiBold",
+                        fontSize: 16,
                       ),
-                      const SizedBox(width: 6),
+                    ),
+                    const SizedBox(width: 6),
+                    if (oldPrice.isNotEmpty)
                       Text(
                         oldPrice,
                         style: const TextStyle(
-                          fontFamily: "PoppinsRegular",
                           fontSize: 13,
                           decoration: TextDecoration.lineThrough,
                           color: Colors.black45,
                         ),
                       ),
-                      const SizedBox(width: 6),
+                    const SizedBox(width: 6),
+                    if (discount.isNotEmpty)
                       Flexible(
                         child: Text(
                           discount,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontFamily: "PoppinsMedium",
                             fontSize: 13,
                             color: AppColors.rusticSunset,
                           ),
                         ),
                       ),
-                    ],
+                  ],
+                ),
+                const SizedBox(height: 10),
+              ],
+            ),
+          ),
+
+          /// BUTTON
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+            child: Container(
+              height: 40,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Center(
+                child: Text(
+                  "Shop",
+                  style: TextStyle(
+                    fontFamily: "PoppinsSemiBold",
+                    color: Colors.white,
+                    fontSize: 14,
                   ),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(
-            height: 5,
-          ),
-
-          /// SHOP BUTTON
-          Container(
-            height: 40,
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(14),
-                bottomRight: Radius.circular(14),
-              ),
-            ),
-            child: const Center(
-              child: Text(
-                "Shop",
-                style: TextStyle(
-                  fontFamily: "PoppinsSemiBold",
-                  color: Colors.white,
-                  fontSize: 14,
                 ),
               ),
             ),
