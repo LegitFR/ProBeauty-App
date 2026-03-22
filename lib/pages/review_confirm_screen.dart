@@ -7,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/home_screen.dart';
+import 'package:probeauty_app/pages/main_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:probeauty_app/widgets/success_animation.dart';
 import 'package:probeauty_app/services/api_client.dart';
@@ -643,7 +644,9 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
               if (shouldExit) {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (_) => const HomeScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const MainScreen(initialIndex: 0),
+                  ),
                   (route) => false,
                 );
               }

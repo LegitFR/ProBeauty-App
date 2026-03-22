@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/first_visit_screen.dart';
 import 'package:probeauty_app/pages/home_screen.dart';
+import 'package:probeauty_app/pages/main_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:probeauty_app/services/api_client.dart';
 
@@ -555,8 +556,11 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
               if (shouldExit) {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (_) => const HomeScreen()),
-                  (route) => false, // 🔥 clears all previous pages
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        const MainScreen(initialIndex: 0), // 👈 HOME TAB
+                  ),
+                  (route) => false,
                 );
               }
             },

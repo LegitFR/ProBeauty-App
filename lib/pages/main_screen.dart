@@ -15,18 +15,20 @@ import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final int initialIndex;
 
+  const MainScreen({super.key, this.initialIndex = 0});
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
 
   @override
   void initState() {
     super.initState();
+    _selectedIndex = widget.initialIndex;
 
     // 🔔 Foreground notification listener
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
