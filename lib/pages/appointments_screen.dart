@@ -387,13 +387,16 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                           const SizedBox(height: 30),
 
                           /// PAST TITLE (optional placeholder)
-                          const Text(
-                            "Past",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontFamily: "PoppinsSemiBold",
-                            ),
-                          ),
+
+                          appointmentProvider.bookings.isEmpty
+                              ? Container()
+                              : const Text(
+                                  "Past",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontFamily: "PoppinsSemiBold",
+                                  ),
+                                ),
                         ],
                       ),
                     ),

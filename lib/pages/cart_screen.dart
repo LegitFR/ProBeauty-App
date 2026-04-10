@@ -1,8 +1,11 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:http/http.dart' as http;
 import 'package:probeauty_app/models/cart_item.dart';
 import 'package:probeauty_app/providers/address_provider.dart';
 import 'package:probeauty_app/routes/app_routes.dart';
@@ -20,6 +23,7 @@ class CartScreen extends StatefulWidget {
 
 class _CartScreenState extends State<CartScreen> {
   bool _isPaying = false;
+  final TextEditingController _phoneController = TextEditingController();
 
   @override
   void initState() {
@@ -29,6 +33,61 @@ class _CartScreenState extends State<CartScreen> {
       context.read<CartProvider>().fetchCart();
       context.read<AddressProvider>().fetchAddresses();
     });
+  }
+
+  Future<String?> pollMbWayWebhook({
+    required String orderId,
+    required String requestId,
+    required dynamic amount,
+  }) async {
+    final rawKey = dotenv.env['IFTHENPAY_ANTI_PHISHING_KEY'] ?? '';
+    final encodedKey = Uri.encodeComponent(rawKey);
+
+    final url = Uri.parse(
+      "https://9c01-2405-201-e057-a014-39e2-910a-230e-1c15.ngrok-free.app/api/v1/webhooks/ifthenpay/mbway"
+      "?key=$encodedKey"
+      "&orderId=$orderId"
+      "&requestId=$requestId"
+      "&amount=$amount",
+    );
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        return data["status"]; // or adjust based on backend
+      }
+    } catch (e) {
+      print("Webhook polling error: $e");
+    }
+
+    return null;
+  }
+
+  Future<String?> getOrderPaymentStatus(String orderId) async {
+    final url = Uri.parse(
+      "https://9c01-2405-201-e057-a014-39e2-910a-230e-1c15.ngrok-free.app/api/v1/orders/$orderId/payment",
+    );
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        final payments = data["data"];
+
+        if (payments != null && payments.isNotEmpty) {
+          return payments[0]["status"];
+        }
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
+
+    return null;
   }
 
   Future<void> _showSuccessOverlay() async {
@@ -132,38 +191,78 @@ class _CartScreenState extends State<CartScreen> {
                         setState(() => _isPaying = true);
 
                         try {
-                          // 1️⃣ Create order + payment intent
-                          final result = await cart.checkoutWithStripe();
+                          final phone = _phoneController.text.trim();
+
+                          if (phone.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text("Please enter phone number")),
+                            );
+                            setState(() => _isPaying = false);
+                            return;
+                          }
+
+                          final result = await cart.checkoutWithIfThenPay(
+                            paymentMethod: "MBWAY",
+                            mobileNumber: "351#$phone",
+                          );
+
                           if (result == null) {
                             throw Exception(cart.error ?? "Checkout failed");
                           }
 
-                          final clientSecret = result['clientSecret'] as String;
+                          final payment = result["payment"];
+                          final orderId = result["orderId"];
+                          final requestId = payment["requestId"];
+                          final amount = payment["amount"]; // check if exists
 
-                          // 2️⃣ Confirm payment USING PROVIDER
-                          final success = await cart.confirmStripePayment(
-                            clientSecret,
+                          print(orderId);
+
+// ✅ MBWAY message
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                payment["message"] ??
+                                    "Approve payment in MB WAY app",
+                              ),
+                            ),
                           );
 
-                          if (!success) {
-                            throw Exception(cart.error ?? "Payment failed");
-                          }
+// ✅ Poll status
+                          int attempts = 0;
+                          String? status;
 
-                          if (mounted) {
-                            await _showSuccessOverlay();
-                          }
+                          do {
+                            await Future.delayed(const Duration(seconds: 3));
 
-                          await cart.fetchCart();
-                        } on StripeException catch (e) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  e.error.message ?? "Payment cancelled",
-                                ),
-                                backgroundColor: Colors.red,
-                              ),
+                            await pollMbWayWebhook(
+                              orderId: orderId,
+                              requestId: requestId,
+                              amount: amount,
                             );
+
+                            status = await pollMbWayWebhook(
+                              orderId: orderId,
+                              requestId: requestId,
+                              amount: amount,
+                            );
+
+                            print("STATUS: $status");
+
+                            print("STATUS: $status");
+
+                            attempts++;
+                          } while (status != null &&
+                              status.toUpperCase() == "PAYMENT_PENDING" &&
+                              attempts < 15);
+
+                          if (status != null &&
+                              status.toUpperCase() == "CONFIRMED") {
+                            await cart.clearCart();
+
+                            if (mounted) {
+                              await _showSuccessOverlay();
+                            }
                           }
                         } catch (e) {
                           if (mounted) {
@@ -335,8 +434,29 @@ class _CartScreenState extends State<CartScreen> {
                                 color: Colors.black,
                               ),
                             ),
+                            const SizedBox(height: 12),
                           ],
                         ),
+                      ),
+                    ),
+                    const Text(
+                      "Enter Phone Number",
+                      style: TextStyle(
+                        fontFamily: "PoppinsSemiBold",
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      cursorColor: AppColors.rusticSunset,
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                        hintText: "e.g. 912345678",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefixText: "351#",
                       ),
                     ),
                   ],

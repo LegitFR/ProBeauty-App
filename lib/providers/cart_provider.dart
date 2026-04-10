@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:probeauty_app/models/cart_item.dart';
 import 'package:probeauty_app/services/api_client.dart';
 
@@ -199,10 +198,13 @@ class CartProvider with ChangeNotifier {
     );
   }
 
-  // ==========================================================
-  // STRIPE CHECKOUT (STEP 1–5)
-  // ==========================================================
-  Future<Map<String, dynamic>?> checkoutWithStripe() async {
+  Future<Map<String, dynamic>?> checkoutWithIfThenPay({
+    required String paymentMethod,
+    String? mobileNumber,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+
     try {
       final addressResp = await ApiClient.get(_addressesEndpoint);
 
@@ -219,55 +221,43 @@ class CartProvider with ChangeNotifier {
       if (defaultAddress.isEmpty) {
         throw Exception("No default address found");
       }
+
+      final body = {
+        "addressId": defaultAddress["id"],
+        "paymentMethod": paymentMethod,
+      };
+
+      // ✅ FIX: Proper MBWAY validation
+      if (paymentMethod == "MBWAY") {
+        if (mobileNumber == null || mobileNumber.isEmpty) {
+          throw Exception("Mobile number required for MBWAY");
+        }
+        body["mobileNumber"] = mobileNumber;
+      }
+
       final resp = await ApiClient.post(
         _checkoutEndpoint,
-        body: {"addressId": defaultAddress["id"]},
+        body: body,
       );
 
       if (resp.statusCode != 200 && resp.statusCode != 201) {
         throw Exception(jsonDecode(resp.body)["message"]);
       }
 
-      final data = jsonDecode(resp.body)["data"];
-      final order = data["order"];
-
-      if (order == null || data["clientSecret"] == null) {
-        throw Exception("Invalid checkout response");
-      }
+      // ✅ FIX: safer parsing
+      final data = jsonDecode(resp.body)["data"] ?? {};
 
       return {
-        "orderId": order["id"],
-        "clientSecret": data["clientSecret"],
+        "orderId": data["order"]?["id"],
+        "payment": data["payment"],
       };
     } catch (e) {
       _error = e.toString();
-      notifyListeners();
       return null;
-    }
-  }
-
-  // ==========================================================
-  // STRIPE CONFIRM PAYMENT (STEP 6–7)
-  // ==========================================================
-  Future<bool> confirmStripePayment(String clientSecret) async {
-    try {
-      await Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: clientSecret,
-          merchantDisplayName: 'ProBeauty',
-        ),
-      );
-
-      await Stripe.instance.presentPaymentSheet();
-      return true;
-    } on StripeException catch (e) {
-      _error = e.error.message ?? "Payment cancelled";
+    } finally {
+      // ✅ FIX: loading state handled properly
+      _isLoading = false;
       notifyListeners();
-      return false;
-    } catch (e) {
-      _error = e.toString();
-      notifyListeners();
-      return false;
     }
   }
 
