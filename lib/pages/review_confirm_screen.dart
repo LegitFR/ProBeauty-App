@@ -2,11 +2,9 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
-import 'package:probeauty_app/pages/home_screen.dart';
 import 'package:probeauty_app/pages/main_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:probeauty_app/widgets/success_animation.dart';
@@ -50,6 +48,7 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
   static final Map<String, Map<String, dynamic>> _ratingCache = {};
   List<Map<String, dynamic>> _availableOffers = [];
   Map<String, dynamic>? _selectedOffer;
+  final TextEditingController _phoneController = TextEditingController();
 
   bool _offersLoading = true;
   bool _applyingOffer = false;
@@ -59,6 +58,20 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
     super.initState();
     _fetchSalonRating();
     _fetchApplicableOffers();
+  }
+
+  int _getGrandTotal() {
+    final total = widget.selectedServices.fold<int>(
+      0,
+      (sum, s) => sum + _parsePrice(s["price"]),
+    );
+
+    const taxes = 50;
+    final discount = (_selectedOffer?["discountAmount"] ?? 0).round();
+
+    final discountedTotal = (total - discount).clamp(0, double.infinity);
+
+    return discountedTotal.toInt() + taxes;
   }
 
   Map<String, dynamic>? _staffForService(String serviceId) {
@@ -452,101 +465,6 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
     return "$hours hr $minutes mins";
   }
 
-  Future<void> _startStripeCheckout(BuildContext context) async {
-    try {
-      setState(() => _isProcessing = true);
-
-      final startTime = _buildStartTimeISO();
-
-      final serviceIds =
-          widget.selectedServices.map((s) => s["id"].toString()).toList();
-
-      final List<String?> staffIds = widget.selectedServices.map((s) {
-        final staff = _staffForService(s["id"]);
-        return staff?["id"]?.toString();
-      }).toList();
-
-      final body = {
-        "salonId": widget.salonId,
-        "serviceIds": serviceIds,
-        "staffIds": staffIds,
-        "startTime": startTime,
-      };
-
-      final res = await ApiClient.post(
-        "/api/v1/bookings/checkout",
-        body: body,
-      );
-
-      final json = jsonDecode(res.body);
-
-      if (res.statusCode != 201) {
-        throw BookingException(json["message"] ?? "Checkout failed");
-      }
-
-      final clientSecret = json["data"]["clientSecret"];
-      final bookingId = json["data"]["booking"]["id"];
-
-      await Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: clientSecret,
-          merchantDisplayName: "ProBeauty",
-          style: ThemeMode.light,
-        ),
-      );
-
-      await Stripe.instance.presentPaymentSheet();
-
-      await _pollBookingStatus(context, bookingId);
-    } on StripeException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.error.message ?? "Payment cancelled"),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => _isProcessing = false);
-    }
-  }
-
-  Future<void> _pollBookingStatus(
-    BuildContext context,
-    String bookingId,
-  ) async {
-    for (int i = 0; i < 6; i++) {
-      await Future.delayed(const Duration(seconds: 2));
-
-      final res = await ApiClient.get(
-        "/api/v1/bookings/$bookingId",
-      );
-
-      if (res.statusCode == 200) {
-        final json = jsonDecode(res.body);
-        final status = json["data"]["status"];
-
-        if (status == "CONFIRMED") {
-          await _showSuccessOverlay();
-          return;
-        }
-      }
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Payment received. Booking pending confirmation."),
-      ),
-    );
-  }
-
-  // --------------------------------------------------
   Future<void> _confirmPayAtVenue(BuildContext context) async {
     try {
       setState(() => _isProcessing = true);
@@ -603,6 +521,131 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
         );
       },
     );
+  }
+
+  Future<String?> pollMbWayWebhook({
+    required String bookingId,
+    required String requestId,
+    required dynamic amount,
+  }) async {
+    try {
+      final response = await ApiClient.get(
+        "/api/v1/webhooks/ifthenpay/mbway",
+        query: {
+          "orderId": bookingId,
+          "requestId": requestId,
+          "amount": amount.toString(),
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data["status"];
+      }
+    } catch (e) {
+      debugPrint("Webhook polling error: $e");
+    }
+
+    return null;
+  }
+
+  Future<void> _startMbWayPayment(BuildContext context, int amount) async {
+    try {
+      setState(() => _isProcessing = true);
+
+      final startTime = _buildStartTimeISO();
+
+      final serviceIds =
+          widget.selectedServices.map((s) => s["id"].toString()).toList();
+
+      String? staffId;
+
+// Priority 1: single staff
+      if (widget.staff != null && widget.staff!["id"] != null) {
+        staffId = widget.staff!["id"].toString();
+      }
+
+// Priority 2: from mapping
+      else if (widget.staffMapping != null) {
+        for (var entry in widget.staffMapping!.values) {
+          if (entry != null && entry["id"] != null) {
+            staffId = entry["id"].toString();
+            break;
+          }
+        }
+      }
+
+      if (staffId == null) {
+        throw Exception("No staff selected");
+      }
+
+      final body = {
+        "salonId": widget.salonId,
+        "serviceIds": serviceIds,
+        "staffId": staffId, // ✅ FIXED
+        "startTime": startTime,
+        "paymentMethod": "MBWAY",
+        "mobileNumber": "351#${_phoneController.text.trim()}",
+      };
+
+      final res = await ApiClient.post(
+        "/api/v1/bookings/checkout",
+        body: body,
+      );
+
+      final json = jsonDecode(res.body);
+
+      if (res.statusCode != 201) {
+        throw Exception(json["message"] ?? "MBWAY failed");
+      }
+
+      final payment = json["data"]["payment"];
+      final bookingId = json["data"]["booking"]["id"];
+
+      final requestId = payment["requestId"];
+      final amt = payment["amount"];
+
+      // 🔥 SHOW MESSAGE
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            payment["message"] ?? "Approve payment in MB WAY app",
+          ),
+        ),
+      );
+
+      // 🔥 POLLING
+      int attempts = 0;
+      String? status;
+
+      do {
+        await Future.delayed(const Duration(seconds: 3));
+
+        status = await pollMbWayWebhook(
+          bookingId: bookingId,
+          requestId: requestId,
+          amount: amt,
+        );
+
+        attempts++;
+      } while (status != null &&
+          status.toUpperCase() == "PAYMENT_PENDING" &&
+          attempts < 15);
+
+      if (status != null && (status == "SUCCESS" || status == "000")) {
+        await _showSuccessOverlay();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Payment pending or failed")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+      );
+    } finally {
+      if (mounted) setState(() => _isProcessing = false);
+    }
   }
 
   // --------------------------------------------------
@@ -929,7 +972,7 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
             GestureDetector(
               onTap: () {
                 setState(() {
-                  payAtVenue = !payAtVenue;
+                  payAtVenue = true;
                 });
               },
               child: Container(
@@ -981,14 +1024,10 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
                         ),
                       ),
                       child: payAtVenue
-                          ? Center(
-                              child: Container(
-                                width: 10,
-                                height: 10,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: AppColors.rusticSunset,
-                                ),
+                          ? const Center(
+                              child: CircleAvatar(
+                                radius: 5,
+                                backgroundColor: AppColors.rusticSunset,
                               ),
                             )
                           : null,
@@ -997,6 +1036,104 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 10),
+
+            /// ✅ MBWAY OPTION (SEPARATE)
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  payAtVenue = false;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: !payAtVenue ? Colors.black : Colors.black26,
+                    width: 1.5,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.phone_android, size: 26),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text(
+                        "Pay via MBWAY",
+                        style: TextStyle(
+                          fontFamily: "PoppinsMedium",
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: 25,
+                      height: 25,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: !payAtVenue ? Colors.black : Colors.black26,
+                        ),
+                      ),
+                      child: !payAtVenue
+                          ? const Center(
+                              child: CircleAvatar(
+                                radius: 5,
+                                backgroundColor: AppColors.rusticSunset,
+                              ),
+                            )
+                          : null,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            /// ✅ PHONE INPUT (ONLY WHEN MBWAY)
+            if (!payAtVenue) ...[
+              const SizedBox(height: 10),
+              TextField(
+                controller: _phoneController,
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                  hintText: "Enter phone number",
+                  prefixText: "351#",
+
+                  // 🔥 DEFAULT BORDER
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: AppColors.rusticSunset),
+                  ),
+
+                  // 🔥 WHEN ENABLED (NOT FOCUSED)
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: AppColors.rusticSunset),
+                  ),
+
+                  // 🔥 WHEN FOCUSED (CLICKED)
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: AppColors.rusticSunset,
+                      width: 2, // optional thicker border
+                    ),
+                  ),
+
+                  // 🔥 ERROR BORDER (optional but clean)
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.red),
+                  ),
+
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.red, width: 2),
+                  ),
+                ),
+              )
+            ],
 
             const SizedBox(height: 90),
           ],
@@ -1043,7 +1180,16 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
                         if (payAtVenue) {
                           _confirmPayAtVenue(context);
                         } else {
-                          _startStripeCheckout(context);
+                          // MBWAY
+                          if (_phoneController.text.trim().isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text("Enter phone number")),
+                            );
+                            return;
+                          }
+
+                          _startMbWayPayment(context, _getGrandTotal());
                         }
                       },
                 style: ElevatedButton.styleFrom(

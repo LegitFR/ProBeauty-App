@@ -666,7 +666,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                                     salonId: widget.salonId,
                                     salonName: widget.salonName,
                                     image: widget.image,
-                                    staff: widget.staff,
+                                    staff: widget.staffMapping,
                                     date: selectedDate,
                                     time: formattedTime,
                                     staffMapping: widget.staffMapping,

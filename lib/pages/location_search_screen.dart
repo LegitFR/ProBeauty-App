@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:http/http.dart' as http;
 import '../resources/AppColors.dart';
 
 class LocationSearchScreen extends StatefulWidget {
@@ -12,22 +15,35 @@ class LocationSearchScreen extends StatefulWidget {
 class _LocationSearchScreenState extends State<LocationSearchScreen> {
   TextEditingController controller = TextEditingController();
 
-  List<Map<String, String>> locations = [
-    {"title": "Chennai", "subtitle": "Tamil Nadu, India"},
-    {
-      "title": "Chennai International Airport (MAA)",
-      "subtitle": "Chennai - Trichy Highway, Tambaram"
-    },
-    {
-      "title": "Chennai Central Railway Station",
-      "subtitle": "Periamet, Park Town"
-    },
-    {"title": "Chennai Central", "subtitle": "Tamil Nadu"},
-    {
-      "title": "Chennai Trade Centre – Nandambakkam",
-      "subtitle": "Ramapuram, Nandambakkam"
-    },
-  ];
+  List<dynamic> places = [];
+  bool isLoading = false;
+
+  final String apiKey = "AlzaSyCjdEs_XIU50HnYFJgAsafh8_KlhjQXJw";
+
+  Future<void> searchPlaces(String input) async {
+    if (input.isEmpty) {
+      setState(() => places = []);
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    final url = "https://maps.googleapis.com/maps/api/place/autocomplete/json"
+        "?input=$input&key=$apiKey&components=country:in";
+
+    final response = await http.get(Uri.parse(url));
+    print(response.body);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      setState(() {
+        places = data['predictions'];
+        isLoading = false;
+      });
+    } else {
+      setState(() => isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +122,9 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  onChanged: (_) => setState(() {}),
+                  onChanged: (value) {
+                    searchPlaces(value);
+                  },
                 ),
               ),
             ),
@@ -166,7 +184,7 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
             // 📍 Results
             Expanded(
               child: ListView.separated(
-                itemCount: locations.length,
+                itemCount: places.length,
                 separatorBuilder: (context, index) => Padding(
                   padding: EdgeInsets.symmetric(horizontal: width * 0.045),
                   child: Divider(
@@ -176,57 +194,30 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                   ),
                 ),
                 itemBuilder: (context, index) {
-                  final item = locations[index];
+                  final place = places[index];
 
                   return InkWell(
                     onTap: () {
-                      Navigator.pop(context, item["title"]);
+                      Navigator.pop(context, place["description"]);
                     },
                     child: Padding(
                       padding: EdgeInsets.symmetric(
                         horizontal: width * 0.045,
-                        vertical: 10, // 👈 better spacing
+                        vertical: 10,
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // 📍 Icon
-                          Padding(
-                            padding: const EdgeInsets.only(top: 3),
-                            child: SvgPicture.asset(
-                              "assets/images/icons/location_icon.svg",
-                              height: 18,
-                              colorFilter: const ColorFilter.mode(
-                                  Colors.black, BlendMode.srcIn),
-                            ),
-                          ),
-
+                          const Icon(Icons.location_on, size: 18),
                           const SizedBox(width: 12),
-
-                          // 📄 Text
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item["title"]!,
-                                  style: const TextStyle(
-                                    fontFamily: "PoppinsMedium",
-                                    fontSize: 14,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                const SizedBox(
-                                    height: 4), // 👈 more breathing space
-                                Text(
-                                  item["subtitle"]!,
-                                  style: const TextStyle(
-                                    fontFamily: "PoppinsRegular",
-                                    fontSize: 12,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                              ],
+                            child: Text(
+                              place["description"],
+                              style: const TextStyle(
+                                fontFamily: "PoppinsMedium",
+                                fontSize: 14,
+                                color: Colors.black,
+                              ),
                             ),
                           ),
                         ],

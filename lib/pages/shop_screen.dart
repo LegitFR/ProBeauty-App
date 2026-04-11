@@ -536,6 +536,7 @@ class _ShopScreenState extends State<ShopScreen> {
   }) {
     return Container(
       width: width * 0.55,
+      height: width * 0.75, // 🔥 FIX: give fixed height
       margin: EdgeInsets.only(right: width * 0.04),
       decoration: BoxDecoration(
         color: AppColors.softIvory,
@@ -543,7 +544,7 @@ class _ShopScreenState extends State<ShopScreen> {
         border: Border.all(color: Colors.black, width: 2),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        // ❌ REMOVE mainAxisSize.min
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           /// IMAGE
@@ -613,7 +614,8 @@ class _ShopScreenState extends State<ShopScreen> {
                       ),
                     const SizedBox(width: 6),
                     if (discount.isNotEmpty)
-                      Flexible(
+                      Expanded(
+                        // 🔥 FIX: prevents overflow
                         child: Text(
                           discount,
                           overflow: TextOverflow.ellipsis,
@@ -625,12 +627,14 @@ class _ShopScreenState extends State<ShopScreen> {
                       ),
                   ],
                 ),
-                const SizedBox(height: 10),
               ],
             ),
           ),
 
-          /// BUTTON
+          /// 🔥 THIS IS THE MAIN FIX
+          const Spacer(),
+
+          /// BUTTON (no navigation change)
           Padding(
             padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
             child: Container(

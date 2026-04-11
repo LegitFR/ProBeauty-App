@@ -93,7 +93,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   void _selectTimeSlot() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.softIvory,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),

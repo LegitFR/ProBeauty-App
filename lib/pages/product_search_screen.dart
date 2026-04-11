@@ -161,6 +161,7 @@ Widget specialOfferCard(
 }) {
   return Container(
     width: width * 0.55,
+    height: width * 0.75, // 🔥 FIX: give fixed height
     margin: EdgeInsets.only(right: width * 0.04),
     decoration: BoxDecoration(
       color: AppColors.softIvory,
@@ -168,121 +169,114 @@ Widget specialOfferCard(
       border: Border.all(color: Colors.black, width: 2),
     ),
     child: Column(
+      // ❌ REMOVE mainAxisSize.min
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         /// IMAGE
         Padding(
           padding: const EdgeInsets.all(12),
           child: AspectRatio(
-            aspectRatio: 1.3,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(14),
-                child: imageUrl != null
-                    ? Image.network(
-                        imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                            const Icon(Icons.image_not_supported),
-                      )
-                    : const Icon(Icons.image, size: 60),
-              ),
+            aspectRatio: 1.4,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: imageUrl != null
+                  ? Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          const Icon(Icons.image_not_supported),
+                    )
+                  : const Icon(Icons.image, size: 60),
             ),
           ),
         ),
 
-        /// CONTENT AREA
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  brand,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontFamily: "PoppinsMedium",
-                    fontSize: 13,
-                    color: AppColors.rusticSunset,
-                  ),
+        /// CONTENT
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                brand,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: "PoppinsMedium",
+                  fontSize: 13,
+                  color: AppColors.rusticSunset,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  productName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontFamily: "PoppinsRegular",
-                    fontSize: 14,
-                  ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                productName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: "PoppinsRegular",
+                  fontSize: 14,
                 ),
-                const Spacer(),
-                Row(
-                  children: [
-                    Text(
-                      price,
-                      style: const TextStyle(
-                        fontFamily: "PoppinsSemiBold",
-                        fontSize: 16,
-                      ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Text(
+                    price,
+                    style: const TextStyle(
+                      fontFamily: "PoppinsSemiBold",
+                      fontSize: 16,
                     ),
-                    const SizedBox(width: 6),
+                  ),
+                  const SizedBox(width: 6),
+                  if (oldPrice.isNotEmpty)
                     Text(
                       oldPrice,
                       style: const TextStyle(
-                        fontFamily: "PoppinsRegular",
                         fontSize: 13,
                         decoration: TextDecoration.lineThrough,
                         color: Colors.black45,
                       ),
                     ),
-                    const SizedBox(width: 6),
-                    Flexible(
+                  const SizedBox(width: 6),
+                  if (discount.isNotEmpty)
+                    Expanded(
+                      // 🔥 FIX: prevents overflow
                       child: Text(
                         discount,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontFamily: "PoppinsMedium",
                           fontSize: 13,
                           color: AppColors.rusticSunset,
                         ),
                       ),
                     ),
-                  ],
+                ],
+              ),
+            ],
+          ),
+        ),
+
+        /// 🔥 THIS IS THE MAIN FIX
+        const Spacer(),
+
+        /// BUTTON (no navigation change)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+          child: Container(
+            height: 40,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Center(
+              child: Text(
+                "Shop",
+                style: TextStyle(
+                  fontFamily: "PoppinsSemiBold",
+                  color: Colors.white,
+                  fontSize: 14,
                 ),
-              ],
-            ),
-          ),
-        ),
-
-        const SizedBox(
-          height: 5,
-        ),
-
-        /// SHOP BUTTON
-        Container(
-          height: 40,
-          width: double.infinity,
-          decoration: const BoxDecoration(
-            color: Colors.black,
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(14),
-              bottomRight: Radius.circular(14),
-            ),
-          ),
-          child: const Center(
-            child: Text(
-              "Shop",
-              style: TextStyle(
-                fontFamily: "PoppinsSemiBold",
-                color: Colors.white,
-                fontSize: 14,
               ),
             ),
           ),

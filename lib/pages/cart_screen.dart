@@ -448,17 +448,46 @@ class _CartScreenState extends State<CartScreen> {
                     ),
                     const SizedBox(height: 8),
                     TextField(
-                      cursorColor: AppColors.rusticSunset,
                       controller: _phoneController,
                       keyboardType: TextInputType.phone,
                       decoration: InputDecoration(
-                        hintText: "e.g. 912345678",
+                        hintText: "Enter phone number",
+                        prefixText: "351#",
+
+                        // 🔥 DEFAULT BORDER
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: AppColors.rusticSunset),
                         ),
-                        prefixText: "351#",
+
+                        // 🔥 WHEN ENABLED (NOT FOCUSED)
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: AppColors.rusticSunset),
+                        ),
+
+                        // 🔥 WHEN FOCUSED (CLICKED)
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: AppColors.rusticSunset,
+                            width: 2, // optional thicker border
+                          ),
+                        ),
+
+                        // 🔥 ERROR BORDER (optional but clean)
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Colors.red),
+                        ),
+
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide:
+                              const BorderSide(color: Colors.red, width: 2),
+                        ),
                       ),
-                    ),
+                    )
                   ],
                 ),
               ),

@@ -52,6 +52,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final salonProvider = context.watch<SalonProvider>();
     final offerProvider = context.watch<OfferProvider>();
     final offers = offerProvider.salonOffers;
+    print("OFFERS");
+    print(offers);
     // fallback images
     final fallbackImages = [
       'assets/images/saloons/saloon1.png',
