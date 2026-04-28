@@ -7,20 +7,12 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:568953432506:android:037b4146860a1813aad583",
+        "mobilesdk_app_id": "1:568953432506:android:c21d285a7ea1d27eaad583",
         "android_client_info": {
-          "package_name": "com.example.probeauty_app"
+          "package_name": "com.probeautyapp"
         }
       },
       "oauth_client": [
-        {
-          "client_id": "568953432506-vi46iukhlvkm3n660ec4hiovo99pdmoi.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.probeauty_app",
-            "certificate_hash": "c3e308e066f7f48cffac17f9a046daec19317c3d"
-          }
-        },
         {
           "client_id": "568953432506-8vkn7qn586nl6fq9m2qshr027u8luji1.apps.googleusercontent.com",
           "client_type": 3
