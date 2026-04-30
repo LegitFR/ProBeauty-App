@@ -119,7 +119,7 @@ class _AnimatedSuccessScreenState extends State<AnimatedSuccessScreen>
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
-        Color.fromRGBO(244, 74, 1, 1),
+        AppColors.rusticSunset,
         Color.fromRGBO(66, 19, 2, 1),
       ],
     );

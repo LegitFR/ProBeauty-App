@@ -267,7 +267,10 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFFFA7D4F), Color(0xFFC64414)],
+                    colors: [
+                      Color.fromARGB(255, 248, 145, 28),
+                      Color.fromARGB(255, 248, 145, 28)
+                    ],
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),

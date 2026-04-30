@@ -20,8 +20,8 @@ if (keystorePropertiesFile.exists()) {
 
 
 android {
-    namespace = "com.example.probeautyapp"
-    compileSdk = flutter.compileSdkVersion
+    namespace = "com.probeautyapp"
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -37,7 +37,7 @@ android {
     defaultConfig {
         applicationId = "com.probeautyapp"
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled = true

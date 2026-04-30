@@ -206,15 +206,28 @@ class _DecisionScreenState extends State<DecisionScreen> {
                 ),
               ),
             ),
+            // Positioned(
+            //   top: size.height * 0.1,
+            //   left: 0,
+            //   right: 0,
+            //   child: Center(
+            //     child: Image.asset(
+            //       "assets/images/logos/probeauty_app_logo.png",
+            //       width: size.width * 0.5,
+            //       height: size.height * 0.25,
+            //       fit: BoxFit.contain,
+            //     ),
+            //   ),
+            // ),
             Positioned(
               top: size.height * 0.1,
               left: 0,
               right: 0,
               child: Center(
-                child: Image.asset(
-                  "assets/images/logos/probeauty_app_logo.png",
-                  width: size.width * 0.5,
-                  height: size.height * 0.25,
+                child: SvgPicture.asset(
+                  "assets/images/logos/probeauty_app_logo.svg",
+                  width: size.width * 0.2,
+                  height: size.height * 0.1,
                   fit: BoxFit.contain,
                 ),
               ),
