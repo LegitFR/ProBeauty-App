@@ -17,6 +17,7 @@ class DecisionScreen extends StatefulWidget {
 class _DecisionScreenState extends State<DecisionScreen> {
   bool _shrink = false;
   bool _showContent = false;
+  bool _isGoogleLoading = false;
 
   @override
   void initState() {
@@ -155,70 +156,75 @@ class _DecisionScreenState extends State<DecisionScreen> {
                         children: [
                           GestureDetector(
                             onTap: () async {
+                              if (_isGoogleLoading) return;
+
+                              setState(() => _isGoogleLoading = true);
+
                               try {
-                                await GoogleAuthService.signInWithGoogle();
+                                final success =
+                                    await GoogleAuthService.signInWithGoogle();
+
+                                if (!success) return;
 
                                 if (!mounted) return;
+
                                 Navigator.pushReplacementNamed(
                                     context, '/home');
                               } catch (e) {
                                 debugPrint("GOOGLE SIGN IN ERROR: $e");
 
                                 if (!mounted) return;
+
+                                String message =
+                                    "Unable to sign in right now. Please try again later.";
+
+                                final error = e.toString().toLowerCase();
+
+                                if (error.contains("network")) {
+                                  message =
+                                      "Please check your internet connection and try again.";
+                                } else if (error.contains("cancel")) {
+                                  message = "Google sign-in was cancelled.";
+                                }
+
+                                ScaffoldMessenger.of(context)
+                                    .hideCurrentSnackBar();
+
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(e.toString())),
+                                  SnackBar(
+                                    content: Text(message),
+                                  ),
                                 );
+                              } finally {
+                                if (mounted) {
+                                  setState(() => _isGoogleLoading = false);
+                                }
                               }
                             },
-                            child: SvgPicture.asset(
-                              "assets/images/icons/google.svg",
-                              width: 25,
-                              height: 25,
+                            child: AnimatedOpacity(
+                              duration: const Duration(milliseconds: 200),
+                              opacity: _isGoogleLoading ? 0.5 : 1,
+                              child: SizedBox(
+                                width: 25,
+                                height: 25,
+                                child: _isGoogleLoading
+                                    ? const CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        color: Colors.white,
+                                      )
+                                    : SvgPicture.asset(
+                                        "assets/images/icons/google.svg",
+                                      ),
+                              ),
                             ),
                           ),
-                          // const SizedBox(width: 40),
-                          // SvgPicture.asset(
-                          //   "assets/images/icons/facebook.svg",
-                          //   width: 25,
-                          //   height: 25,
-                          // ),
-                          // const SizedBox(width: 40),
-                          // SvgPicture.asset(
-                          //   "assets/images/icons/apple.svg",
-                          //   width: 25,
-                          //   height: 25,
-                          // ),
                         ],
                       ),
-                      // SizedBox(height: size.height * 0.03),
-                      // Text(
-                      //   AppLocalizations.of(context)!.continueAsGuest,
-                      //   style: TextStyle(
-                      //     color: Colors.white,
-                      //     fontSize: size.width * 0.03,
-                      //     decoration: TextDecoration.underline,
-                      //     decorationColor: Colors.white,
-                      //     fontFamily: "PoppinsSemiBold",
-                      //   ),
-                      // ),
                     ],
                   ),
                 ),
               ),
             ),
-            // Positioned(
-            //   top: size.height * 0.1,
-            //   left: 0,
-            //   right: 0,
-            //   child: Center(
-            //     child: Image.asset(
-            //       "assets/images/logos/probeauty_app_logo.png",
-            //       width: size.width * 0.5,
-            //       height: size.height * 0.25,
-            //       fit: BoxFit.contain,
-            //     ),
-            //   ),
-            // ),
             Positioned(
               top: size.height * 0.1,
               left: 0,

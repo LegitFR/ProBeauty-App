@@ -137,6 +137,20 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
   // CREATE OR UPDATE ADDRESS
   // -------------------------------------------------------
   Future<void> _saveOrUpdateAddress() async {
+    if (houseController.text.trim().isEmpty ||
+        cityController.text.trim().isEmpty ||
+        pincodeController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Please fill all required address fields.",
+          ),
+        ),
+      );
+
+      return;
+    }
     setState(() => isLoading = true);
 
     try {
@@ -172,12 +186,12 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
       }
 
       if (response.statusCode == 201 || response.statusCode == 200) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(isEditMode
                 ? AppLocalizations.of(context)!.savedAddressUpdatedSuccess
                 : AppLocalizations.of(context)!.savedAddressSavedSuccess),
-            backgroundColor: Colors.green,
           ),
         );
 
@@ -188,13 +202,26 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
           isEditMode = false;
           editAddressId = null;
         });
-      } else {}
+      } else {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              isEditMode
+                  ? "Unable to update address."
+                  : "Unable to save address.",
+            ),
+          ),
+        );
+      }
     } catch (e) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text(
-              AppLocalizations.of(context)!.savedAddressFailed(e.toString())),
-          backgroundColor: Colors.red,
+            "Unable to save address right now. Please try again.",
+          ),
         ),
       );
     }
@@ -202,9 +229,17 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
     setState(() => isLoading = false);
   }
 
-  // -------------------------------------------------------
-  // UI
-  // -------------------------------------------------------
+  @override
+  void dispose() {
+    houseController.dispose();
+    buildingController.dispose();
+    landmarkController.dispose();
+    cityController.dispose();
+    districtController.dispose();
+    pincodeController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;

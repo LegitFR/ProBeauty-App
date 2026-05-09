@@ -57,8 +57,12 @@ class _ProfileDetailsState extends State<ProfileDetails> {
 
   // 🔴 SHOW MESSAGE
   void _showMessage(String msg) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
+      SnackBar(
+        content: Text(msg),
+      ),
     );
   }
 
@@ -102,10 +106,14 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         _showMessage(l10n.profileUpdateSuccess);
         Navigator.pop(context, true);
       } else {
-        _showMessage(data["message"] ?? l10n.profileUpdateFailed);
+        _showMessage(
+          l10n.profileUpdateFailed,
+        );
       }
     } catch (e) {
-      _showMessage(l10n.profileUpdateError(e.toString()));
+      _showMessage(
+        "Unable to update profile right now. Please try again.",
+      );
     }
 
     setState(() => _saving = false);
@@ -348,17 +356,5 @@ class _ProfileDetailsState extends State<ProfileDetails> {
               ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _phoneController.dispose();
-    _emailController.dispose();
-    _dayController.dispose();
-    _monthController.dispose();
-    _yearController.dispose();
-    super.dispose();
   }
 }

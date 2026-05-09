@@ -120,10 +120,13 @@ class _ProductScreenState extends State<ProductScreen> {
 
         if (response.statusCode == 200) {
           if (mounted) setState(() => _isFavourited = false);
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text("Removed from favourites"),
-              backgroundColor: Colors.green,
+              content: Text(
+                "Removed from favourites.",
+              ),
             ),
           );
         }
@@ -135,19 +138,25 @@ class _ProductScreenState extends State<ProductScreen> {
 
         if (response.statusCode == 201 || response.statusCode == 200) {
           if (mounted) setState(() => _isFavourited = true);
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text("Added to favourites"),
-              backgroundColor: Colors.green,
+              content: Text(
+                "Added to favourites.",
+              ),
             ),
           );
         }
       }
     } catch (e) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error: $e"),
-          backgroundColor: Colors.red,
+        const SnackBar(
+          content: Text(
+            "Unable to update favourites right now.",
+          ),
         ),
       );
     } finally {
@@ -159,8 +168,13 @@ class _ProductScreenState extends State<ProductScreen> {
     if (_cartUpdating) return;
 
     if (quantity >= stock) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No more stock available")),
+        const SnackBar(
+          content: Text(
+            "No more stock available for this product.",
+          ),
+        ),
       );
       return;
     }
@@ -180,8 +194,14 @@ class _ProductScreenState extends State<ProductScreen> {
           );
 
     if (msg != null && mounted) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg)),
+        SnackBar(
+          content: Text(
+            msg.isNotEmpty ? msg : "Cart updated successfully.",
+          ),
+        ),
       );
     }
 
@@ -490,7 +510,7 @@ class _ProductScreenState extends State<ProductScreen> {
                     ],
                   ),
                   GestureDetector(
-                    onTap: _toggleFavourite,
+                    onTap: _favUpdating ? null : _toggleFavourite,
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
@@ -778,8 +798,12 @@ class _ProductScreenState extends State<ProductScreen> {
         children: [
           Row(
             children: [
-              _offerChip(width, Icons.local_offer_outlined,
-                  "${_availableOffers.length} Offers"),
+              _offerChip(
+                  width,
+                  Icons.local_offer_outlined,
+                  _availableOffers.isEmpty
+                      ? "No offers"
+                      : "${_availableOffers.length} Offers"),
               // SizedBox(width: width * 0.03),
               // _offerChip(width, Icons.card_giftcard_outlined, "Free Gifts"),
             ],

@@ -45,6 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (identifier.isEmpty || password.isEmpty) {
       final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.loginEmptyFieldsError)),
       );
@@ -81,13 +82,33 @@ class _LoginScreenState extends State<LoginScreen> {
         if (!mounted) return;
         Navigator.pushNamedAndRemoveUntil(context, "/main", (route) => false);
       } else {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data["message"] ?? "Login failed")),
+          const SnackBar(
+            content: Text(
+              "Invalid email or password.",
+            ),
+          ),
         );
       }
     } catch (e) {
+      if (!mounted) return;
+
+      String message = "Unable to sign in right now. Please try again later.";
+
+      final error = e.toString().toLowerCase();
+
+      if (error.contains("network")) {
+        message = "Please check your internet connection and try again.";
+      }
+
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
+        SnackBar(
+          content: Text(message),
+        ),
       );
     } finally {
       setState(() => _isLoading = false);
@@ -210,7 +231,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: width * 0.65,
                     height: 45,
                     child: ElevatedButton(
-                      onPressed: _login,
+                      onPressed: _isLoading ? null : _login,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.rusticSunset,
                         shape: RoundedRectangleBorder(
@@ -275,19 +296,32 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       GestureDetector(
                         onTap: () async {
-                          try {
-                            await GoogleAuthService.signInWithGoogle();
+                          final success =
+                              await GoogleAuthService.signInWithGoogle();
 
+                          if (!success) {
                             if (!mounted) return;
-                            Navigator.pushReplacementNamed(context, '/home');
-                          } catch (e) {
-                            debugPrint("GOOGLE SIGN IN ERROR: $e");
 
-                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(e.toString())),
+                              const SnackBar(
+                                content: Text(
+                                  "Unable to sign in with Google.",
+                                ),
+                              ),
                             );
+
+                            return;
                           }
+
+                          if (!mounted) return;
+
+                          Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            "/main",
+                            (route) => false,
+                          );
                         },
                         child: SvgPicture.asset(
                           "assets/images/icons/google.svg",
@@ -295,17 +329,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: 25,
                         ),
                       ),
-                      // SvgPicture.asset(
-                      //   "assets/images/icons/facebook.svg",
-                      //   width: 25,
-                      //   height: 25,
-                      // ),
-                      // const SizedBox(width: 40),
-                      // SvgPicture.asset(
-                      //   "assets/images/icons/apple.svg",
-                      //   width: 25,
-                      //   height: 25,
-                      // ),
                     ],
                   ),
                   SizedBox(height: size.height * 0.018),

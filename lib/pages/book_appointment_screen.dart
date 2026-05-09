@@ -244,7 +244,18 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       }
     } catch (_) {
       if (!mounted) return;
+
       setState(() => loadingSlots = false);
+
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Unable to load available slots. Please try again.",
+          ),
+        ),
+      );
     }
   }
 
@@ -624,7 +635,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
               const Padding(
                 padding: EdgeInsets.all(16),
                 child: Text(
-                  "No slots available for today",
+                  "No slots available for the selected date",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: "PoppinsMedium",
@@ -649,6 +660,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                       onTap: !isAvailable
                           ? null
                           : () {
+                              if (selectedSlotIndex == i) return;
                               setState(() {
                                 selectedSlotIndex = i;
                               });

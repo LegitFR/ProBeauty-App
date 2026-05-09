@@ -373,6 +373,32 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                   // ---------------------------
                   // SERVICES LIST
                   // ---------------------------
+                  if (widget.services.isEmpty)
+                    const Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 30,
+                      ),
+                      child: Center(
+                        child: Column(
+                          children: const [
+                            Icon(
+                              Icons.content_cut,
+                              size: 50,
+                              color: Colors.black45,
+                            ),
+                            SizedBox(height: 12),
+                            Text(
+                              "No services available right now.",
+                              style: TextStyle(
+                                fontFamily: "PoppinsMedium",
+                                fontSize: 14,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   for (var s in widget.services) ...[
                     _serviceTile(
                       title: s["title"] ?? "",

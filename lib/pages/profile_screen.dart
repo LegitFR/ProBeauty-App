@@ -34,7 +34,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  // Get initials (AB, AJ, A)
   String _getInitials(String name) {
     if (name.trim().isEmpty) return "";
 
@@ -43,6 +42,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return parts[0][0].toUpperCase();
     }
     return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -218,7 +223,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(width: 15),
                   TextButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            "Support feature coming soon.",
+                          ),
+                        ),
+                      );
+                    },
                     icon: SvgPicture.asset(
                       'assets/images/icons/support_icon.svg',
                       height: 22,
@@ -246,12 +261,77 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () async {
+                    final shouldLogout = await showDialog<bool>(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          backgroundColor: AppColors.softIvory,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          title: const Text(
+                            "Log out",
+                            style: TextStyle(
+                              fontFamily: "PoppinsSemiBold",
+                              color: Colors.black,
+                            ),
+                          ),
+                          content: const Text(
+                            "Are you sure you want to log out?",
+                            style: TextStyle(
+                              fontFamily: "PoppinsRegular",
+                              color: Colors.black87,
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context, false);
+                              },
+                              child: const Text(
+                                "Cancel",
+                                style: TextStyle(
+                                  color: Colors.black54,
+                                  fontFamily: "PoppinsMedium",
+                                ),
+                              ),
+                            ),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.rusticSunset,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              onPressed: () {
+                                Navigator.pop(context, true);
+                              },
+                              child: const Text(
+                                "Log out",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: "PoppinsSemiBold",
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+
+                    if (shouldLogout != true) return;
+
                     final prefs = await SharedPreferences.getInstance();
+
                     await prefs.clear();
+
+                    if (!mounted) return;
 
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (_) => const DecisionScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => const DecisionScreen(),
+                      ),
                       (_) => false,
                     );
                   },

@@ -63,7 +63,23 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                       controller: _controller,
                       textInputAction: TextInputAction.search,
                       onSubmitted: (value) {
-                        provider.searchProducts(query: value);
+                        if (value.trim().isEmpty) {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "Please enter a product name.",
+                              ),
+                            ),
+                          );
+
+                          return;
+                        }
+
+                        provider.searchProducts(
+                          query: value,
+                        );
                       },
                       decoration: InputDecoration(
                         hintText: l10n.shopSearchHint,
@@ -88,14 +104,75 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                   }
 
                   if (provider.searchError != null) {
-                    return Center(
-                      child: Text(provider.searchError!),
+                    return const Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.search_off,
+                              size: 60,
+                              color: Colors.black45,
+                            ),
+                            const SizedBox(height: 14),
+                            const Text(
+                              "Unable to load search results.",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily: "PoppinsSemiBold",
+                                fontSize: 16,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            const Text(
+                              "Please try again later.",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily: "PoppinsRegular",
+                                fontSize: 13,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     );
                   }
 
                   if (provider.searchResults.isEmpty) {
                     return Center(
-                      child: Text(l10n.shopNoProducts),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.inventory_2_outlined,
+                            size: 60,
+                            color: Colors.black45,
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            l10n.shopNoProducts,
+                            style: const TextStyle(
+                              fontFamily: "PoppinsSemiBold",
+                              fontSize: 16,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          const Text(
+                            "Try searching for another product.",
+                            style: TextStyle(
+                              fontFamily: "PoppinsRegular",
+                              fontSize: 13,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   }
 

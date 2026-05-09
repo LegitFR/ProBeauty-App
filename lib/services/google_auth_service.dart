@@ -7,13 +7,16 @@ import 'package:probeauty_app/services/api_client.dart';
 class GoogleAuthService {
   static final GoogleSignIn _googleSignIn = GoogleSignIn.standard();
 
-  static Future<void> signInWithGoogle() async {
+  static Future<bool> signInWithGoogle() async {
     try {
       // Force fresh session
       await _googleSignIn.signOut();
 
       final account = await _googleSignIn.signIn();
-      if (account == null) return;
+
+      if (account == null) {
+        return false;
+      }
 
       final auth = await account.authentication;
       final idToken = auth.idToken;
@@ -47,12 +50,14 @@ class GoogleAuthService {
             await prefs.setString("userPhone", data["user"]["phone"]);
           }
         }
+
+        return true;
       } else {
-        throw Exception(data["message"] ?? "Google login failed");
+        return false;
       }
     } catch (e) {
       debugPrint("Google sign-in failed: $e");
-      rethrow;
+      return false;
     }
   }
 }

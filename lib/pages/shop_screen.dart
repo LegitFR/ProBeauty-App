@@ -82,8 +82,13 @@ class _ShopScreenState extends State<ShopScreen> {
       debugPrint("Failed to open product: $e");
 
       if (!context.mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Unable to open product")),
+        const SnackBar(
+          content: Text(
+            "Unable to load product details.",
+          ),
+        ),
       );
     }
   }
@@ -133,7 +138,18 @@ class _ShopScreenState extends State<ShopScreen> {
                         cursorColor: AppColors.rusticSunset,
                         textInputAction: TextInputAction.search,
                         onSubmitted: (value) {
-                          if (value.trim().isEmpty) return;
+                          if (value.trim().isEmpty) {
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  "Please enter a product name.",
+                                ),
+                              ),
+                            );
+
+                            return;
+                          }
 
                           Navigator.push(
                             context,
@@ -234,7 +250,31 @@ class _ShopScreenState extends State<ShopScreen> {
                       ),
                     )
                   : productOffers.isEmpty
-                      ? const SizedBox()
+                      ? const Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 20,
+                          ),
+                          child: Center(
+                            child: Column(
+                              children: const [
+                                Icon(
+                                  Icons.local_offer_outlined,
+                                  color: Colors.black45,
+                                  size: 38,
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  "No active offers available right now.",
+                                  style: TextStyle(
+                                    fontFamily: "PoppinsRegular",
+                                    fontSize: 14,
+                                    color: Colors.black54,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
                       : NotificationListener<ScrollNotification>(
                           onNotification: (notification) {
                             if (notification.metrics.pixels >=
@@ -439,11 +479,67 @@ class _ShopScreenState extends State<ShopScreen> {
     }
 
     if (provider.error != null) {
-      return Text(provider.error!, style: const TextStyle(color: Colors.red));
+      return const Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 32,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Icon(
+                Icons.inventory_2_outlined,
+                size: 60,
+                color: Colors.black45,
+              ),
+              SizedBox(height: 14),
+              Text(
+                "Unable to load products.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: "PoppinsSemiBold",
+                  fontSize: 15,
+                  color: Colors.black87,
+                ),
+              ),
+              SizedBox(height: 6),
+              Text(
+                "Please try again later.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: "PoppinsRegular",
+                  fontSize: 13,
+                  color: Colors.black54,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
     }
 
     if (provider.products.isEmpty) {
-      return Text(l10n.shopNoProducts);
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.shopping_bag_outlined,
+              size: 60,
+              color: Colors.black45,
+            ),
+            const SizedBox(height: 14),
+            Text(
+              l10n.shopNoProducts,
+              style: const TextStyle(
+                fontFamily: "PoppinsSemiBold",
+                fontSize: 15,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
     return ListView.builder(
@@ -736,7 +832,21 @@ class _VoiceWaveformState extends State<VoiceWaveform> {
   }
 
   Future<void> _initRecorder() async {
-    await Permission.microphone.request();
+    final status = await Permission.microphone.request();
+
+    if (!status.isGranted) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Microphone permission is required for voice search.",
+          ),
+        ),
+      );
+      return;
+    }
+
     await _recorder.openRecorder();
 
     await _recorder.startRecorder(
@@ -751,6 +861,7 @@ class _VoiceWaveformState extends State<VoiceWaveform> {
       if (mounted) {
         setState(() {
           _levels.add(db);
+
           if (_levels.length > 40) {
             _levels.removeAt(0);
           }

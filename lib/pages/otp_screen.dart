@@ -40,8 +40,14 @@ class _OTPScreenState extends State<OTPScreen> {
     final otp = _otpControllers.map((c) => c.text).join();
 
     if (otp.length != 6) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter a valid 6-digit OTP")),
+        const SnackBar(
+          content: Text(
+            "Please enter the complete 6-digit OTP.",
+          ),
+        ),
       );
       setState(() => _isLoading = false);
       return;
@@ -62,10 +68,15 @@ class _OTPScreenState extends State<OTPScreen> {
       );
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Account verified successfully!")),
-        );
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Account verified successfully.",
+            ),
+          ),
+        );
         await Future.delayed(const Duration(milliseconds: 500));
         if (!mounted) return;
 
@@ -75,14 +86,24 @@ class _OTPScreenState extends State<OTPScreen> {
           (route) => false,
         );
       } else {
-        final data = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data["message"] ?? "Verification failed")),
+          const SnackBar(
+            content: Text(
+              "Invalid or expired OTP. Please try again.",
+            ),
+          ),
         );
       }
     } catch (e) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
+        const SnackBar(
+          content: Text(
+            "Unable to verify OTP right now. Please try again.",
+          ),
+        ),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -174,11 +195,17 @@ class _OTPScreenState extends State<OTPScreen> {
                             ),
                           ),
                           onChanged: (value) {
-                            if (value.isNotEmpty && index < 7) {
+                            if (value.isNotEmpty && index < 5) {
                               FocusScope.of(context).nextFocus();
                             }
+
                             if (value.isEmpty && index > 0) {
                               FocusScope.of(context).previousFocus();
+                            }
+
+                            if (index == 5 && value.isNotEmpty) {
+                              FocusScope.of(context).unfocus();
+                              _verifyOtp(contact);
                             }
                           },
                         ),

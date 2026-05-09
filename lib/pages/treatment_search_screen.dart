@@ -21,6 +21,34 @@ class _TreatmentSearchScreenState extends State<TreatmentSearchScreen> {
     {"title": "Facials & skincare", "icon": Icons.self_improvement},
   ];
 
+  List<Map<String, dynamic>> get filteredTreatments {
+    final query = controller.text.trim().toLowerCase();
+
+    if (query.isEmpty) {
+      return treatments;
+    }
+
+    return treatments
+        .where(
+          (t) => t["title"].toString().toLowerCase().contains(query),
+        )
+        .toList();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    controller.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -67,77 +95,94 @@ class _TreatmentSearchScreenState extends State<TreatmentSearchScreen> {
                   border: Border.all(color: Colors.black, width: 1.4),
                 ),
                 child: TextField(
+                  autofocus: true,
                   controller: controller,
                   cursorColor: AppColors.rusticSunset,
                   style: const TextStyle(
                     fontFamily: "PoppinsMedium",
                     color: Colors.black,
                   ),
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.search, color: Colors.black),
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.search, color: Colors.black),
+                    suffixIcon: controller.text.isNotEmpty
+                        ? GestureDetector(
+                            onTap: () {
+                              controller.clear();
+                            },
+                            child: const Icon(
+                              Icons.close,
+                              size: 18,
+                              color: Colors.black54,
+                            ),
+                          )
+                        : null,
                     hintText: "Search services",
-                    hintStyle: TextStyle(
+                    hintStyle: const TextStyle(
                       fontFamily: "PoppinsMedium",
                       color: Colors.black,
                     ),
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 16),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                 ),
               ),
             ),
-
             const SizedBox(height: 25),
-
-            // ❌ No results text
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: width * 0.08),
-              child: const Column(
-                children: const [
-                  Text(
-                    "We didn't find a match",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: "PoppinsSemiBold",
-                      fontSize: 18,
-                      color: Colors.black,
+            if (controller.text.isNotEmpty && filteredTreatments.isEmpty)
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: width * 0.08,
+                ),
+                child: const Column(
+                  children: [
+                    Icon(
+                      Icons.search_off,
                     ),
-                  ),
-                  SizedBox(height: 6),
-                  Text(
-                    "Clear your search or select from our top categories below",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: "PoppinsRegular",
-                      fontSize: 13,
-                      color: Colors.black54,
+                    Text(
+                      "We didn't find a match",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: "PoppinsSemiBold",
+                        fontSize: 18,
+                        color: Colors.black,
+                      ),
                     ),
-                  ),
-                ],
+                    SizedBox(height: 6),
+                    Text(
+                      "Clear your search or select from our top categories below",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: "PoppinsRegular",
+                        fontSize: 13,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-
             const SizedBox(height: 20),
 
             // 📌 Treatments Title
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: width * 0.045),
-              child: const Text(
-                "Treatments",
-                style: TextStyle(
-                  fontFamily: "PoppinsSemiBold",
-                  fontSize: 16,
-                  color: Colors.black,
-                ),
-              ),
-            ),
+            filteredTreatments.isEmpty
+                ? Container()
+                : Padding(
+                    padding: EdgeInsets.symmetric(horizontal: width * 0.045),
+                    child: const Text(
+                      "Treatments",
+                      style: TextStyle(
+                        fontFamily: "PoppinsSemiBold",
+                        fontSize: 16,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
 
             const SizedBox(height: 10),
 
             // 📍 Treatments List
             Expanded(
               child: ListView.separated(
-                itemCount: treatments.length,
+                itemCount: filteredTreatments.length,
                 separatorBuilder: (_, __) => Padding(
                   padding: EdgeInsets.symmetric(horizontal: width * 0.045),
                   child: Divider(
@@ -147,7 +192,7 @@ class _TreatmentSearchScreenState extends State<TreatmentSearchScreen> {
                   ),
                 ),
                 itemBuilder: (context, index) {
-                  final item = treatments[index];
+                  final item = filteredTreatments[index];
 
                   return InkWell(
                     onTap: () {

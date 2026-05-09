@@ -173,6 +173,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
           _reviewController.clear();
         });
 
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -181,8 +182,9 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
           ),
         );
       } else {
-        final err = jsonDecode(response.body);
-        _showError(err["message"] ?? "Failed to submit review");
+        _showError(
+          "Unable to submit review. Please try again.",
+        );
       }
     } catch (e) {
       if (!mounted) return;
@@ -196,8 +198,11 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   }
 
   void _showError(String message) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      SnackBar(
+        content: Text(message),
+      ),
     );
   }
 
@@ -325,255 +330,324 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                     child: CircularProgressIndicator(
                     color: AppColors.rusticSunset,
                   ))
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // ------------------------
-                        // OVERALL RATING + DISTRIBUTION
-                        // ------------------------
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // LEFT
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _avgRating.toStringAsFixed(1),
-                                  style: const TextStyle(
-                                    fontSize: 40,
-                                    fontFamily: "PoppinsSemiBold",
-                                  ),
-                                ),
-                                Row(
-                                  children: List.generate(
-                                    5,
-                                    (i) => Icon(
-                                      Icons.star,
-                                      size: 18,
-                                      color: i < _avgRating.floor()
-                                          ? AppColors.rusticSunset
-                                          : AppColors.greyTone,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  l10n.reviewsTotalCount(_totalReviews),
-                                  style: const TextStyle(
-                                    fontFamily: "PoppinsRegular",
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(width: 24),
-
-                            // RIGHT
-                            Expanded(
-                              child: Column(
-                                children: List.generate(5, (index) {
-                                  final star = 5 - index;
-                                  return _RatingDistribution(
-                                    star: star,
-                                    count: _ratingCount[star] ?? 0,
-                                    total: _totalReviews,
-                                  );
-                                }),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        // ------------------------
-                        // REVIEWS HEADER
-                        // ------------------------
-                        Text(
-                          l10n.reviewsTitle,
-                          style: const TextStyle(
-                            fontFamily: "PoppinsSemiBold",
-                            fontSize: 16,
-                          ),
-                        ),
-
-                        const SizedBox(height: 12),
-
-                        // ------------------------
-                        // INFO NOTE
-                        // ------------------------
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Text(
-                            "Precut guarantees that reviews with \"verified precut user\" tag have been added by registered precut users who have had an appointment with the provider. A registered precut user can add a review only after the service has been provided.",
-                            style: TextStyle(
-                              fontFamily: "PoppinsRegular",
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // ------------------------
-                        // REVIEWS LIST
-                        // ------------------------
-                        if (_reviews.isEmpty)
-                          const Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 32),
-                            child: Center(
-                              child: Text(
-                                "No reviews",
-                                style: const TextStyle(
-                                  fontFamily: "PoppinsMedium",
-                                  fontSize: 14,
-                                  color: Colors.black54,
-                                ),
-                              ),
-                            ),
-                          )
-                        else
-                          for (final r in _reviews)
-                            _reviewTile(
-                              name: r["user"]?["name"] ?? "User",
-                              date: _formatDate(r["createdAt"]),
-                              service: r["service"]?["title"] ?? "Service",
-                              review: r["comment"] ?? "",
-                              rating: r["rating"] ?? 0,
-                            ),
-
-                        // ------------------------
-// ADD REVIEW SECTION
-// ------------------------
-                        Container(
-                          margin: const EdgeInsets.only(top: 24),
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: AppColors.softIvory,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: Colors.black12),
+                : _error != null
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 32,
                           ),
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
+                              const Icon(
+                                Icons.rate_review_outlined,
+                                size: 60,
+                                color: Colors.black45,
+                              ),
+                              const SizedBox(height: 14),
                               Text(
-                                l10n.reviewsAddYourReview,
+                                _error!,
+                                textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   fontFamily: "PoppinsSemiBold",
-                                  fontSize: 16,
+                                  fontSize: 15,
+                                  color: Colors.black87,
                                 ),
                               ),
-
-                              const SizedBox(height: 12),
-
-                              // ⭐ STAR SELECTOR
-                              Row(
-                                children: List.generate(5, (index) {
-                                  final starIndex = index + 1;
-                                  return GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        _selectedRating = starIndex;
-                                      });
-                                    },
-                                    child: Icon(
-                                      Icons.star,
-                                      size: 28,
-                                      color: starIndex <= _selectedRating
-                                          ? AppColors.rusticSunset
-                                          : AppColors.greyTone,
-                                    ),
-                                  );
-                                }),
-                              ),
-
-                              const SizedBox(height: 14),
-
-                              // 📝 REVIEW INPUT
-                              TextField(
-                                controller: _reviewController,
-                                maxLines: 4,
-                                decoration: InputDecoration(
-                                  hintText: l10n.reviewsWriteHere,
-                                  hintStyle: const TextStyle(
-                                    fontFamily: "PoppinsRegular",
-                                    color: Colors.black45,
-                                  ),
-                                  filled: true,
-                                  fillColor: AppColors.softIvory,
-                                  enabledBorder: OutlineInputBorder(
+                              const SizedBox(height: 18),
+                              ElevatedButton(
+                                onPressed: _fetchReviews,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.rusticSunset,
+                                  shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide:
-                                        const BorderSide(color: Colors.black26),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: const BorderSide(
-                                      color: AppColors.rusticSunset,
-                                      width: 1.2,
-                                    ),
                                   ),
                                 ),
-                                style: const TextStyle(
-                                  fontFamily: "PoppinsRegular",
-                                ),
-                              ),
-
-                              const SizedBox(height: 14),
-
-                              // 📤 SUBMIT BUTTON
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: _submittingReview ||
-                                          _selectedRating == 0 ||
-                                          _reviewController.text.trim().isEmpty
-                                      ? null
-                                      : _submitReview,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.rusticSunset,
-                                    disabledBackgroundColor:
-                                        Colors.grey.shade400,
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 14),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
+                                child: const Text(
+                                  "Try Again",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: "PoppinsSemiBold",
                                   ),
-                                  child: _submittingReview
-                                      ? const SizedBox(
-                                          height: 18,
-                                          width: 18,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: Colors.white,
-                                          ),
-                                        )
-                                      : Text(
-                                          l10n.reviewsSubmit,
-                                          style: const TextStyle(
-                                            fontFamily: "PoppinsSemiBold",
-                                            color: Colors.white,
-                                            fontSize: 14,
-                                          ),
-                                        ),
                                 ),
                               ),
                             ],
                           ),
                         ),
+                      )
+                    : SingleChildScrollView(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // ------------------------
+                            // OVERALL RATING + DISTRIBUTION
+                            // ------------------------
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // LEFT
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _avgRating.toStringAsFixed(1),
+                                      style: const TextStyle(
+                                        fontSize: 40,
+                                        fontFamily: "PoppinsSemiBold",
+                                      ),
+                                    ),
+                                    Row(
+                                      children: List.generate(
+                                        5,
+                                        (i) => Icon(
+                                          Icons.star,
+                                          size: 18,
+                                          color: i < _avgRating.floor()
+                                              ? AppColors.rusticSunset
+                                              : AppColors.greyTone,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      l10n.reviewsTotalCount(_totalReviews),
+                                      style: const TextStyle(
+                                        fontFamily: "PoppinsRegular",
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                ),
 
-                        const SizedBox(height: 80),
-                      ],
-                    ),
-                  ),
+                                const SizedBox(width: 24),
+
+                                // RIGHT
+                                Expanded(
+                                  child: Column(
+                                    children: List.generate(5, (index) {
+                                      final star = 5 - index;
+                                      return _RatingDistribution(
+                                        star: star,
+                                        count: _ratingCount[star] ?? 0,
+                                        total: _totalReviews,
+                                      );
+                                    }),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 24),
+
+                            // ------------------------
+                            // REVIEWS HEADER
+                            // ------------------------
+                            Text(
+                              l10n.reviewsTitle,
+                              style: const TextStyle(
+                                fontFamily: "PoppinsSemiBold",
+                                fontSize: 16,
+                              ),
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            // ------------------------
+                            // INFO NOTE
+                            // ------------------------
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Text(
+                                "Precut guarantees that reviews with \"verified precut user\" tag have been added by registered precut users who have had an appointment with the provider. A registered precut user can add a review only after the service has been provided.",
+                                style: TextStyle(
+                                  fontFamily: "PoppinsRegular",
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 20),
+
+                            // ------------------------
+                            // REVIEWS LIST
+                            // ------------------------
+                            if (_reviews.isEmpty)
+                              const Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 32,
+                                ),
+                                child: Center(
+                                  child: Column(
+                                    children: const [
+                                      Icon(
+                                        Icons.star_border,
+                                        size: 50,
+                                        color: Colors.black45,
+                                      ),
+                                      SizedBox(height: 12),
+                                      Text(
+                                        "No reviews yet",
+                                        style: TextStyle(
+                                          fontFamily: "PoppinsSemiBold",
+                                          fontSize: 15,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                      SizedBox(height: 6),
+                                      Text(
+                                        "Be the first to share your experience.",
+                                        style: TextStyle(
+                                          fontFamily: "PoppinsRegular",
+                                          fontSize: 13,
+                                          color: Colors.black54,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            else
+                              for (final r in _reviews)
+                                _reviewTile(
+                                  name: r["user"]?["name"] ?? "User",
+                                  date: _formatDate(r["createdAt"]),
+                                  service: r["service"]?["title"] ?? "Service",
+                                  review: r["comment"] ?? "",
+                                  rating: r["rating"] ?? 0,
+                                ),
+
+                            // ------------------------
+// ADD REVIEW SECTION
+// ------------------------
+                            Container(
+                              margin: const EdgeInsets.only(top: 24),
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: AppColors.softIvory,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: Colors.black12),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    l10n.reviewsAddYourReview,
+                                    style: const TextStyle(
+                                      fontFamily: "PoppinsSemiBold",
+                                      fontSize: 16,
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 12),
+
+                                  // ⭐ STAR SELECTOR
+                                  Row(
+                                    children: List.generate(5, (index) {
+                                      final starIndex = index + 1;
+                                      return GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            _selectedRating = starIndex;
+                                          });
+                                        },
+                                        child: Icon(
+                                          Icons.star,
+                                          size: 28,
+                                          color: starIndex <= _selectedRating
+                                              ? AppColors.rusticSunset
+                                              : AppColors.greyTone,
+                                        ),
+                                      );
+                                    }),
+                                  ),
+
+                                  const SizedBox(height: 14),
+
+                                  // 📝 REVIEW INPUT
+                                  TextField(
+                                    controller: _reviewController,
+                                    maxLines: 4,
+                                    decoration: InputDecoration(
+                                      hintText: l10n.reviewsWriteHere,
+                                      hintStyle: const TextStyle(
+                                        fontFamily: "PoppinsRegular",
+                                        color: Colors.black45,
+                                      ),
+                                      filled: true,
+                                      fillColor: AppColors.softIvory,
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: const BorderSide(
+                                            color: Colors.black26),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: const BorderSide(
+                                          color: AppColors.rusticSunset,
+                                          width: 1.2,
+                                        ),
+                                      ),
+                                    ),
+                                    style: const TextStyle(
+                                      fontFamily: "PoppinsRegular",
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 14),
+
+                                  // 📤 SUBMIT BUTTON
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      onPressed: _submittingReview ||
+                                              _selectedRating == 0 ||
+                                              _reviewController.text
+                                                  .trim()
+                                                  .isEmpty
+                                          ? null
+                                          : _submitReview,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.rusticSunset,
+                                        disabledBackgroundColor:
+                                            Colors.grey.shade400,
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 14),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                      child: _submittingReview
+                                          ? const SizedBox(
+                                              height: 18,
+                                              width: 18,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: Colors.white,
+                                              ),
+                                            )
+                                          : Text(
+                                              l10n.reviewsSubmit,
+                                              style: const TextStyle(
+                                                fontFamily: "PoppinsSemiBold",
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 80),
+                          ],
+                        ),
+                      ),
           ),
         ],
       ),

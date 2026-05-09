@@ -165,27 +165,89 @@ class _OrdersScreenState extends State<OrdersScreen> {
         child: ordersProvider.isLoading
             ? _buildOrdersSkeleton(context) // 1️⃣ LOADING FIRST
             : ordersProvider.error != null
-                ? Padding(
-                    padding: const EdgeInsets.only(left: 20, top: 20),
-                    child: Text(
-                      ordersProvider.error!,
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontFamily: "PoppinsRegular",
-                        fontSize: 14,
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.receipt_long_outlined,
+                            size: 64,
+                            color: Colors.black45,
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            "Unable to load your orders.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: "PoppinsSemiBold",
+                              fontSize: 16,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            "Please try again later.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: "PoppinsRegular",
+                              fontSize: 13,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                            onPressed: () {
+                              context.read<OrderProvider>().fetchOrders();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.rusticSunset,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              "Try Again",
+                              style: TextStyle(
+                                fontFamily: "PoppinsSemiBold",
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   )
                 : ordersProvider.orders.isEmpty
-                    ? Padding(
-                        padding: const EdgeInsets.only(left: 20, top: 20),
-                        child: Text(
-                          l10n.ordersEmpty,
-                          style: const TextStyle(
-                            fontFamily: "PoppinsRegular",
-                            fontSize: 14,
-                            color: Colors.black,
-                          ),
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.shopping_bag_outlined,
+                              size: 64,
+                              color: Colors.black45,
+                            ),
+                            const SizedBox(height: 14),
+                            Text(
+                              l10n.ordersEmpty,
+                              style: const TextStyle(
+                                fontFamily: "PoppinsSemiBold",
+                                fontSize: 16,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            const Text(
+                              "Your orders will appear here.",
+                              style: TextStyle(
+                                fontFamily: "PoppinsRegular",
+                                fontSize: 13,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
                         ),
                       )
                     : SingleChildScrollView(
@@ -405,7 +467,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                               .fetchOrders();
 
                                           if (!mounted) return;
-
+                                          ScaffoldMessenger.of(context)
+                                              .hideCurrentSnackBar();
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
                                             const SnackBar(
@@ -415,12 +478,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                           );
                                         } catch (e) {
                                           if (!mounted) return;
-
+                                          ScaffoldMessenger.of(context)
+                                              .hideCurrentSnackBar();
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
-                                            SnackBar(
-                                              content: Text(e.toString()),
-                                              backgroundColor: Colors.red,
+                                            const SnackBar(
+                                              content: Text(
+                                                "Unable to cancel order. Please try again.",
+                                              ),
                                             ),
                                           );
                                         } finally {

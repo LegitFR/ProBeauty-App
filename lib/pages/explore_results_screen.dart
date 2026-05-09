@@ -147,7 +147,7 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
         });
       } else {
         setState(() {
-          _error = "Failed to fetch salons: ${response.statusCode}";
+          _error = "Unable to load salons right now. Please try again.";
           _isLoadingPage = false;
           _initialLoading = false;
           _hasMore = false;
@@ -155,7 +155,7 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
       }
     } catch (e) {
       setState(() {
-        _error = "Error: $e";
+        _error = "Unable to load salons right now. Please try again later.";
         _isLoadingPage = false;
         _initialLoading = false;
       });
@@ -313,7 +313,7 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
             ),
             const SizedBox(height: 16),
             const Text(
-              "No results found",
+              "No salons matched your search",
               style: TextStyle(
                 fontFamily: "PoppinsSemiBold",
                 fontSize: 18,
@@ -356,7 +356,46 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
 
   Widget _buildError() {
     return Center(
-      child: Text(_error!, style: const TextStyle(color: Colors.red)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 60,
+              color: Colors.black45,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              _error ?? "Something went wrong.",
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: "PoppinsMedium",
+                fontSize: 15,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _refreshSearch,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.rusticSunset,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                "Try Again",
+                style: TextStyle(
+                  fontFamily: "PoppinsSemiBold",
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -662,8 +701,11 @@ class _SalonCardState extends State<SalonCard> {
       if (!mounted) return;
 
       if (response.statusCode != 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Failed to load salon details")),
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        const SnackBar(
+          content: Text(
+            "Unable to load salon details. Please try again.",
+          ),
         );
         return;
       }
@@ -686,8 +728,13 @@ class _SalonCardState extends State<SalonCard> {
       );
     } catch (e) {
       if (!mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
+        const SnackBar(
+          content: Text(
+            "Unable to load salon details. Please try again.",
+          ),
+        ),
       );
     } finally {
       if (mounted) {

@@ -234,16 +234,34 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           height: height * 0.06,
                           child: ElevatedButton(
                             onPressed: () {
+                              if (searchController.text.trim().isEmpty &&
+                                  (currentCity == null ||
+                                      currentCity!.trim().isEmpty)) {
+                                ScaffoldMessenger.of(context)
+                                    .hideCurrentSnackBar();
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      "Please select a service or location to continue.",
+                                    ),
+                                  ),
+                                );
+
+                                return;
+                              }
+
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => ExploreResultsScreen(
-                                      serviceText: searchController.text,
-                                      dateText: selectedDate != null
-                                          ? _formatDate(selectedDate!)
-                                          : "",
-                                      timeText: selectedTimeSlot ?? "",
-                                      locationText: currentCity),
+                                    serviceText: searchController.text,
+                                    dateText: selectedDate != null
+                                        ? _formatDate(selectedDate!)
+                                        : "",
+                                    timeText: selectedTimeSlot ?? "",
+                                    locationText: currentCity,
+                                  ),
                                 ),
                               );
                             },

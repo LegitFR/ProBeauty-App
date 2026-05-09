@@ -143,7 +143,7 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
                           child: const Text(
-                            "yes, exit",
+                            "Yes, Exit",
                             style: TextStyle(
                               fontFamily: "PoppinsSemiBold",
                               fontSize: 16,
@@ -236,15 +236,40 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
               ),
             ),
             const Divider(thickness: 1),
-            Expanded(
-              child: ListView.separated(
-                itemCount: filtered.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (_, index) {
-                  return _serviceTile(filtered[index]);
-                },
+            if (filtered.isEmpty)
+              const Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(
+                        Icons.content_cut,
+                        size: 50,
+                        color: Colors.black45,
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        "No services available in this category.",
+                        style: TextStyle(
+                          fontFamily: "PoppinsMedium",
+                          fontSize: 14,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              Expanded(
+                child: ListView.separated(
+                  itemCount: filtered.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (_, index) {
+                    return _serviceTile(filtered[index]);
+                  },
+                ),
               ),
-            ),
           ],
         ),
         bottomNavigationBar: SafeArea(

@@ -52,8 +52,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final salonProvider = context.watch<SalonProvider>();
     final offerProvider = context.watch<OfferProvider>();
     final offers = offerProvider.salonOffers;
-    print("OFFERS");
-    print(offers);
     // fallback images
     final fallbackImages = [
       'assets/images/saloons/saloon1.png',
@@ -96,6 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         GestureDetector(
                           onTap: () {
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 backgroundColor: AppColors.rusticSunset,
@@ -188,94 +187,126 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     )
-                  : NotificationListener<ScrollNotification>(
-                      onNotification: (notification) {
-                        if (notification.metrics.pixels >=
-                                notification.metrics.maxScrollExtent - 100 &&
-                            offerProvider.hasMore &&
-                            !offerProvider.isLoading) {
-                          offerProvider.fetchActiveOffers(showLoader: false);
-                        }
-                        return false;
-                      },
-                      child: CarouselSlider(
-                        options: CarouselOptions(
-                          onPageChanged: (index, reason) {
-                            setState(() {
-                              _currentOfferIndex = index;
-                            });
+
+                  // ✅ EMPTY STATE
+                  : offers.isEmpty
+                      ? const Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: Center(
+                            child: Column(
+                              children: const [
+                                Icon(
+                                  Icons.local_offer_outlined,
+                                  color: Colors.black45,
+                                  size: 38,
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  "No active offers available right now.",
+                                  style: TextStyle(
+                                    fontFamily: "PoppinsRegular",
+                                    fontSize: 14,
+                                    color: Colors.black54,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : NotificationListener<ScrollNotification>(
+                          onNotification: (notification) {
+                            if (notification.metrics.pixels >=
+                                    notification.metrics.maxScrollExtent -
+                                        100 &&
+                                offerProvider.hasMore &&
+                                !offerProvider.isLoading) {
+                              offerProvider.fetchActiveOffers(
+                                  showLoader: false);
+                            }
+                            return false;
                           },
+                          child: CarouselSlider(
+                            options: CarouselOptions(
+                              onPageChanged: (index, reason) {
+                                setState(() {
+                                  _currentOfferIndex = index;
+                                });
+                              },
 
-                          height: height * 0.20,
+                              height: height * 0.20,
 
-                          // 🔥 prevent duplication
-                          autoPlay: offers.length > 1,
-                          enableInfiniteScroll: offers.length > 1,
-                          enlargeCenterPage: offers.length > 1,
+                              // 🔥 prevent duplication
+                              autoPlay: offers.length > 1,
+                              enableInfiniteScroll: offers.length > 1,
+                              enlargeCenterPage: offers.length > 1,
 
-                          // 🔥 padding behavior
-                          viewportFraction: offers.length > 1 ? 0.78 : 0.9,
+                              // 🔥 padding behavior
+                              viewportFraction: offers.length > 1 ? 0.78 : 0.9,
 
-                          aspectRatio: 16 / 9,
-                          autoPlayInterval: const Duration(seconds: 3),
-                        ),
-                        items: offers.map((offer) {
-                          final String imageUrl = offer["image"] ?? "";
-                          final String salonId = offer["salonId"] ?? "";
+                              aspectRatio: 16 / 9,
+                              autoPlayInterval: const Duration(seconds: 3),
+                            ),
+                            items: offers.map((offer) {
+                              final String imageUrl = offer["image"] ?? "";
+                              final String salonId = offer["salonId"] ?? "";
 
-                          return GestureDetector(
-                            onTap: () async {
-                              try {
-                                if (salonId.isEmpty) return;
-                                final salon =
-                                    await SalonService.fetchSalonById(salonId);
+                              return GestureDetector(
+                                onTap: () async {
+                                  try {
+                                    if (salonId.isEmpty) return;
+                                    final salon =
+                                        await SalonService.fetchSalonById(
+                                            salonId);
 
-                                if (!context.mounted) return;
+                                    if (!context.mounted) return;
 
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => SalonDetailScreen(
-                                      id: salon["id"],
-                                      name: salon["name"] ?? "",
-                                      address: salon["address"] ?? "",
-                                      image: salon["thumbnail"] ??
-                                          'assets/images/saloons/saloon1.png',
-                                      services: salon["services"] ?? [],
-                                      salonStaffList: salon["staff"] ?? [],
-                                      hours: salon["hours"] ?? {},
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => SalonDetailScreen(
+                                          id: salon["id"],
+                                          name: salon["name"] ?? "",
+                                          address: salon["address"] ?? "",
+                                          image: salon["thumbnail"] ??
+                                              'assets/images/saloons/saloon1.png',
+                                          services: salon["services"] ?? [],
+                                          salonStaffList: salon["staff"] ?? [],
+                                          hours: salon["hours"] ?? {},
+                                        ),
+                                      ),
+                                    );
+                                  } catch (e) {
+                                    debugPrint("Failed to open salon: $e");
+
+                                    if (!context.mounted) return;
+                                    ScaffoldMessenger.of(context)
+                                        .hideCurrentSnackBar();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              "Unable to load salon details. Please try again.")),
+                                    );
+                                  }
+                                },
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: offers.length == 1 ? 12 : 6,
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: Image.network(
+                                      imageUrl,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) =>
+                                          const Icon(Icons.image_not_supported),
                                     ),
                                   ),
-                                );
-                              } catch (e) {
-                                debugPrint("Failed to open salon: $e");
-
-                                if (!context.mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text("Unable to open salon")),
-                                );
-                              }
-                            },
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: offers.length == 1 ? 12 : 6,
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(20),
-                                child: Image.network(
-                                  imageUrl,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) =>
-                                      const Icon(Icons.image_not_supported),
                                 ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
 
               const SizedBox(height: 12),
 

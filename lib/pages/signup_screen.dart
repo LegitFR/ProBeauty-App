@@ -17,6 +17,8 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   bool _obscurePassword = true;
+  bool _isLoading = false;
+  bool _isGoogleLoading = false;
 
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
@@ -51,6 +53,7 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Future<void> _signupUser() async {
+    if (_isLoading) return;
     final firstName = _firstNameController.text.trim();
     final lastName = _lastNameController.text.trim();
     final contact = _contactController.text.trim();
@@ -60,14 +63,50 @@ class _SignupScreenState extends State<SignupScreen> {
         lastName.isEmpty ||
         contact.isEmpty ||
         password.isEmpty) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context)!.signupEmptyFieldsError),
+          content: Text(
+            AppLocalizations.of(context)!.signupEmptyFieldsError,
+          ),
         ),
       );
       return;
     }
 
+    if (contact.contains("@")) {
+      final emailRegex = RegExp(
+        r'^[^@]+@[^@]+\.[^@]+',
+      );
+
+      if (!emailRegex.hasMatch(contact)) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Please enter a valid email address.",
+            ),
+          ),
+        );
+
+        return;
+      }
+    }
+
+    if (password.length < 6) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Password must be at least 6 characters.",
+          ),
+        ),
+      );
+
+      return;
+    }
     final Map<String, dynamic> bodyData = {
       "name": "$firstName $lastName",
       "password": password,
@@ -80,6 +119,7 @@ class _SignupScreenState extends State<SignupScreen> {
       bodyData["phone"] = contact;
     }
 
+    setState(() => _isLoading = true);
     try {
       final response = await ApiClient.post(
         "/api/v1/auth/signup",
@@ -89,25 +129,39 @@ class _SignupScreenState extends State<SignupScreen> {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 201 || data['success'] == true) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content:
-                  Text(AppLocalizations.of(context)!.signupSuccessMessage)),
+            content: Text(
+              AppLocalizations.of(context)!.signupSuccessMessage,
+            ),
+          ),
         );
         Navigator.pushNamed(context, "/OTP", arguments: contact);
       } else {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(data['message'] ??
-                  AppLocalizations.of(context)!.signupFailedMessage)),
+            content: Text(
+              AppLocalizations.of(context)!.signupFailedMessage,
+            ),
+          ),
         );
       }
     } catch (e) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(AppLocalizations.of(context)!
-                .signupErrorMessage(e.toString()))),
+        const SnackBar(
+          content: Text(
+            "Unable to create account right now.",
+          ),
+        ),
       );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -363,19 +417,36 @@ class _SignupScreenState extends State<SignupScreen> {
                     children: [
                       GestureDetector(
                         onTap: () async {
-                          try {
-                            await GoogleAuthService.signInWithGoogle();
+                          if (_isGoogleLoading) return;
 
-                            if (!mounted) return;
-                            Navigator.pushReplacementNamed(context, '/home');
-                          } catch (e) {
-                            debugPrint("GOOGLE SIGN IN ERROR: $e");
+                          setState(() => _isGoogleLoading = true);
 
-                            if (!mounted) return;
+                          final success =
+                              await GoogleAuthService.signInWithGoogle();
+
+                          if (!mounted) return;
+
+                          if (!success) {
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(e.toString())),
+                              const SnackBar(
+                                content: Text(
+                                  "Unable to sign in with Google.",
+                                ),
+                              ),
                             );
+
+                            setState(() => _isGoogleLoading = false);
+
+                            return;
                           }
+
+                          Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            "/main",
+                            (route) => false,
+                          );
                         },
                         child: SvgPicture.asset(
                           "assets/images/icons/google.svg",

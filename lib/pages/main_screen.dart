@@ -30,27 +30,6 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     _selectedIndex = widget.initialIndex;
 
-    // 🔔 Foreground notification listener
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      final notification = message.notification;
-
-      if (notification == null) return;
-
-      flutterLocalNotificationsPlugin.show(
-        notification.hashCode,
-        notification.title,
-        notification.body,
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'default', // MUST match backend + channel
-            'Default Notifications',
-            importance: Importance.high,
-            priority: Priority.high,
-          ),
-        ),
-      );
-    });
-
     // 🔔 When user taps notification (background → open app)
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       debugPrint("📲 Notification tapped");
@@ -74,8 +53,10 @@ class _MainScreenState extends State<MainScreen> {
     final screen = data['screen'];
 
     if (screen == 'BookingDetails') {
+      if (!mounted) return;
       Navigator.pushNamed(context, '/bookingDetails');
     } else if (screen == 'OrderDetails') {
+      if (!mounted) return;
       Navigator.pushNamed(context, '/orderDetails');
     }
   }
@@ -137,12 +118,13 @@ class _MainScreenState extends State<MainScreen> {
                 animationDuration: const Duration(milliseconds: 300),
                 animationCurve: Curves.easeInOut,
                 onTap: (index) {
+                  if (_selectedIndex == index) return;
+
                   setState(() {
                     _selectedIndex = index;
                   });
                 },
               ),
-              // Label for selected item
               Positioned(
                 bottom: 7,
                 left: 0,

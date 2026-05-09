@@ -93,7 +93,7 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
       }
     } catch (e) {
       setState(() {
-        _error = e.toString();
+        _error = "Unable to load favourites right now. Please try again later.";
         _loading = false;
       });
     }
@@ -112,7 +112,7 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
         setState(() {
           _favourites.removeAt(index);
         });
-
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content:
@@ -120,20 +120,20 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
           ),
         );
       } else {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(AppLocalizations.of(context)!.favouritesRemoveFailed),
-            backgroundColor: Colors.red,
           ),
         );
       }
     } catch (e) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             AppLocalizations.of(context)!.favouritesError(e.toString()),
           ),
-          backgroundColor: Colors.red,
         ),
       );
     }
@@ -155,6 +155,7 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
       );
 
       if (resp.statusCode == 201) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(AppLocalizations.of(context)!.favouritesAddedToCart),
@@ -162,23 +163,23 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
         );
       } else {
         final body = jsonDecode(resp.body);
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               body["message"] ??
                   AppLocalizations.of(context)!.favouritesAddToCartFailed,
             ),
-            backgroundColor: Colors.red,
           ),
         );
       }
     } catch (e) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             AppLocalizations.of(context)!.favouritesError(e.toString()),
           ),
-          backgroundColor: Colors.red,
         ),
       );
     } finally {
@@ -222,9 +223,45 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
     // 2️⃣ ERROR
     if (_error != null) {
       return Center(
-        child: Text(
-          _error!,
-          style: const TextStyle(color: Colors.red),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.favorite_border,
+                size: 60,
+                color: Colors.black45,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                _error!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: "PoppinsMedium",
+                  fontSize: 15,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _fetchFavourites,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.rusticSunset,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  "Try Again",
+                  style: TextStyle(
+                    fontFamily: "PoppinsSemiBold",
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }

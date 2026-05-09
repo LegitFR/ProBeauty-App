@@ -473,8 +473,14 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
 
       await _showSuccessOverlay();
     } catch (e) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text(
+            "Unable to complete booking. Please try again.",
+          ),
+        ),
       );
     } finally {
       if (mounted) setState(() => _isProcessing = false);
@@ -576,7 +582,9 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
       }
 
       if (staffId == null) {
-        throw Exception("No staff selected");
+        throw Exception(
+          "Unable to process booking. Please select a staff member.",
+        );
       }
 
       final body = {
@@ -605,11 +613,12 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
       final requestId = payment["requestId"];
       final amt = payment["amount"];
 
-      // 🔥 SHOW MESSAGE
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            payment["message"] ?? "Approve payment in MB WAY app",
+            payment["message"] ??
+                "Please approve the payment in your MB WAY app.",
           ),
         ),
       );
@@ -635,20 +644,35 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
       if (status != null && (status == "SUCCESS" || status == "000")) {
         await _showSuccessOverlay();
       } else {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Payment pending or failed")),
+          const SnackBar(
+            content: Text(
+              "Payment could not be completed.",
+            ),
+          ),
         );
       }
     } catch (e) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text(
+            "Unable to process payment right now. Please try again.",
+          ),
+        ),
       );
     } finally {
       if (mounted) setState(() => _isProcessing = false);
     }
   }
 
-  // --------------------------------------------------
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -1103,13 +1127,13 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
                   // 🔥 DEFAULT BORDER
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: AppColors.rusticSunset),
+                    borderSide: const BorderSide(color: AppColors.rusticSunset),
                   ),
 
                   // 🔥 WHEN ENABLED (NOT FOCUSED)
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: AppColors.rusticSunset),
+                    borderSide: const BorderSide(color: AppColors.rusticSunset),
                   ),
 
                   // 🔥 WHEN FOCUSED (CLICKED)
@@ -1184,7 +1208,7 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
                           if (_phoneController.text.trim().isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                  content: Text("Enter phone number")),
+                                  content: Text("Please enter phone number.")),
                             );
                             return;
                           }

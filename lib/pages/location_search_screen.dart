@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
 import '../resources/AppColors.dart';
@@ -14,11 +16,11 @@ class LocationSearchScreen extends StatefulWidget {
 
 class _LocationSearchScreenState extends State<LocationSearchScreen> {
   TextEditingController controller = TextEditingController();
+  final String apiKey = dotenv.env['GOOGLE_PLACES_API_KEY'] ?? '';
 
   List<dynamic> places = [];
   bool isLoading = false;
-
-  final String apiKey = "AlzaSyCjdEs_XIU50HnYFJgAsafh8_KlhjQXJw";
+  Timer? _debounce;
 
   Future<void> searchPlaces(String input) async {
     if (input.isEmpty) {
@@ -28,21 +30,55 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
 
     setState(() => isLoading = true);
 
-    final url = "https://maps.googleapis.com/maps/api/place/autocomplete/json"
-        "?input=$input&key=$apiKey&components=country:in";
+    try {
+      final url = "https://maps.googleapis.com/maps/api/place/autocomplete/json"
+          "?input=$input&key=$apiKey&components=country:in";
 
-    final response = await http.get(Uri.parse(url));
-    print(response.body);
+      final response = await http.get(Uri.parse(url));
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      setState(() {
-        places = data['predictions'];
-        isLoading = false;
-      });
-    } else {
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        setState(() {
+          places = data['predictions'];
+          isLoading = false;
+        });
+      } else {
+        setState(() => isLoading = false);
+
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Unable to search locations right now.",
+            ),
+          ),
+        );
+      }
+    } catch (_) {
+      if (!mounted) return;
+
       setState(() => isLoading = false);
+
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Please check your internet connection and try again.",
+          ),
+        ),
+      );
     }
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -111,19 +147,43 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                       fontFamily: "PoppinsMedium",
                       color: Colors.black,
                     ),
-                    suffixIcon: controller.text.isNotEmpty
-                        ? GestureDetector(
-                            onTap: () {
-                              setState(() => controller.clear());
-                            },
-                            child: const Icon(Icons.close, size: 18),
+                    suffixIcon: isLoading
+                        ? const Padding(
+                            padding: EdgeInsets.all(14),
+                            child: SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.rusticSunset,
+                              ),
+                            ),
                           )
-                        : null,
+                        : controller.text.isNotEmpty
+                            ? GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    controller.clear();
+                                    places = [];
+                                  });
+                                },
+                                child: const Icon(Icons.close, size: 18),
+                              )
+                            : null,
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   onChanged: (value) {
-                    searchPlaces(value);
+                    if (_debounce?.isActive ?? false) {
+                      _debounce!.cancel();
+                    }
+
+                    _debounce = Timer(
+                      const Duration(milliseconds: 400),
+                      () {
+                        searchPlaces(value);
+                      },
+                    );
                   },
                 ),
               ),

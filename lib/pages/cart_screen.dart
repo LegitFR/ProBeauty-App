@@ -3,12 +3,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:probeauty_app/models/cart_item.dart';
 import 'package:probeauty_app/providers/address_provider.dart';
 import 'package:probeauty_app/routes/app_routes.dart';
+import 'package:probeauty_app/services/api_client.dart';
 import 'package:probeauty_app/widgets/success_animation.dart';
 import 'package:provider/provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
@@ -40,39 +40,32 @@ class _CartScreenState extends State<CartScreen> {
     required String requestId,
     required dynamic amount,
   }) async {
-    final rawKey = dotenv.env['IFTHENPAY_ANTI_PHISHING_KEY'] ?? '';
-    final encodedKey = Uri.encodeComponent(rawKey);
-
-    final url = Uri.parse(
-      "https://9c01-2405-201-e057-a014-39e2-910a-230e-1c15.ngrok-free.app/api/v1/webhooks/ifthenpay/mbway"
-      "?key=$encodedKey"
-      "&orderId=$orderId"
-      "&requestId=$requestId"
-      "&amount=$amount",
-    );
-
     try {
-      final response = await http.get(url);
+      final response = await ApiClient.get(
+        "/api/v1/webhooks/ifthenpay/mbway",
+        query: {
+          "orderId": orderId,
+          "requestId": requestId,
+          "amount": amount.toString(),
+        },
+      );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-
-        return data["status"]; // or adjust based on backend
+        return data["status"];
       }
     } catch (e) {
-      print("Webhook polling error: $e");
+      debugPrint("Webhook polling error: $e");
     }
 
     return null;
   }
 
   Future<String?> getOrderPaymentStatus(String orderId) async {
-    final url = Uri.parse(
-      "https://9c01-2405-201-e057-a014-39e2-910a-230e-1c15.ngrok-free.app/api/v1/orders/$orderId/payment",
-    );
-
     try {
-      final response = await http.get(url);
+      final response = await ApiClient.get(
+        "/api/v1/orders/$orderId/payment",
+      );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -84,7 +77,7 @@ class _CartScreenState extends State<CartScreen> {
         }
       }
     } catch (e) {
-      print("Error: $e");
+      debugPrint("Payment status error: $e");
     }
 
     return null;
@@ -194,9 +187,14 @@ class _CartScreenState extends State<CartScreen> {
                           final phone = _phoneController.text.trim();
 
                           if (phone.isEmpty) {
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                  content: Text("Please enter phone number")),
+                                content: Text(
+                                  "Please enter your phone number.",
+                                ),
+                              ),
                             );
                             setState(() => _isPaying = false);
                             return;
@@ -219,11 +217,13 @@ class _CartScreenState extends State<CartScreen> {
                           print(orderId);
 
 // ✅ MBWAY message
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
                                 payment["message"] ??
-                                    "Approve payment in MB WAY app",
+                                    "Please approve the payment in your MB WAY app.",
                               ),
                             ),
                           );
@@ -247,10 +247,6 @@ class _CartScreenState extends State<CartScreen> {
                               amount: amount,
                             );
 
-                            print("STATUS: $status");
-
-                            print("STATUS: $status");
-
                             attempts++;
                           } while (status != null &&
                               status.toUpperCase() == "PAYMENT_PENDING" &&
@@ -265,14 +261,28 @@ class _CartScreenState extends State<CartScreen> {
                             }
                           }
                         } catch (e) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(e.toString()),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
+                          if (!mounted) return;
+
+                          String message =
+                              "Unable to complete payment. Please try again later.";
+
+                          final error = e.toString().toLowerCase();
+
+                          if (error.contains("mb way")) {
+                            message =
+                                "Payment failed. Please verify your MB WAY number.";
+                          } else if (error.contains("network")) {
+                            message =
+                                "Please check your internet connection and try again.";
                           }
+
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(message),
+                            ),
+                          );
                         } finally {
                           if (mounted) {
                             setState(() => _isPaying = false);
@@ -333,7 +343,9 @@ class _CartScreenState extends State<CartScreen> {
                       Padding(
                         padding: const EdgeInsets.only(top: 20),
                         child: Text(
-                          cart.error!,
+                          cart.error!.contains("network")
+                              ? "Please check your internet connection."
+                              : "Unable to load cart items.",
                           style: const TextStyle(
                             color: Colors.red,
                             fontFamily: "PoppinsRegular",
@@ -439,6 +451,9 @@ class _CartScreenState extends State<CartScreen> {
                         ),
                       ),
                     ),
+                    const SizedBox(
+                      height: 25,
+                    ),
                     const Text(
                       "Enter Phone Number",
                       style: TextStyle(
@@ -452,18 +467,22 @@ class _CartScreenState extends State<CartScreen> {
                       keyboardType: TextInputType.phone,
                       decoration: InputDecoration(
                         hintText: "Enter phone number",
+                        hintStyle: const TextStyle(
+                            fontFamily: "PoppinsRegular", fontSize: 13),
                         prefixText: "351#",
 
                         // 🔥 DEFAULT BORDER
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.rusticSunset),
+                          borderSide:
+                              const BorderSide(color: AppColors.rusticSunset),
                         ),
 
                         // 🔥 WHEN ENABLED (NOT FOCUSED)
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.rusticSunset),
+                          borderSide:
+                              const BorderSide(color: AppColors.rusticSunset),
                         ),
 
                         // 🔥 WHEN FOCUSED (CLICKED)
@@ -554,8 +573,15 @@ class _CartScreenState extends State<CartScreen> {
                     );
 
                     if (msg != null && mounted) {
-                      ScaffoldMessenger.of(context)
-                          .showSnackBar(SnackBar(content: Text(msg)));
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            msg.isNotEmpty ? msg : "Cart updated successfully.",
+                          ),
+                        ),
+                      );
                     }
                   },
                   child: const Padding(
@@ -579,9 +605,15 @@ class _CartScreenState extends State<CartScreen> {
                       quantity: newQty,
                     );
                     if (msg != null && mounted) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text(msg)));
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            msg.isNotEmpty ? msg : "Cart updated successfully.",
+                          ),
+                        ),
+                      );
                     }
                   },
                   child: const Padding(
