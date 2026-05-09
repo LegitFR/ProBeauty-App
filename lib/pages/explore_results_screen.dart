@@ -959,7 +959,7 @@ class _SalonCardState extends State<SalonCard> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      s.price != null ? "₹${s.price!.toInt()}" : "",
+                      s.price != null ? "€${s.price!.toInt()}" : "",
                       style: const TextStyle(
                         fontFamily: "PoppinsSemiBold",
                         fontSize: 15,

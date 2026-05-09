@@ -846,7 +846,7 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
                         ),
                       ],
                     ),
-                    Text("₹$price",
+                    Text("€$price",
                         style: const TextStyle(fontFamily: "PoppinsSemiBold")),
                   ],
                 ),
@@ -880,14 +880,14 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
                   children: [
                     if (_selectedOffer != null)
                       Text(
-                        "₹${total + taxes}",
+                        "€${total + taxes}",
                         style: const TextStyle(
                           decoration: TextDecoration.lineThrough,
                           color: Colors.black45,
                         ),
                       ),
                     Text(
-                      "₹$grandTotal",
+                      "€$grandTotal",
                       style: const TextStyle(
                         fontFamily: "PoppinsSemiBold",
                         fontSize: 16,
@@ -968,7 +968,7 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
                           Text(
                             offer["discountType"] == "percentage"
                                 ? "${offer["discountValue"]}% OFF"
-                                : "₹${offer["discountValue"]} OFF",
+                                : "€${offer["discountValue"]} OFF",
                             style: const TextStyle(
                               fontFamily: "PoppinsSemiBold",
                               color: AppColors.rusticSunset,
@@ -1177,7 +1177,7 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      "₹$grandTotal",
+                      "€$grandTotal",
                       style: const TextStyle(
                         fontFamily: "PoppinsSemiBold",
                         fontSize: 15,
@@ -1267,7 +1267,7 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
             style: TextStyle(
                 fontFamily: bold ? "PoppinsSemiBold" : "PoppinsRegular",
                 color: green ? Colors.green : Colors.black)),
-        Text("₹$value",
+        Text("€$value",
             style: TextStyle(
                 fontFamily: bold ? "PoppinsSemiBold" : "PoppinsRegular",
                 color: green ? Colors.green : Colors.black)),

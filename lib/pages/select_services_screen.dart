@@ -362,7 +362,7 @@ class _SelectServicesScreenState extends State<SelectServicesScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    "₹${service["price"]}",
+                    "€${service["price"]}",
                     style: const TextStyle(
                       fontFamily: "PoppinsSemiBold",
                       fontSize: 15,

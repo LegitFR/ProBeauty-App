@@ -127,7 +127,7 @@ class _CartScreenState extends State<CartScreen> {
     final cart = context.watch<CartProvider>();
 
     double totalAmount = cart.subtotal;
-    String totalText = "₹${totalAmount.toStringAsFixed(0)}";
+    String totalText = "€${totalAmount.toStringAsFixed(0)}";
 
     return Scaffold(
       appBar: AppBar(
@@ -387,7 +387,7 @@ class _CartScreenState extends State<CartScreen> {
                       ),
                     if (cart.items.isNotEmpty) const SizedBox(height: 4),
                     if (cart.items.isNotEmpty)
-                      _summaryRow("Discount", "-₹0", green: true),
+                      _summaryRow("Discount", "-€0", green: true),
                     if (cart.items.isNotEmpty) const SizedBox(height: 4),
                     if (cart.items.isNotEmpty) _summaryRow("Shipping", "Free"),
                     if (cart.items.isNotEmpty) const Divider(thickness: 1),
@@ -548,7 +548,7 @@ class _CartScreenState extends State<CartScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  "₹${item.price.toStringAsFixed(0)}",
+                  "€${item.price.toStringAsFixed(0)}",
                   style: const TextStyle(
                     fontFamily: "PoppinsMedium",
                     fontSize: 14,

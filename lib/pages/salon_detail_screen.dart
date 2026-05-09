@@ -403,7 +403,7 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                     _serviceTile(
                       title: s["title"] ?? "",
                       subtitle: l10n.salonServiceDuration(s["durationMinutes"]),
-                      price: "₹${s["price"]}",
+                      price: "€${s["price"]}",
                       category: s["category"] ?? "Featured",
                     ),
                     const SizedBox(height: 12),

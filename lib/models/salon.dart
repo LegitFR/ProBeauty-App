@@ -19,7 +19,7 @@ class Salon {
       name: json["name"],
       address: json["address"],
       geo: json["geo"] != null ? Geo.fromJson(json["geo"]) : null,
-      image: json["thumbnail"],
+      image: json["image"],
     );
   }
 }

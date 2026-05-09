@@ -390,7 +390,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                       ),
                     ),
                     Text(
-                      "₹${service["price"] ?? "--"}",
+                      "€${service["price"] ?? "--"}",
                       style: const TextStyle(
                         fontFamily: "PoppinsSemiBold",
                         fontSize: 15,

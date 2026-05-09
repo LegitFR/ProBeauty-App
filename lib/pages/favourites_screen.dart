@@ -355,7 +355,7 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
                 color: Colors.black54)),
         const SizedBox(height: 6),
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text("₹$price",
+          Text("€$price",
               style:
                   const TextStyle(fontFamily: "PoppinsSemiBold", fontSize: 16)),
           ElevatedButton(

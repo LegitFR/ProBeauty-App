@@ -568,7 +568,7 @@ class _ShopScreenState extends State<ShopScreen> {
             width,
             brand: salonName,
             productName: p.title ?? 'Product',
-            price: '₹${p.price ?? "-"}',
+            price: '€${p.price ?? "-"}',
             oldPrice: '',
             discount: '',
             imageUrl: image,

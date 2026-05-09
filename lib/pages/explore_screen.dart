@@ -866,7 +866,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           color: AppColors.softIvory,
                         ),
                         child: Text(
-                          "₹${maxPrice.toInt()}",
+                          "€${maxPrice.toInt()}",
                           style: const TextStyle(
                             fontFamily: "PoppinsMedium",
                             fontSize: 14,
@@ -1111,7 +1111,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           color: AppColors.softIvory,
                         ),
                         child: Text(
-                          "₹${maxPrice.toInt()}",
+                          "€${maxPrice.toInt()}",
                           style: const TextStyle(
                             fontFamily: "PoppinsMedium",
                             fontSize: 14,

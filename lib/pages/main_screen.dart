@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
-import 'package:probeauty_app/main.dart';
 import 'package:probeauty_app/pages/appointments_screen.dart';
 import 'package:probeauty_app/pages/explore_screen.dart';
 import 'package:probeauty_app/pages/home_screen.dart';

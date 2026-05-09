@@ -26,7 +26,7 @@ class AppointmentInfo extends StatelessWidget {
       "Dec"
     ];
 
-    final hour = dt.hour > 12 ? dt.hour - 12 : dt.hour;
+    final hour = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
     final ampm = dt.hour >= 12 ? "pm" : "am";
 
     return "${dt.day} ${months[dt.month - 1]} ${dt.year} at "
@@ -39,12 +39,21 @@ class AppointmentInfo extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     final salon = booking.salon;
-    final service = booking.service;
+    final services = booking.services;
     final staff = booking.staff;
 
-    final duration = service.durationMinutes;
-    final price = double.tryParse(service.price) ?? 0;
-    final tax = price * 0.07; // example 7%
+    final duration = services.fold<int>(
+      0,
+      (sum, item) => sum + item.durationMinutes,
+    );
+
+    final price = services.fold<double>(
+      0,
+      (sum, item) => sum + (double.tryParse(item.price.toString()) ?? 0),
+    );
+
+    final tax = price * 0.07;
+
     final total = price + tax;
 
     return Scaffold(
@@ -74,7 +83,9 @@ class AppointmentInfo extends StatelessWidget {
             Stack(
               children: [
                 Image.network(
-                  salon.image ?? "https://via.placeholder.com/600x400",
+                  (salon.image != null && salon.image!.isNotEmpty)
+                      ? salon.image!
+                      : "https://via.placeholder.com/600x400",
                   width: double.infinity,
                   height: screenHeight * 0.3,
                   fit: BoxFit.cover,
@@ -167,11 +178,16 @@ class AppointmentInfo extends StatelessWidget {
 
             const SizedBox(height: 14),
 
-            // ===== Service =====
-            _priceTile(
-              title: service.title,
-              subtitle: "$duration minutes",
-              amount: price,
+            ...services.map(
+              (service) {
+                final servicePrice =
+                    double.tryParse(service.price.toString()) ?? 0.0;
+                return _priceTile(
+                  title: service.title,
+                  subtitle: "${service.durationMinutes} minutes",
+                  amount: servicePrice,
+                );
+              },
             ),
 
             _priceTile(
@@ -232,7 +248,7 @@ class AppointmentInfo extends StatelessWidget {
               ),
           ]),
           Text(
-            "₹${amount.toStringAsFixed(2)}",
+            "€${amount.toStringAsFixed(2)}",
             style: TextStyle(
               fontFamily: "PoppinsSemiBold",
               fontSize: isTotal ? 18 : 14,

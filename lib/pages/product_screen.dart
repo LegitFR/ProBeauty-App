@@ -278,7 +278,7 @@ class _ProductScreenState extends State<ProductScreen> {
                   Text(
                     quantity == 0
                         ? "Add to Cart"
-                        : "₹${totalPrice.toStringAsFixed(2)}",
+                        : "€${totalPrice.toStringAsFixed(2)}",
                     style: const TextStyle(
                       fontFamily: "PoppinsSemiBold",
                       fontSize: 18,
@@ -289,7 +289,7 @@ class _ProductScreenState extends State<ProductScreen> {
                   Text(
                     quantity == 0
                         ? "Select quantity to see price"
-                        : "₹${price.toStringAsFixed(2)} × $quantity",
+                        : "€${price.toStringAsFixed(2)} × $quantity",
                     style: const TextStyle(
                       fontFamily: "PoppinsRegular",
                       fontSize: 11,
@@ -572,7 +572,7 @@ class _ProductScreenState extends State<ProductScreen> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    "₹${product.price ?? ""}",
+                    "€${product.price ?? ""}",
                     style: TextStyle(
                       fontFamily: "PoppinsSemiBold",
                       fontSize: width * 0.045,
@@ -581,7 +581,7 @@ class _ProductScreenState extends State<ProductScreen> {
                   ),
                   SizedBox(width: width * 0.015),
                   const Text(
-                    "₹1,620",
+                    "€1,620",
                     style: TextStyle(
                       color: Colors.grey,
                       decoration: TextDecoration.lineThrough,
@@ -705,7 +705,7 @@ class _ProductScreenState extends State<ProductScreen> {
                           Text(
                             offer["discountType"] == "percentage"
                                 ? "${offer["discountValue"]}% OFF"
-                                : "₹${offer["discountValue"]} OFF",
+                                : "€${offer["discountValue"]} OFF",
                             style: const TextStyle(
                               fontFamily: "PoppinsSemiBold",
                               color: AppColors.rusticSunset,

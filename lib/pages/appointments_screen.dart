@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/models/booking.dart';
 import 'package:probeauty_app/pages/appointment_info.dart';
+import 'package:probeauty_app/pages/main_screen.dart';
 import 'package:probeauty_app/pages/salon_detail_screen.dart';
 import 'package:probeauty_app/providers/appointment_provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
@@ -72,23 +73,34 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     final appointmentProvider = context.watch<AppointmentProvider>();
 
     final allBookings = appointmentProvider.bookings;
+    print("BOOKINGS");
+    print(allBookings);
 
-    if (allBookings.isEmpty) {
-      return Center(
-        child: Text(
-          l10n.appointmentsEmpty,
-          style: const TextStyle(
-            fontSize: 18,
-            fontFamily: "PoppinsMedium",
-          ),
-        ),
-      );
-    }
+    final sortedBookings = [...allBookings];
 
-    final confirmed = allBookings.first;
-    final allPrevious = allBookings.length > 1 ? allBookings.sublist(1) : [];
+    /// SORT LATEST FIRST
+    sortedBookings.sort(
+      (a, b) => b.startTime.compareTo(a.startTime),
+    );
+
+    /// MOST RECENT BOOKING -> UPCOMING SECTION
+    final Booking? upcomingBooking =
+        sortedBookings.isNotEmpty ? sortedBookings.first : null;
+
+    /// ALL REMAINING BOOKINGS -> PREVIOUS SECTION
+    final allPrevious =
+        sortedBookings.length > 1 ? sortedBookings.sublist(1) : [];
+
     final previous =
         showAllPrevious ? allPrevious : allPrevious.take(3).toList();
+
+    /// EMPTY STATE
+    final hasUpcoming = upcomingBooking != null;
+    final hasPrevious = allPrevious.isNotEmpty;
+
+    if (!hasUpcoming && !hasPrevious) {
+      return _buildEmptyState();
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -124,53 +136,176 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
             SizedBox(height: screenHeight * 0.03),
 
             /// ------------ CONFIRMED APPOINTMENT CARD ------------
-            _buildConfirmedCard(confirmed, screenWidth, screenHeight),
+            /// ------------ UPCOMING APPOINTMENT CARD ------------
 
-            SizedBox(height: screenHeight * 0.02),
+            /// ------------ UPCOMING APPOINTMENT CARD ------------
 
-            /// ------------ PREVIOUS SECTION TITLE ------------
-            /// ------------ PREVIOUS SECTION HEADER ------------
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.appointmentsPreviousTitle,
+            if (upcomingBooking != null)
+              _buildConfirmedCard(
+                upcomingBooking,
+                screenWidth,
+                screenHeight,
+              )
+            else
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: Colors.black12),
+                ),
+                child: const Text(
+                  "No upcoming appointments",
                   style: TextStyle(
-                    fontSize: screenWidth * 0.05,
-                    fontFamily: "PoppinsSemiBold",
-                    color: Colors.black87,
+                    fontFamily: "PoppinsMedium",
                   ),
                 ),
+              ),
+            if (previous.isNotEmpty) ...[
+              SizedBox(height: screenHeight * 0.02),
 
-                // 👇 SEE ALL / SHOW LESS
-                if (allPrevious.length > 3)
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        showAllPrevious = !showAllPrevious;
-                      });
-                    },
-                    child: Text(
-                      showAllPrevious
-                          ? l10n.appointmentsShowLess
-                          : l10n.appointmentsSeeAll,
-                      style: const TextStyle(
-                        fontFamily: "PoppinsMedium",
-                        fontSize: 14,
-                        color: AppColors.rusticSunset,
-                      ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.appointmentsPreviousTitle,
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.05,
+                      fontFamily: "PoppinsSemiBold",
+                      color: Colors.black87,
                     ),
                   ),
-              ],
+                  if (allPrevious.length > 3)
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          showAllPrevious = !showAllPrevious;
+                        });
+                      },
+                      child: Text(
+                        showAllPrevious
+                            ? l10n.appointmentsShowLess
+                            : l10n.appointmentsSeeAll,
+                        style: const TextStyle(
+                          fontFamily: "PoppinsMedium",
+                          fontSize: 14,
+                          color: AppColors.rusticSunset,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              /// ------------ PREVIOUS BOOKINGS LIST ------------
+              Column(
+                children: previous.map((booking) {
+                  return _buildPreviousCard(booking, screenWidth);
+                }).toList(),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 20),
+            const Text(
+              "Appointments",
+              style: TextStyle(
+                fontSize: 32,
+                fontFamily: "PlayfairDisplayBold",
+                color: Colors.black87,
+              ),
             ),
-
-            const SizedBox(height: 12),
-
-            /// ------------ PREVIOUS BOOKINGS LIST ------------
-            Column(
-              children: previous.map((booking) {
-                return _buildPreviousCard(booking, screenWidth);
-              }).toList(),
+            const SizedBox(height: 30),
+            const Text(
+              "Upcoming",
+              style: TextStyle(
+                fontSize: 20,
+                fontFamily: "PoppinsSemiBold",
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                vertical: 30,
+                horizontal: 20,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.softIvory,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: Colors.black12),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    width: 70,
+                    height: 70,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(18),
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color.fromARGB(255, 236, 136, 93),
+                          AppColors.rusticSunset,
+                        ],
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.event_available_rounded,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    "No upcoming appointments",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: "PoppinsSemiBold",
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    "Your upcoming appointments will appear here when you book",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontFamily: "PoppinsRegular",
+                      color: Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  OutlinedButton(
+                    onPressed: () {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const MainScreen(initialIndex: 0),
+                        ),
+                        (route) => false,
+                      );
+                    },
+                    child: const Text(
+                      "Search salons",
+                      style: TextStyle(
+                          fontFamily: "PoppinsRegular", color: Colors.black),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -256,156 +391,13 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     // final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: AppColors.softIvory,
-      body: SafeArea(
-        bottom: true,
-        child: appointmentProvider.isLoading
-            ? _buildSkeleton(context)
-
-            /// ✅ EMPTY STATE UI (UPDATED)
-            : appointmentProvider.bookings.isEmpty
-                ? SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 18),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 20),
-
-                          /// TITLE
-                          const Text(
-                            "Appointments",
-                            style: TextStyle(
-                              fontSize: 32,
-                              fontFamily: "PlayfairDisplayBold",
-                              color: Colors.black87,
-                            ),
-                          ),
-
-                          const SizedBox(height: 30),
-
-                          /// UPCOMING
-                          const Text(
-                            "Upcoming",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontFamily: "PoppinsSemiBold",
-                              color: Colors.black87,
-                            ),
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          /// EMPTY CARD
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 30, horizontal: 20),
-                            decoration: BoxDecoration(
-                              color: AppColors.softIvory,
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(color: Colors.black12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.04),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              children: [
-                                /// ICON (custom gradient box)
-                                Container(
-                                  width: 70,
-                                  height: 70,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(18),
-                                    gradient: const LinearGradient(
-                                      colors: [
-                                        Color.fromARGB(255, 236, 136, 93),
-                                        AppColors.rusticSunset,
-                                      ],
-                                    ),
-                                  ),
-                                  child: const Icon(
-                                    Icons.event_available_rounded,
-                                    color: Colors.white,
-                                    size: 32,
-                                  ),
-                                ),
-
-                                const SizedBox(height: 20),
-
-                                const Text(
-                                  "No upcoming appointments",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontFamily: "PoppinsSemiBold",
-                                    color: Colors.black87,
-                                  ),
-                                ),
-
-                                const SizedBox(height: 6),
-
-                                const Text(
-                                  "Your upcoming appointments will\nappear here when you book",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontFamily: "PoppinsRegular",
-                                    color: Colors.black54,
-                                  ),
-                                ),
-
-                                const SizedBox(height: 20),
-
-                                /// BUTTON
-                                OutlinedButton(
-                                  onPressed: () {},
-                                  style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 20, vertical: 10),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30),
-                                    ),
-                                    side:
-                                        const BorderSide(color: Colors.black26),
-                                  ),
-                                  child: const Text(
-                                    "Search salons",
-                                    style: TextStyle(
-                                      fontFamily: "PoppinsMedium",
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const SizedBox(height: 30),
-
-                          /// PAST TITLE (optional placeholder)
-
-                          appointmentProvider.bookings.isEmpty
-                              ? Container()
-                              : const Text(
-                                  "Past",
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontFamily: "PoppinsSemiBold",
-                                  ),
-                                ),
-                        ],
-                      ),
-                    ),
-                  )
-
-                /// ✅ DATA STATE
-                : _buildContent(context),
-      ),
-    );
+        backgroundColor: AppColors.softIvory,
+        body: SafeArea(
+          bottom: true,
+          child: appointmentProvider.isLoading
+              ? _buildSkeleton(context)
+              : _buildContent(context),
+        ));
   }
 
   /// ----------------------------------------------------
@@ -418,7 +410,13 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   ) {
     final l10n = AppLocalizations.of(context)!;
     final salon = booking.salon;
-    final service = booking.service;
+    final services = booking.services;
+
+    if (services.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final service = services.first;
 
     final geo = salon.geo;
     final double? lat = geo?.latitude;
@@ -574,7 +572,11 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   Widget _buildPreviousCard(Booking booking, double screenWidth) {
     final l10n = AppLocalizations.of(context)!;
     final salon = booking.salon;
-    final service = booking.service;
+    final services = booking.services;
+
+    if (services.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     final String? imageUrl = salon.image;
 
@@ -638,11 +640,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  l10n.appointmentsDurationPriceService(
-                    service.durationMinutes,
-                    service.price,
-                    service.title,
-                  ),
+                  services.map((s) => s.title).join(", "),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
