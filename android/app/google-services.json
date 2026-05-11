@@ -14,6 +14,30 @@
       },
       "oauth_client": [
         {
+          "client_id": "568953432506-airdfe59f5rmoikeqr8nmhvgdsi0bgom.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.probeautyapp",
+            "certificate_hash": "2df67c56144900277352579c0d2b766005550d4c"
+          }
+        },
+        {
+          "client_id": "568953432506-cq8nj9shns7am93cog42lud5a3g81ome.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.probeautyapp",
+            "certificate_hash": "5deb4546992159ba4809f92d28c35baa7395fcaf"
+          }
+        },
+        {
+          "client_id": "568953432506-v5m9hael5f57p6vjnsi72l6puokukc6c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.probeautyapp",
+            "certificate_hash": "c3e308e066f7f48cffac17f9a046daec19317c3d"
+          }
+        },
+        {
           "client_id": "568953432506-8vkn7qn586nl6fq9m2qshr027u8luji1.apps.googleusercontent.com",
           "client_type": 3
         }
