@@ -712,6 +712,7 @@ class _SalonCardState extends State<SalonCard> {
 
       final json = jsonDecode(response.body);
       final data = json["data"];
+      print(data);
 
       Navigator.push(
         context,
@@ -721,7 +722,10 @@ class _SalonCardState extends State<SalonCard> {
             salonName: data["name"],
             services: data["services"],
             salonStaffList: data["staff"],
-            image: data["thumbnail"],
+            image: (data["thumbnail"] != null &&
+                    data["thumbnail"].toString().isNotEmpty)
+                ? data["thumbnail"]
+                : "https://dev.me/products/image-placeholder",
             initialCategory: _findCategory(data["services"], serviceId),
           ),
         ),

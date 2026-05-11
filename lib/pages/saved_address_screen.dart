@@ -24,7 +24,6 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
   final TextEditingController buildingController = TextEditingController();
   final TextEditingController landmarkController = TextEditingController();
   final TextEditingController cityController = TextEditingController();
-  final TextEditingController districtController = TextEditingController();
   final TextEditingController pincodeController = TextEditingController();
 
   bool isLoading = false;
@@ -123,9 +122,7 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
       buildingController.text = defaultAddress!["addressLine2"] ?? "";
       landmarkController.text = "";
       cityController.text = defaultAddress!["city"] ?? "";
-      districtController.text = defaultAddress!["city"] ?? "";
       pincodeController.text = defaultAddress!["postalCode"] ?? "";
-
       selectedType = "Home";
       editAddressId = defaultAddress!["id"];
       isEditMode = true;
@@ -140,15 +137,22 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
     if (houseController.text.trim().isEmpty ||
         cityController.text.trim().isEmpty ||
         pincodeController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please fill all required address fields."),
+        ),
+      );
+      return;
+    }
+
+    if (houseController.text.trim().length < 5) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            "Please fill all required address fields.",
+            "House / Address must contain at least 5 characters.",
           ),
         ),
       );
-
       return;
     }
     setState(() => isLoading = true);
@@ -161,7 +165,7 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
         "addressLine1": houseController.text,
         "addressLine2": buildingController.text,
         "city": cityController.text,
-        "state": districtController.text,
+        "state": landmarkController.text,
         "postalCode": pincodeController.text,
         "country": "India",
         "isDefault": selectedType == "Home" ? true : false
@@ -176,6 +180,8 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
           "/api/v1/addresses/$editAddressId",
           body: body,
         );
+
+        print("STATUS:  ${response.body}");
       } else {
         // CREATE NEW ADDRESS
 
@@ -183,6 +189,7 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
           "/api/v1/addresses",
           body: body,
         );
+        print("STATUS:  ${response.body}");
       }
 
       if (response.statusCode == 201 || response.statusCode == 200) {
@@ -235,7 +242,6 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
     buildingController.dispose();
     landmarkController.dispose();
     cityController.dispose();
-    districtController.dispose();
     pincodeController.dispose();
     super.dispose();
   }
@@ -357,9 +363,7 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
                   buildingController.clear();
                   landmarkController.clear();
                   cityController.clear();
-                  districtController.clear();
                   pincodeController.clear();
-
                   selectedType = "Home";
                 });
               },
@@ -400,8 +404,6 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
               _labelField(l10n.savedAddressLandmarkLabel, landmarkController),
               const SizedBox(height: 15),
               _labelField(l10n.savedAddressCityLabel, cityController),
-              const SizedBox(height: 15),
-              _labelField(l10n.savedAddressLandmarkLabel, districtController),
               const SizedBox(height: 15),
               _labelField(l10n.savedAddressPincodeLabel, pincodeController),
 
@@ -463,7 +465,10 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
                           gradient: const LinearGradient(
-                            colors: [Color(0xFFFA7D4F), Color(0xFFC64414)],
+                            colors: [
+                              Color.fromARGB(255, 236, 163, 79),
+                              AppColors.rusticSunset
+                            ],
                           ),
                         ),
                         child: Center(
