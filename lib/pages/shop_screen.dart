@@ -654,8 +654,11 @@ class _ShopScreenState extends State<ShopScreen> {
                     ? Image.network(
                         imageUrl,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                            const Icon(Icons.image_not_supported),
+                        errorBuilder: (_, __, ___) => Image.asset(
+                          'assets/images/saloons/error.png',
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
                       )
                     : const Icon(Icons.image, size: 60),
               ),

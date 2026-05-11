@@ -23,7 +23,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   final TextEditingController _monthController = TextEditingController();
   final TextEditingController _yearController = TextEditingController();
 
-  String _selectedCountryCode = '+91';
+  String _selectedCountryCode = '+44';
   // String? _selectedEmailOption;
 
   bool _saving = false;
@@ -183,14 +183,14 @@ class _ProfileDetailsState extends State<ProfileDetails> {
             const SizedBox(height: 8),
             _buildTextField(_emailController, readOnly: true),
             const SizedBox(height: 20),
-            _buildLabel(l10n.profileDobLabel),
+            // _buildLabel(l10n.profileDobLabel),
             const SizedBox(height: 8),
-            _buildDateFields(),
-            const SizedBox(height: 20),
-            // _buildLabel(l10n.profileEmailLabel),
-            // const SizedBox(height: 8),
-            // _buildDropdownField(),
-            // const SizedBox(height: 40),
+            // _buildDateFields(),
+            // const SizedBox(height: 20),
+            // // _buildLabel(l10n.profileEmailLabel),
+            // // const SizedBox(height: 8),
+            // // _buildDropdownField(),
+            // // const SizedBox(height: 40),
             _buildSaveButton(),
           ],
         ),
@@ -253,7 +253,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     return Row(
       children: [
         Container(
-          width: 80,
+          width: 95,
           decoration: BoxDecoration(
             color: AppColors.softIvory,
             borderRadius: BorderRadius.circular(25),
@@ -261,10 +261,32 @@ class _ProfileDetailsState extends State<ProfileDetails> {
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
+              dropdownColor: AppColors.softIvory,
               value: _selectedCountryCode,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               icon: const Icon(Icons.keyboard_arrow_down, size: 20),
-              items: ['+91', '+1', '+44', '+61']
+              items: [
+                '+44', // UK
+                '+33', // France
+                '+49', // Germany
+                '+39', // Italy
+                '+34', // Spain
+                '+31', // Netherlands
+                '+32', // Belgium
+                '+41', // Switzerland
+                '+43', // Austria
+                '+45', // Denmark
+                '+46', // Sweden
+                '+47', // Norway
+                '+48', // Poland
+                '+351', // Portugal
+                '+353', // Ireland
+                '+30', // Greece
+                '+420', // Czech Republic
+                '+36', // Hungary
+                '+40', // Romania
+                '+1', // US/Canada
+              ]
                   .map((code) => DropdownMenuItem(
                         value: code,
                         child: Text(code),

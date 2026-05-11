@@ -542,8 +542,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             width: double.infinity,
                             height: height * 0.135,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) =>
-                                const Icon(Icons.image_not_supported),
+                            errorBuilder: (_, __, ___) => Image.asset(
+                              'assets/images/saloons/saloon1.png',
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                       ),

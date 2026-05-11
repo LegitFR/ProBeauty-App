@@ -10,6 +10,7 @@ import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:probeauty_app/services/api_client.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../models/product.dart';
 
@@ -536,8 +537,11 @@ class _ProductScreenState extends State<ProductScreen> {
                           ? Image.network(
                               imgUrl,
                               fit: BoxFit.cover, // 🔥 KEY FIX
-                              errorBuilder: (_, __, ___) =>
-                                  const Icon(Icons.broken_image, size: 100),
+                              errorBuilder: (_, __, ___) => Image.asset(
+                                'assets/images/saloons/error.png',
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
                             )
                           : const Icon(Icons.image, size: 120),
                     );
@@ -596,20 +600,68 @@ class _ProductScreenState extends State<ProductScreen> {
                       ),
                     ],
                   ),
-                  GestureDetector(
-                    onTap: _favUpdating ? null : _toggleFavourite,
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.black26),
-                        color: AppColors.softIvory,
+                  Row(
+                    children: [
+                      // ❤️ Favourite
+                      GestureDetector(
+                        onTap: _favUpdating ? null : _toggleFavourite,
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.black26),
+                            color: AppColors.softIvory,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            _isFavourited
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: _isFavourited ? Colors.red : Colors.black,
+                          ),
+                        ),
                       ),
-                      child: Icon(
-                        _isFavourited ? Icons.favorite : Icons.favorite_border,
-                        color: _isFavourited ? Colors.red : Colors.black,
+
+                      const SizedBox(width: 10),
+
+                      // 🔗 Share
+                      GestureDetector(
+                        onTap: () async {
+                          await SharePlus.instance.share(
+                            ShareParams(
+                              text:
+                                  "Check out ${product.title ?? "this product"} from $salonName ✨",
+                              subject: product.title ?? "Product",
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.black26),
+                            color: AppColors.softIvory,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.share_outlined,
+                            color: Colors.black,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),

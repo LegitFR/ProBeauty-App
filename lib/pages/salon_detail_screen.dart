@@ -11,6 +11,7 @@ import 'package:probeauty_app/pages/select_services_screen.dart';
 import 'package:probeauty_app/pages/team_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:probeauty_app/services/api_client.dart';
+import 'package:share_plus/share_plus.dart';
 
 class SalonDetailScreen extends StatefulWidget {
   final String id;
@@ -198,13 +199,35 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                   Positioned(
                     right: 16,
                     top: 16,
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.black.withOpacity(0.4),
+                    child: GestureDetector(
+                      onTap: () async {
+                        await SharePlus.instance.share(
+                          ShareParams(
+                            text:
+                                "Check out ${widget.name} on ProBeauty ✨\n\n${widget.address}\n\nBook your appointment now!",
+                            subject: widget.name,
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.black26),
+                          color: AppColors.softIvory,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.15),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.share_outlined,
+                          color: Colors.black,
+                        ),
                       ),
-                      child: const Icon(Icons.share, color: Colors.white),
                     ),
                   )
                 ],
