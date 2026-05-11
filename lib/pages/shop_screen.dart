@@ -22,6 +22,7 @@ class ShopScreen extends StatefulWidget {
 
 class _ShopScreenState extends State<ShopScreen> {
   int _currentProductOfferIndex = 0;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -41,6 +42,12 @@ class _ShopScreenState extends State<ShopScreen> {
         offerProvider.fetchActiveOffers(showLoader: false);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _openProductFromOffer(
@@ -135,11 +142,16 @@ class _ShopScreenState extends State<ShopScreen> {
                     SizedBox(width: width * 0.025),
                     Expanded(
                       child: TextField(
+                        controller: _searchController,
+                        style: const TextStyle(
+                          fontFamily: "PoppinsRegular",
+                        ),
                         cursorColor: AppColors.rusticSunset,
                         textInputAction: TextInputAction.search,
                         onSubmitted: (value) {
                           if (value.trim().isEmpty) {
                             ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text(
@@ -163,7 +175,24 @@ class _ShopScreenState extends State<ShopScreen> {
                         decoration: InputDecoration(
                           hintText: l10n.shopSearchHint,
                           border: InputBorder.none,
+                          suffixIcon: _searchController.text.isNotEmpty
+                              ? GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _searchController.clear();
+                                    });
+                                  },
+                                  child: const Icon(
+                                    Icons.close,
+                                    size: 18,
+                                    color: Colors.black54,
+                                  ),
+                                )
+                              : null,
                         ),
+                        onChanged: (_) {
+                          setState(() {});
+                        },
                       ),
                     ),
                     // GestureDetector(

@@ -453,13 +453,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.softIvory,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            offset: Offset(0, 1),
-            blurRadius: 4,
-          ),
-        ],
       ),
       child: SafeArea(
         child: Padding(

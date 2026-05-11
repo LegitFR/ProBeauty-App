@@ -60,6 +60,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                   ),
                   Expanded(
                     child: TextField(
+                      style: TextStyle(fontFamily: "PoppinsRegular"),
                       controller: _controller,
                       textInputAction: TextInputAction.search,
                       onSubmitted: (value) {
