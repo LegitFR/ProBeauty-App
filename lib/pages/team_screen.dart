@@ -29,6 +29,11 @@ class TeamScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // final l10n = AppLocalizations.of(context)!;
+    final filteredStaff = staffList.where((staff) {
+      final name = (staff["name"] ?? "").toString().trim().toUpperCase();
+
+      return name != "UNKNOWN" && name.isNotEmpty;
+    }).toList();
 
     return SafeArea(
       bottom: true,
@@ -124,23 +129,45 @@ class TeamScreen extends StatelessWidget {
 
             // ---------------- TEAM GRID ----------------
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: GridView.builder(
-                  itemCount: staffList.length, // +1 for Any Staff
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 18,
-                    crossAxisSpacing: 18,
-                    childAspectRatio: 0.85,
-                  ),
-                  itemBuilder: (context, index) {
-                    // 🔵 STAFF CARD
-                    final staff = staffList[index];
-                    return _professionalCard(staff, context);
-                  },
-                ),
-              ),
+              child: filteredStaff.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(
+                            Icons.groups_outlined,
+                            color: Colors.black45,
+                            size: 42,
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            "No team members available right now.",
+                            style: TextStyle(
+                              fontFamily: "PoppinsRegular",
+                              fontSize: 14,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: GridView.builder(
+                        itemCount: filteredStaff.length,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 18,
+                          crossAxisSpacing: 18,
+                          childAspectRatio: 0.85,
+                        ),
+                        itemBuilder: (context, index) {
+                          final staff = filteredStaff[index];
+                          return _professionalCard(staff, context);
+                        },
+                      ),
+                    ),
             ),
           ],
         ),

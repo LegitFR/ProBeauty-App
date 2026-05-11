@@ -146,13 +146,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             const SizedBox(height: 6),
 
                             // Subtitle
-                            Text(
-                              l10n.profileEdit,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.black,
-                                fontFamily: 'PoppinsRegular',
-                              ),
+                            Row(
+                              children: [
+                                Text(
+                                  l10n.profileEdit,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black,
+                                    fontFamily: 'PoppinsRegular',
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                const Icon(
+                                  Icons.edit_outlined,
+                                  size: 16,
+                                  color: AppColors.rusticSunset,
+                                ),
+                              ],
                             ),
                           ],
                         ),

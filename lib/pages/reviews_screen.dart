@@ -738,21 +738,8 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
           children: [
             Text(name, style: const TextStyle(fontFamily: "PoppinsSemiBold")),
             const Spacer(),
-            Row(
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.reviewsVerifiedUser,
-                  style: const TextStyle(
-                    fontFamily: "PoppinsMedium",
-                    fontSize: 12,
-                    color: AppColors.rusticSunset,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                const Icon(Icons.check_circle,
-                    size: 14, color: AppColors.rusticSunset),
-              ],
-            ),
+            const Icon(Icons.check_circle,
+                size: 14, color: AppColors.rusticSunset),
           ],
         ),
         const SizedBox(height: 4),

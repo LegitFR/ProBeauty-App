@@ -123,10 +123,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
   // ================= ACTIONS =================
   Future<void> _markAsRead(String id) async {
     try {
-      await ApiClient.post(
+      final body = await ApiClient.put(
         "/api/v1/notifications/$id/read",
       );
 
+      print(body.body);
       _fetchNotifications();
     } catch (_) {
       if (!mounted) return;
@@ -167,11 +168,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   Future<void> _markAllAsRead() async {
     try {
-      await ApiClient.post(
+      await ApiClient.put(
         "/api/v1/notifications/read-all",
       );
 
-      _fetchNotifications();
+      await _fetchNotifications();
 
       if (!mounted) return;
 

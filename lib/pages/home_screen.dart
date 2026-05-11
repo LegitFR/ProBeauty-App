@@ -484,7 +484,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 salon["services"] is List ? salon["services"] : [];
             final List salonStaffList =
                 salon["staff"] is List ? salon["staff"] : [];
-            final img = salon["thumbnail"] ?? images[index % images.length];
+            final img =
+                salon["thumbnail"] ?? "assets/images/saloons/saloon1.png";
             final hours = salon["hours"];
 
             // 🔥 Trigger rating fetch (cached → safe)

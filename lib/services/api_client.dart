@@ -58,6 +58,18 @@ class ApiClient {
     );
   }
 
+  static Future<http.Response> put(
+    String path, {
+    Map<String, dynamic>? body,
+    Map<String, String>? query,
+  }) {
+    return _send(
+      method: "PUT",
+      path: path,
+      body: body,
+      query: query,
+    );
+  }
   // =====================
   // CORE ENGINE
   // =====================

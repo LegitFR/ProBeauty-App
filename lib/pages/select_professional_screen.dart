@@ -38,6 +38,12 @@ class _SelectProfessionalScreenState extends State<SelectProfessionalScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    final filteredStaff = widget.staffList.where((staff) {
+      final name = (staff["name"] ?? "").toString().trim().toUpperCase();
+
+      return name != "UNKNOWN" && name.isNotEmpty;
+    }).toList();
+
     return Scaffold(
       backgroundColor: AppColors.softIvory,
       appBar: AppBar(
@@ -111,7 +117,7 @@ class _SelectProfessionalScreenState extends State<SelectProfessionalScreen> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: GridView.builder(
-                itemCount: widget.staffList.length + 1,
+                itemCount: filteredStaff.length + 1,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   mainAxisSpacing: 18,
@@ -137,7 +143,7 @@ class _SelectProfessionalScreenState extends State<SelectProfessionalScreen> {
                     );
                   }
 
-                  final staff = widget.staffList[index - 1];
+                  final staff = filteredStaff[index - 1];
                   final isSelected =
                       selectedStaffPerService[serviceId]?["id"] == staff["id"];
 

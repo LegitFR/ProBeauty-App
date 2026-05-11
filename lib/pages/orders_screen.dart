@@ -533,10 +533,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
               ],
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.only(top: 6),
-            child: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black),
-          ),
+          // const Padding(
+          //   padding: EdgeInsets.only(top: 6),
+          //   child: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black),
+          // ),
         ],
       ),
     );

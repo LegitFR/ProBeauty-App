@@ -72,12 +72,30 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     if (_saving) return;
 
     final first = _firstNameController.text.trim();
+    final email = _emailController.text.trim();
+    final day = _dayController.text.trim();
+    final year = _yearController.text.trim();
     final last = _lastNameController.text.trim();
     final phone = _phoneController.text.trim();
     final fullName = "$first $last".trim();
 
     if (first.isEmpty) {
-      _showMessage(l10n.profileFirstNameRequired);
+      _showMessage("Please enter your first name.");
+      return;
+    }
+
+    if (last.isEmpty) {
+      _showMessage("Please enter your last name.");
+      return;
+    }
+
+    if (email.isEmpty) {
+      _showMessage("Please enter your email address.");
+      return;
+    }
+
+    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
+      _showMessage("Please enter a valid email address.");
       return;
     }
 
@@ -88,15 +106,22 @@ class _ProfileDetailsState extends State<ProfileDetails> {
 
     setState(() => _saving = true);
 
-    final body = {"name": fullName, if (phone.isNotEmpty) "phone": phone};
+    final body = {
+      "name": fullName,
+      if (phone.isNotEmpty) "phone": phone,
+    };
 
     try {
-      final response = await ApiClient.post(
+      final response = await ApiClient.patch(
         "/api/v1/user/me",
         body: body,
       );
 
+      print(body);
+
       final data = jsonDecode(response.body);
+      print("STATUS");
+      print(data);
 
       if (response.statusCode == 200) {
         final prefs = await SharedPreferences.getInstance();
@@ -142,11 +167,11 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildLabel(l10n.profileFirstNameLabel),
+            _buildLabel(l10n.profileFirstNameLabel, required: true),
             const SizedBox(height: 8),
             _buildTextField(_firstNameController),
             const SizedBox(height: 20),
-            _buildLabel(l10n.profileLastNameLabel),
+            _buildLabel(l10n.profileLastNameLabel, required: true),
             const SizedBox(height: 8),
             _buildTextField(_lastNameController),
             const SizedBox(height: 20),
@@ -156,7 +181,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
             const SizedBox(height: 20),
             _buildLabel(l10n.profileEmailLabel),
             const SizedBox(height: 8),
-            _buildTextField(_emailController),
+            _buildTextField(_emailController, readOnly: true),
             const SizedBox(height: 20),
             _buildLabel(l10n.profileDobLabel),
             const SizedBox(height: 8),
@@ -173,18 +198,34 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     );
   }
 
-  Widget _buildLabel(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 14,
-        fontFamily: "PoppinsSemiBold",
-        color: Colors.black,
-      ),
+  Widget _buildLabel(String text, {bool required = false}) {
+    return Row(
+      children: [
+        Text(
+          text,
+          style: const TextStyle(
+            fontSize: 14,
+            fontFamily: "PoppinsSemiBold",
+            color: Colors.black,
+          ),
+        ),
+        if (required)
+          const Text(
+            " *",
+            style: TextStyle(
+              color: Colors.red,
+              fontSize: 15,
+              fontFamily: "PoppinsSemiBold",
+            ),
+          ),
+      ],
     );
   }
 
-  Widget _buildTextField(TextEditingController controller) {
+  Widget _buildTextField(
+    TextEditingController controller, {
+    bool readOnly = false,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.softIvory,
@@ -192,11 +233,15 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         border: Border.all(color: Colors.black, width: 1.5),
       ),
       child: TextField(
+        readOnly: readOnly,
         cursorColor: AppColors.rusticSunset,
         controller: controller,
         style: const TextStyle(
             fontFamily: "PoppinsRegular", fontSize: 14, color: Colors.black),
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
+          filled: readOnly,
+          fillColor:
+              readOnly ? Colors.grey.withOpacity(0.08) : Colors.transparent,
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         ),

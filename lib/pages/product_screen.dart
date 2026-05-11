@@ -41,6 +41,7 @@ class _ProductScreenState extends State<ProductScreen> {
   List<Map<String, dynamic>> _availableOffers = [];
   bool _offersLoading = true;
   bool _showAllOffers = false;
+  String _cartAction = "";
 
   @override
   void initState() {
@@ -184,7 +185,10 @@ class _ProductScreenState extends State<ProductScreen> {
 
     if (productId == null) return;
 
-    setState(() => _cartUpdating = true);
+    setState(() {
+      _cartUpdating = true;
+      _cartAction = "increment";
+    });
 
     final msg = quantity == 0
         ? await cart.addItem(productId: productId)
@@ -205,7 +209,12 @@ class _ProductScreenState extends State<ProductScreen> {
       );
     }
 
-    if (mounted) setState(() => _cartUpdating = false);
+    if (mounted) {
+      setState(() {
+        _cartUpdating = false;
+        _cartAction = "";
+      });
+    }
   }
 
   Future<void> _decrementQuantity(int quantity) async {
@@ -218,7 +227,10 @@ class _ProductScreenState extends State<ProductScreen> {
 
     if (productId == null) return;
 
-    setState(() => _cartUpdating = true);
+    setState(() {
+      _cartUpdating = true;
+      _cartAction = "decrement";
+    });
 
     final msg = await cart.decreaseQty(
       productId: productId,
@@ -231,7 +243,12 @@ class _ProductScreenState extends State<ProductScreen> {
       );
     }
 
-    if (mounted) setState(() => _cartUpdating = false);
+    if (mounted) {
+      setState(() {
+        _cartUpdating = false;
+        _cartAction = "";
+      });
+    }
   }
 
   @override
@@ -302,46 +319,116 @@ class _ProductScreenState extends State<ProductScreen> {
               // Right: Quantity selector + Cart icon
               Row(
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.rusticSunset,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          onPressed: _cartUpdating
-                              ? null
-                              : () => _decrementQuantity(quantity),
-                          icon: const Icon(
-                            Icons.remove,
-                            color: Colors.white,
-                            size: 15,
+                  quantity == 0
+                      ? AnimatedOpacity(
+                          duration: const Duration(milliseconds: 200),
+                          opacity: _cartUpdating ? 0.8 : 1,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: AppColors.rusticSunset,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(8),
+                              onTap: _cartUpdating
+                                  ? null
+                                  : () => _incrementQuantity(quantity, stock),
+                              child: SizedBox(
+                                height: 46,
+                                width: 85,
+                                child: Center(
+                                  child: _cartAction == "increment"
+                                      ? const SizedBox(
+                                          height: 18,
+                                          width: 18,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.2,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : const Text(
+                                          "Add",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontFamily: "PoppinsMedium",
+                                          ),
+                                        ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      : AnimatedOpacity(
+                          duration: const Duration(milliseconds: 200),
+                          opacity: _cartUpdating ? 0.8 : 1,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: AppColors.rusticSunset,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: SizedBox(
+                              height: 46,
+                              child: Row(
+                                children: [
+                                  IconButton(
+                                    onPressed: _cartAction == "decrement"
+                                        ? null
+                                        : () => _decrementQuantity(quantity),
+                                    icon: _cartAction == "decrement"
+                                        ? const SizedBox(
+                                            height: 16,
+                                            width: 16,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : const Icon(
+                                            Icons.remove,
+                                            color: Colors.white,
+                                            size: 15,
+                                          ),
+                                  ),
+                                  AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 200),
+                                    child: Text(
+                                      "$quantity",
+                                      key: ValueKey(quantity),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontFamily: "PoppinsMedium",
+                                      ),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: _cartAction == "increment"
+                                        ? null
+                                        : () =>
+                                            _incrementQuantity(quantity, stock),
+                                    icon: _cartAction == "increment"
+                                        ? const SizedBox(
+                                            height: 16,
+                                            width: 16,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : Icon(
+                                            Icons.add,
+                                            color: quantity >= stock
+                                                ? Colors.white38
+                                                : Colors.white,
+                                            size: 15,
+                                          ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
-                        Text(
-                          "$quantity",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontFamily: "PoppinsMedium",
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: (_cartUpdating || quantity >= stock)
-                              ? null
-                              : () => _incrementQuantity(quantity, stock),
-                          icon: Icon(
-                            Icons.add,
-                            color: quantity >= stock
-                                ? Colors.white38
-                                : Colors.white,
-                            size: 15,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                   const SizedBox(width: 10),
                   GestureDetector(
                     onTap: () {
@@ -748,9 +835,9 @@ class _ProductScreenState extends State<ProductScreen> {
               SizedBox(height: height * 0.03),
 
               // Delivery options
-              _deliverySection(width, height),
+              // _deliverySection(width, height),
 
-              SizedBox(height: height * 0.03),
+              // SizedBox(height: height * 0.03),
 
               // Description
               sectionTile(
@@ -1006,6 +1093,8 @@ class _ProductScreenState extends State<ProductScreen> {
       child: Theme(
         data: ThemeData(dividerColor: Colors.transparent),
         child: ExpansionTile(
+          collapsedIconColor: AppColors.rusticSunset,
+          iconColor: AppColors.rusticSunset,
           title: Text(
             title,
             style: const TextStyle(
@@ -1014,13 +1103,16 @@ class _ProductScreenState extends State<ProductScreen> {
             ),
           ),
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                content,
-                style: const TextStyle(
-                  fontFamily: "PoppinsRegular",
-                  color: Colors.black,
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  content,
+                  style: const TextStyle(
+                    fontFamily: "PoppinsRegular",
+                    color: Colors.black,
+                  ),
                 ),
               ),
             ),
