@@ -105,14 +105,48 @@ class _TreatmentSearchScreenState extends State<TreatmentSearchScreen> {
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.search, color: Colors.black),
                     suffixIcon: controller.text.isNotEmpty
-                        ? GestureDetector(
-                            onTap: () {
-                              controller.clear();
-                            },
-                            child: const Icon(
-                              Icons.close,
-                              size: 18,
-                              color: Colors.black54,
+                        ? Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // 🔍 SEARCH ACTION
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.pop(
+                                      context,
+                                      controller.text.trim(),
+                                    );
+                                  },
+                                  child: Container(
+                                    height: 34,
+                                    width: 34,
+                                    decoration: const BoxDecoration(
+                                      color: AppColors.rusticSunset,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.arrow_forward,
+                                      size: 18,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(width: 8),
+
+                                // ❌ CLEAR
+                                GestureDetector(
+                                  onTap: () {
+                                    controller.clear();
+                                  },
+                                  child: const Icon(
+                                    Icons.close,
+                                    size: 18,
+                                    color: Colors.black54,
+                                  ),
+                                ),
+                              ],
                             ),
                           )
                         : null,

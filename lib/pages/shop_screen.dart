@@ -166,23 +166,23 @@ class _ShopScreenState extends State<ShopScreen> {
                         ),
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          builder: (context) {
-                            return const VoiceBottomSheet();
-                          },
-                        );
-                      },
-                      child: Image.asset(
-                        'assets/images/icons/mic.png',
-                        width: 20,
-                        height: 20,
-                      ),
-                    ),
+                    // GestureDetector(
+                    //   onTap: () {
+                    //     showModalBottomSheet(
+                    //       context: context,
+                    //       isScrollControlled: true,
+                    //       backgroundColor: Colors.transparent,
+                    //       builder: (context) {
+                    //         return const VoiceBottomSheet();
+                    //       },
+                    //     );
+                    //   },
+                    //   child: Image.asset(
+                    //     'assets/images/icons/mic.png',
+                    //     width: 20,
+                    //     height: 20,
+                    //   ),
+                    // ),
                   ],
                 ),
               ),

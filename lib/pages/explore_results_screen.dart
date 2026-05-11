@@ -223,11 +223,11 @@ class _ExploreResultsScreenState extends State<ExploreResultsScreen> {
                       ),
                     ),
 
-                    const SizedBox(width: 8),
-                    SvgPicture.asset(
-                      "assets/images/icons/audio_icon.svg",
-                      height: 22,
-                    ),
+                    // const SizedBox(width: 8),
+                    // SvgPicture.asset(
+                    //   "assets/images/icons/audio_icon.svg",
+                    //   height: 22,
+                    // ),
                   ],
                 ),
               ),
