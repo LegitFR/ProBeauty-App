@@ -75,9 +75,6 @@ class _SelectProfessionalScreenState extends State<SelectProfessionalScreen> {
         },
       );
 
-      print("SALON ID -> ${widget.salonId}");
-      print("SERVICE ID -> $serviceId");
-
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
 
@@ -97,16 +94,11 @@ class _SelectProfessionalScreenState extends State<SelectProfessionalScreen> {
           currentStaffList = filtered;
         });
       } else {
-        print("API FAILED -> ${response.statusCode}");
-        print(response.body);
-
         setState(() {
           currentStaffList = [];
         });
       }
     } catch (e) {
-      print("FETCH STAFF ERROR -> $e");
-
       setState(() {
         currentStaffList = [];
       });
@@ -219,76 +211,78 @@ class _SelectProfessionalScreenState extends State<SelectProfessionalScreen> {
                         );
                       },
                     )
-                  : currentStaffList.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(
-                                Icons.person_off_outlined,
-                                size: 44,
-                                color: Colors.black45,
-                              ),
-                              SizedBox(height: 12),
-                              Text(
-                                "No staff available for this service",
-                                style: TextStyle(
-                                  fontFamily: "PoppinsMedium",
-                                  fontSize: 14,
-                                  color: Colors.black54,
+                  : GridView.builder(
+                      itemCount: currentStaffList.length + 1,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 18,
+                        crossAxisSpacing: 18,
+                        childAspectRatio: 0.85,
+                      ),
+                      itemBuilder: (context, index) {
+                        final serviceId = currentService["id"];
+
+                        // 🟢 ANY STAFF
+                        if (index == 0) {
+                          final isSelected =
+                              selectedStaffPerService[serviceId] == null &&
+                                  selectedStaffPerService
+                                      .containsKey(serviceId);
+
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                selectedStaffPerService[serviceId] = null;
+                              });
+                            },
+                            child: _anyStaffCard(isSelected),
+                          );
+                        }
+                        if (currentStaffList.isEmpty) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(
+                                  Icons.person_off_outlined,
+                                  size: 32,
+                                  color: Colors.black45,
                                 ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : GridView.builder(
-                          itemCount: currentStaffList.length + 1,
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            mainAxisSpacing: 18,
-                            crossAxisSpacing: 18,
-                            childAspectRatio: 0.85,
-                          ),
-                          itemBuilder: (context, index) {
-                            final serviceId = currentService["id"];
+                                SizedBox(height: 8),
+                                Text(
+                                  "No specific staff available",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: "PoppinsMedium",
+                                    fontSize: 13,
+                                    color: Colors.black54,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
 
-                            // 🟢 ANY STAFF
-                            if (index == 0) {
-                              final isSelected =
-                                  selectedStaffPerService[serviceId] == null &&
-                                      selectedStaffPerService
-                                          .containsKey(serviceId);
+                        final staff = currentStaffList[index - 1];
 
-                              return GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    selectedStaffPerService[serviceId] = null;
-                                  });
-                                },
-                                child: _anyStaffCard(isSelected),
-                              );
-                            }
+                        final isSelected = selectedStaffPerService[serviceId]
+                                ?["id"] ==
+                            staff["id"];
 
-                            final staff = currentStaffList[index - 1];
-
-                            final isSelected =
-                                selectedStaffPerService[serviceId]?["id"] ==
-                                    staff["id"];
-
-                            return GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  selectedStaffPerService[serviceId] = staff;
-                                });
-                              },
-                              child: _professionalCard(
-                                staff,
-                                isSelected,
-                              ),
-                            );
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedStaffPerService[serviceId] = staff;
+                            });
                           },
-                        ),
+                          child: _professionalCard(
+                            staff,
+                            isSelected,
+                          ),
+                        );
+                      },
+                    ),
             ),
           ),
         ],

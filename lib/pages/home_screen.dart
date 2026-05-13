@@ -528,11 +528,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       // IMAGE
                       Padding(
-                        padding: const EdgeInsets.only(
-                          left: 6,
-                          right: 6,
-                          top: 6,
-                        ),
+                        padding: const EdgeInsets.all(6),
                         child: ClipRRect(
                           borderRadius: imageRadius,
                           child: Image(
@@ -540,7 +536,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ? NetworkImage(img)
                                 : AssetImage(img) as ImageProvider,
                             width: double.infinity,
-                            height: height * 0.135,
+                            height: height * 0.125,
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => Image.asset(
                               'assets/images/saloons/saloon1.png',
