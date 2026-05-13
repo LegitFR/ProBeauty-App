@@ -73,7 +73,6 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     final appointmentProvider = context.watch<AppointmentProvider>();
 
     final allBookings = appointmentProvider.bookings;
-    print("BOOKINGS");
     print(allBookings);
 
     final sortedBookings = [...allBookings];
@@ -598,7 +597,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                     },
                     errorBuilder: (context, error, stackTrace) {
                       return Image.asset(
-                        "assets/images/appointments/saloon_thumb_1.png",
+                        "assets/images/saloons/error.png",
                         width: screenWidth * 0.22,
                         height: screenWidth * 0.22,
                         fit: BoxFit.cover,
@@ -606,7 +605,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                     },
                   )
                 : Image.asset(
-                    "assets/images/appointments/saloon_thumb_1.png",
+                    "assets/images/saloons/error.png",
                     width: screenWidth * 0.22,
                     height: screenWidth * 0.22,
                     fit: BoxFit.cover,
@@ -677,8 +676,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                       id: salonData["id"],
                       name: salonData["name"],
                       address: salonData["address"],
-                      image: salonData["image"] ??
-                          "assets/images/appointments/saloon_thumb_1.png",
+                      image: salonData["thumbnail"] ??
+                          "assets/images/saloons/error.png",
                       services: salonData["services"] ?? [],
                       salonStaffList: salonData["staff"] ?? [],
                       hours: salonData["hours"] ?? {},

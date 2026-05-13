@@ -22,9 +22,6 @@ class AppointmentProvider with ChangeNotifier {
 
     try {
       final res = await ApiClient.get(_endpoint);
-      print("STATUS AND BODY");
-      print(res.statusCode);
-      print(res.body);
 
       if (res.statusCode == 200) {
         final decoded = jsonDecode(res.body);
@@ -34,14 +31,8 @@ class AppointmentProvider with ChangeNotifier {
 
         for (final item in data) {
           try {
-            print("RAW BOOKING ITEM:");
-            print(item);
-
             bookings.add(Booking.fromJson(item));
-
-            print("BOOKING PARSED SUCCESS");
           } catch (e, st) {
-            print("BOOKING PARSE ERROR");
             print(e);
             print(st);
             print(item);
@@ -56,7 +47,6 @@ class AppointmentProvider with ChangeNotifier {
 
       _hasFetchedOnce = true;
     } catch (e, st) {
-      debugPrint("Fetch bookings error: $e");
       debugPrintStack(stackTrace: st);
       _bookings = [];
       _hasFetchedOnce = true;

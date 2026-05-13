@@ -118,6 +118,16 @@ class ApiClient {
               .timeout(_timeout);
           break;
 
+        case "PUT":
+          response = await http
+              .put(
+                uri,
+                headers: headers,
+                body: body != null ? jsonEncode(body) : null,
+              )
+              .timeout(_timeout);
+          break;
+
         case "DELETE":
           response = await http
               .delete(

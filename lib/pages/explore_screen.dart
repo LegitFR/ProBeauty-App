@@ -320,18 +320,18 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
               SizedBox(height: height * 0.03),
 
-              Center(
-                child: Text(
-                  l10n.exploreAppointmentsBooked(446305.toString()),
-                  style: TextStyle(
-                    fontFamily: "PoppinsRegular",
-                    fontSize: width * 0.035,
-                    color: Colors.black87,
-                  ),
-                ),
-              ),
+              // Center(
+              //   child: Text(
+              //     l10n.exploreAppointmentsBooked(446305.toString()),
+              //     style: TextStyle(
+              //       fontFamily: "PoppinsRegular",
+              //       fontSize: width * 0.035,
+              //       color: Colors.black87,
+              //     ),
+              //   ),
+              // ),
 
-              SizedBox(height: height * 0.02),
+              // SizedBox(height: height * 0.02),
 
               // ----------------------- SERVICES SECTION -----------------------
               Padding(

@@ -269,9 +269,25 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
     // 3️⃣ EMPTY (ONLY AFTER LOAD)
     if (_favourites.isEmpty) {
       return Center(
-        child: Text(
-          AppLocalizations.of(context)!.favouritesEmpty,
-          style: const TextStyle(fontFamily: "PoppinsRegular"),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.favorite_border,
+              color: Colors.black45,
+              size: 38,
+            ),
+            SizedBox(height: 10),
+            Text(
+              AppLocalizations.of(context)!.favouritesEmpty,
+              style: const TextStyle(
+                fontFamily: "PoppinsRegular",
+                fontSize: 14,
+                color: Colors.black54,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       );
     }

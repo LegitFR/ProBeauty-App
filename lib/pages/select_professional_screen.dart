@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/book_appointment_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
+import 'package:probeauty_app/services/api_client.dart';
 
 class SelectProfessionalScreen extends StatefulWidget {
   final String salonId;
@@ -28,21 +31,95 @@ class SelectProfessionalScreen extends StatefulWidget {
 class _SelectProfessionalScreenState extends State<SelectProfessionalScreen> {
   int selectedServiceIndex = 0;
 
-  /// serviceId -> staff
+  /// serviceId -> selected staff
   final Map<String, dynamic> selectedStaffPerService = {};
+
+  /// currently visible staffs
+  List<dynamic> currentStaffList = [];
+
+  /// loading state
+  bool isLoadingStaff = false;
+
+  /// cache per service
+  final Map<String, List<dynamic>> serviceStaffCache = {};
 
   Map<String, dynamic> get currentService =>
       widget.selectedServices[selectedServiceIndex];
 
   @override
+  void initState() {
+    super.initState();
+
+    fetchStaffForService(currentService["id"]);
+  }
+
+  Future<void> fetchStaffForService(String serviceId) async {
+    // ✅ use cache if already fetched
+    if (serviceStaffCache.containsKey(serviceId)) {
+      setState(() {
+        currentStaffList = serviceStaffCache[serviceId]!;
+      });
+      return;
+    }
+
+    setState(() {
+      isLoadingStaff = true;
+    });
+
+    try {
+      final response = await ApiClient.get(
+        "/api/v1/staff/salon/${widget.salonId}",
+        query: {
+          "serviceId": serviceId,
+          "limit": "20",
+        },
+      );
+
+      print("SALON ID -> ${widget.salonId}");
+      print("SERVICE ID -> $serviceId");
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+
+        final List<dynamic> staffs = decoded["data"] ?? [];
+
+        // ✅ only remove invalid names
+        final filtered = staffs.where((staff) {
+          final name = (staff["name"] ?? "").toString().trim().toUpperCase();
+
+          return name != "UNKNOWN" && name.isEmpty == false;
+        }).toList();
+
+        // ✅ cache service staffs
+        serviceStaffCache[serviceId] = filtered;
+
+        setState(() {
+          currentStaffList = filtered;
+        });
+      } else {
+        print("API FAILED -> ${response.statusCode}");
+        print(response.body);
+
+        setState(() {
+          currentStaffList = [];
+        });
+      }
+    } catch (e) {
+      print("FETCH STAFF ERROR -> $e");
+
+      setState(() {
+        currentStaffList = [];
+      });
+    }
+
+    setState(() {
+      isLoadingStaff = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-
-    final filteredStaff = widget.staffList.where((staff) {
-      final name = (staff["name"] ?? "").toString().trim().toUpperCase();
-
-      return name != "UNKNOWN" && name.isNotEmpty;
-    }).toList();
 
     return Scaffold(
       backgroundColor: AppColors.softIvory,
@@ -79,15 +156,22 @@ class _SelectProfessionalScreenState extends State<SelectProfessionalScreen> {
                 final isSelected = index == selectedServiceIndex;
 
                 return GestureDetector(
-                  onTap: () {
+                  onTap: () async {
                     setState(() {
                       selectedServiceIndex = index;
                     });
+
+                    await fetchStaffForService(
+                      widget.selectedServices[index]["id"],
+                    );
                   },
-                  child: Container(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
                     margin: const EdgeInsets.only(right: 10),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 10),
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? AppColors.rusticSunset
@@ -116,51 +200,97 @@ class _SelectProfessionalScreenState extends State<SelectProfessionalScreen> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: GridView.builder(
-                itemCount: filteredStaff.length + 1,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 18,
-                  crossAxisSpacing: 18,
-                  childAspectRatio: 0.85,
-                ),
-                itemBuilder: (context, index) {
-                  final serviceId = currentService["id"];
-
-                  // 🟢 ANY STAFF
-                  if (index == 0) {
-                    final isSelected =
-                        selectedStaffPerService[serviceId] == null &&
-                            selectedStaffPerService.containsKey(serviceId);
-
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          selectedStaffPerService[serviceId] = null;
-                        });
+              child: isLoadingStaff
+                  ? GridView.builder(
+                      itemCount: 4,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 18,
+                        crossAxisSpacing: 18,
+                        childAspectRatio: 0.85,
+                      ),
+                      itemBuilder: (_, __) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Colors.black12,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        );
                       },
-                      child: _anyStaffCard(isSelected),
-                    );
-                  }
+                    )
+                  : currentStaffList.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(
+                                Icons.person_off_outlined,
+                                size: 44,
+                                color: Colors.black45,
+                              ),
+                              SizedBox(height: 12),
+                              Text(
+                                "No staff available for this service",
+                                style: TextStyle(
+                                  fontFamily: "PoppinsMedium",
+                                  fontSize: 14,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : GridView.builder(
+                          itemCount: currentStaffList.length + 1,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 18,
+                            crossAxisSpacing: 18,
+                            childAspectRatio: 0.85,
+                          ),
+                          itemBuilder: (context, index) {
+                            final serviceId = currentService["id"];
 
-                  final staff = filteredStaff[index - 1];
-                  final isSelected =
-                      selectedStaffPerService[serviceId]?["id"] == staff["id"];
+                            // 🟢 ANY STAFF
+                            if (index == 0) {
+                              final isSelected =
+                                  selectedStaffPerService[serviceId] == null &&
+                                      selectedStaffPerService
+                                          .containsKey(serviceId);
 
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedStaffPerService[serviceId] = staff;
-                      });
-                    },
-                    child: _professionalCard(staff, isSelected),
-                  );
-                },
-              ),
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    selectedStaffPerService[serviceId] = null;
+                                  });
+                                },
+                                child: _anyStaffCard(isSelected),
+                              );
+                            }
+
+                            final staff = currentStaffList[index - 1];
+
+                            final isSelected =
+                                selectedStaffPerService[serviceId]?["id"] ==
+                                    staff["id"];
+
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  selectedStaffPerService[serviceId] = staff;
+                                });
+                              },
+                              child: _professionalCard(
+                                staff,
+                                isSelected,
+                              ),
+                            );
+                          },
+                        ),
             ),
           ),
-
-          // ---------------- CONTINUE BUTTON ----------------
         ],
       ),
       bottomNavigationBar: SafeArea(
@@ -177,7 +307,7 @@ class _SelectProfessionalScreenState extends State<SelectProfessionalScreen> {
                     image: widget.image,
                     staff: null,
                     selectedServices: widget.selectedServices,
-                    staffMapping: selectedStaffPerService, // 🔥 pass map
+                    staffMapping: selectedStaffPerService,
                   ),
                 ),
               );
@@ -187,14 +317,16 @@ class _SelectProfessionalScreenState extends State<SelectProfessionalScreen> {
               disabledBackgroundColor: Colors.grey,
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
             child: Text(
               l10n.selectServicesContinue,
               style: const TextStyle(
-                  fontFamily: "PoppinsSemiBold",
-                  fontSize: 14,
-                  color: Colors.white),
+                fontFamily: "PoppinsSemiBold",
+                fontSize: 14,
+                color: Colors.white,
+              ),
             ),
           ),
         ),

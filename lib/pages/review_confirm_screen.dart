@@ -438,6 +438,8 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
       body: body,
     );
 
+    print(body);
+
     final json = jsonDecode(response.body);
 
     if (response.statusCode != 201) {
@@ -788,8 +790,8 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
                                 ),
                               ],
                             ),
-                      const Text("Anna Nagar, Chennai",
-                          style: TextStyle(color: Colors.black54)),
+                      // const Text("Anna Nagar, Chennai",
+                      //     style: TextStyle(color: Colors.black54)),
                     ],
                   ),
                 )
@@ -802,7 +804,9 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
               children: [
                 const Icon(Icons.schedule, size: 16),
                 const SizedBox(width: 6),
-                Text(_buildTimeRange()),
+                Text(_buildTimeRange(),
+                    style: TextStyle(
+                        fontFamily: "PoppinsRegular", fontSize: 12.5)),
               ],
             ),
 
@@ -810,7 +814,11 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
               children: [
                 const Icon(Icons.calendar_today, size: 16),
                 const SizedBox(width: 6),
-                Text(dateText),
+                Text(
+                  dateText,
+                  style:
+                      TextStyle(fontFamily: "PoppinsRegular", fontSize: 12.5),
+                ),
               ],
             ),
 
@@ -841,9 +849,10 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
                             style:
                                 const TextStyle(fontFamily: "PoppinsSemiBold")),
                         Text(
-                          l10n.reviewConfirmServiceDuration(
-                              s["durationMinutes"]),
-                        ),
+                            l10n.reviewConfirmServiceDuration(
+                                s["durationMinutes"]),
+                            style: TextStyle(
+                                fontFamily: "PoppinsRegular", fontSize: 12.5)),
                       ],
                     ),
                     Text("€$price",
@@ -1121,8 +1130,10 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
+                  hintStyle:
+                      TextStyle(fontFamily: "PoppinsRegular", fontSize: 13),
                   hintText: "Enter phone number",
-                  prefixText: "351#",
+                  prefixText: " 351 # ",
 
                   // 🔥 DEFAULT BORDER
                   border: OutlineInputBorder(
