@@ -79,29 +79,43 @@ Create a `.env` file in the assets/ directory of the project. refer the .env.exa
 Example `.env` file:
 
 ```env
-# API Base URL
+# =========================================================
+# API CONFIGURATION
+# =========================================================
 
-# Production Server
+# Production API URL
 # API_BASE_URL=http://vps-9ebf5d76.vps.ovh.net:5000
 
-# Development / Ngrok URL
+# Development / Ngrok API URL
 API_BASE_URL=https://628a-2405-201-e057-a867-e0ea-a675-6b3a-396b.ngrok-free.app
 
 
-# Stripe Publishable Key
-STRIPE_PUBLISHABLE_KEY=pk_test_51SSLPXFg60Wha3A5QhjKRseEZTKPkpEIfQdfGp0p2TKi7ScL6CSbJmsQUB6VzDwpZsN9foPJfmFZYVq5Z9JSX2I700VsaiuHRe
+# =========================================================
+# STRIPE CONFIGURATION
+# =========================================================
+
+STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
 
 
-# Google OAuth Web Client ID
-GOOGLE_WEB_CLIENT_ID=744378484852-l7o5h92lorsucarblhjh4i1t4v019or5.apps.googleusercontent.com
+# =========================================================
+# GOOGLE AUTH CONFIGURATION
+# =========================================================
+
+GOOGLE_WEB_CLIENT_ID=your_google_web_client_id_here
 
 
-# IFTHENPAY Anti Phishing Key
-IFTHENPAY_ANTI_PHISHING_KEY=60f29776c24a01b29e97201cc3c94c51
+# =========================================================
+# IFTHENPAY CONFIGURATION
+# =========================================================
+
+IFTHENPAY_ANTI_PHISHING_KEY=your_ifthenpay_anti_phishing_key_here
 
 
-# Google Places API Key
-GOOGLE_PLACES_API_KEY=YOUR_GOOGLE_PLACES_API_KEY
+# =========================================================
+# GOOGLE PLACES / MAPS CONFIGURATION
+# =========================================================
+
+GOOGLE_PLACES_API_KEY=your_google_places_api_key_here
 ```
 
 ---
