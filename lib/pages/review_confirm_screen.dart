@@ -433,6 +433,9 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
       "startTime": startTime,
     };
 
+    print("BODY");
+    print(body);
+
     final response = await ApiClient.post(
       "/api/v1/bookings",
       body: body,
