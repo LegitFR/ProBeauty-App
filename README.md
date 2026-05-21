@@ -74,7 +74,7 @@ flutter pub get
 
 # 🌍 Environment Setup
 
-Create a `.env` file in the root directory of the project.
+Create a `.env` file in the assets/ directory of the project. refer the .env.example
 
 Example `.env` file:
 
