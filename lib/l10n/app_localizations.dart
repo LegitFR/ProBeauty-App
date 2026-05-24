@@ -1722,6 +1722,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show less'**
   String get appointmentsShowLess;
+
+  /// No description provided for @salonAddedToFavourites.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to favourites'**
+  String get salonAddedToFavourites;
+
+  /// No description provided for @salonAddToFavouritesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add to favourites'**
+  String get salonAddToFavouritesFailed;
 }
 
 class _AppLocalizationsDelegate

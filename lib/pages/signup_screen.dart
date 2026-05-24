@@ -140,22 +140,21 @@ class _SignupScreenState extends State<SignupScreen> {
         );
         Navigator.pushNamed(context, "/OTP", arguments: contact);
       } else {
+        final errorMessage = data['message'] ??
+            data['error'] ??
+            AppLocalizations.of(context)!.signupFailedMessage;
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.signupFailedMessage,
-            ),
+            content: Text(errorMessage.toString()),
           ),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Unable to create account right now.",
-          ),
+        SnackBar(
+          content: Text("Error: ${e.toString()}"),
         ),
       );
     } finally {

@@ -174,5 +174,8 @@
   "favouritesAddToCartFailed": "Error al añadir al carrito",
   "favouritesLoginToAddCart": "Inicia sesión para añadir al carrito",
 
-  "favouritesError": "Error: {error}"
+  "favouritesError": "Error: {error}",
+
+  "salonAddedToFavourites": "Añadido a favoritos",
+  "salonAddToFavouritesFailed": "Error al añadir a favoritos"
 }

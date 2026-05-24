@@ -895,4 +895,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get appointmentsShowLess => 'Show less';
+
+  @override
+  String get salonAddedToFavourites => 'Adicionado aos favoritos';
+
+  @override
+  String get salonAddToFavouritesFailed => 'Falha ao adicionar aos favoritos';
 }

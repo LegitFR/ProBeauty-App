@@ -292,7 +292,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                       Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const MainScreen(initialIndex: 0),
+                          builder: (_) => const MainScreen(initialIndex: 1),
                         ),
                         (route) => false,
                       );

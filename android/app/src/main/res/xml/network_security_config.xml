@@ -6,6 +6,11 @@
         </trust-anchors>
     </base-config>
 
+    <!-- Allow cleartext HTTP to emulator host (10.0.2.2 maps to localhost on Mac) -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+
     <domain-config cleartextTrafficPermitted="false">
         <domain includeSubdomains="true">probeauty-backend.onrender.com</domain>
         <trust-anchors>

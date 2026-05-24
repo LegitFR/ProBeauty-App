@@ -260,11 +260,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                     if (!context.mounted) return;
 
+                                    final String resolvedId =
+                                        salon["id"] ?? salonId;
+                                    final salonProv =
+                                        context.read<SalonProvider>();
+
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (_) => SalonDetailScreen(
-                                          id: salon["id"],
+                                          id: resolvedId,
                                           name: salon["name"] ?? "",
                                           address: salon["address"] ?? "",
                                           image: salon["thumbnail"] ??
@@ -274,7 +279,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                           hours: salon["hours"] ?? {},
                                         ),
                                       ),
-                                    );
+                                    ).then((_) {
+                                      if (!context.mounted) return;
+                                      salonProv.invalidateRating(resolvedId);
+                                      salonProv.fetchSalonRating(resolvedId);
+                                    });
                                   } catch (e) {
                                     debugPrint("Failed to open salon: $e");
 
@@ -513,7 +522,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       hours: hours,
                     ),
                   ),
-                );
+                ).then((_) {
+                  if (!mounted) return;
+                  // Bust the cached rating so the card re-fetches fresh data
+                  provider.invalidateRating(id);
+                  provider.fetchSalonRating(id);
+                });
               },
               child: Padding(
                 padding: EdgeInsets.only(right: width * 0.04),

@@ -135,7 +135,10 @@ class _ProductScreenState extends State<ProductScreen> {
       } else {
         response = await ApiClient.post(
           "/api/v1/favourites",
-          body: {"productId": productId},
+          body: {
+              "type": "product",
+              "itemId": productId
+            },
         );
 
         if (response.statusCode == 201 || response.statusCode == 200) {

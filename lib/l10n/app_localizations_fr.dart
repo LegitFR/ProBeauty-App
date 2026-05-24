@@ -894,4 +894,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get appointmentsShowLess => 'Show less';
+
+  @override
+  String get salonAddedToFavourites => 'Ajouté aux favoris';
+
+  @override
+  String get salonAddToFavouritesFailed => 'Échec de l\'ajout aux favoris';
 }

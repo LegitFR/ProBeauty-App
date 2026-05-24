@@ -348,5 +348,8 @@
 
   "reviewConfirmConfirmButton": "Confirmer",
 
-  "reviewConfirmBookingFailed": "Échec de la réservation"
+  "reviewConfirmBookingFailed": "Échec de la réservation",
+
+  "salonAddedToFavourites": "Ajouté aux favoris",
+  "salonAddToFavouritesFailed": "Échec de l'ajout aux favoris"
 }

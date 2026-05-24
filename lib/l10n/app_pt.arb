@@ -244,5 +244,8 @@
 
   "notificationSettingWhatsappTitle": "Mensagens do WhatsApp",
   "notificationSettingWhatsappDesc":
-    "Receba atualizações pelo WhatsApp"
+    "Receba atualizações pelo WhatsApp",
+
+  "salonAddedToFavourites": "Adicionado aos favoritos",
+  "salonAddToFavouritesFailed": "Falha ao adicionar aos favoritos"
 }

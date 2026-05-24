@@ -676,7 +676,8 @@
 "reviewsSubmit": "Submit review",
 "reviewsThankYou": "Thanks for your feedback!"
 ,"appointmentsSeeAll": "See all",
-"appointmentsShowLess": "Show less"
+"appointmentsShowLess": "Show less",
 
-
+"salonAddedToFavourites": "Added to favourites",
+"salonAddToFavouritesFailed": "Failed to add to favourites"
 }

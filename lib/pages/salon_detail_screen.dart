@@ -1,4 +1,4 @@
-// ignore_for_file: invalid_use_of_protected_member
+// ignore_for_file: invalid_use_of_protected_member, use_build_context_synchronously
 
 import 'dart:convert';
 
@@ -44,6 +44,12 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
   int _totalReviews = 0;
   bool _ratingLoading = true;
   static final Map<String, Map<String, dynamic>> _ratingCache = {};
+
+  // ==========================
+  // FAVOURITE STATE
+  // ==========================
+  bool _isFavourited = false;
+  bool _favouriteLoading = false;
 
   void _setRatingFallback() {
     if (!_ratingCache.containsKey(widget.id)) {
@@ -142,10 +148,112 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
     return map[day]!;
   }
 
+  // ==========================
+  // CHECK FAVOURITE STATUS
+  // ==========================
+  Future<void> _checkFavouriteStatus() async {
+    try {
+      final resp = await ApiClient.get(
+        "/api/v1/favourites",
+        query: {"type": "salon", "page": "1", "limit": "100"},
+      );
+      if (resp.statusCode == 200) {
+        final body = jsonDecode(resp.body);
+        final List items = body["data"] ?? [];
+        final isFav = items.any((item) {
+          final salon = item["salon"];
+          if (salon == null) return false;
+          return (salon["id"] ?? salon["_id"] ?? "") == widget.id ||
+              (item["itemId"] ?? "") == widget.id;
+        });
+        if (mounted) setState(() => _isFavourited = isFav);
+      }
+    } catch (_) {
+      // silently ignore – default to not favourited
+    }
+  }
+
+  // ==========================
+  // TOGGLE FAVOURITE
+  // ==========================
+  Future<void> _toggleFavourite() async {
+    if (_favouriteLoading) return;
+
+    final l10n = AppLocalizations.of(context)!;
+    final wasLiked = _isFavourited;
+
+    // Optimistic update
+    setState(() {
+      _isFavourited = !_isFavourited;
+      _favouriteLoading = true;
+    });
+
+    try {
+      if (!wasLiked) {
+        // ➕ ADD to favourites
+        final resp = await ApiClient.post(
+          "/api/v1/favourites",
+          body: {"type": "salon", "itemId": widget.id},
+        );
+
+        if (resp.statusCode == 201 || resp.statusCode == 200) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.salonAddedToFavourites),
+            ),
+          );
+        } else {
+          // revert
+          setState(() => _isFavourited = wasLiked);
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.salonAddToFavouritesFailed),
+            ),
+          );
+        }
+      } else {
+        // ➖ REMOVE from favourites
+        final resp = await ApiClient.delete(
+          "/api/v1/favourites/${widget.id}",
+        );
+
+        if (resp.statusCode == 200) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.favouritesRemovedSuccess),
+            ),
+          );
+        } else {
+          // revert
+          setState(() => _isFavourited = wasLiked);
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.favouritesRemoveFailed),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // revert on error
+      setState(() => _isFavourited = wasLiked);
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.favouritesError(e.toString()))),
+      );
+    } finally {
+      if (mounted) setState(() => _favouriteLoading = false);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _fetchSalonRating();
+    _checkFavouriteStatus();
   }
 
   @override
@@ -256,21 +364,40 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                           ),
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.black26),
-                          color: AppColors.softIvory,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.15),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+                      GestureDetector(
+                        onTap: _toggleFavourite,
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.black26),
+                            color: AppColors.softIvory,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: _favouriteLoading
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.rusticSunset,
+                                  ),
+                                )
+                              : Icon(
+                                  _isFavourited
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color: _isFavourited
+                                      ? Colors.red
+                                      : Colors.black,
+                                ),
                         ),
-                        child: const Icon(Icons.favorite_border),
                       ),
                     ],
                   ),
@@ -386,7 +513,14 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                             );
                           },
                         ),
-                      );
+                      ).then((_) {
+                        // Reviews tab: bust cache so fresh rating is shown
+                        if (index == 1 && mounted) {
+                          _ratingCache.remove(widget.id);
+                          setState(() => _ratingLoading = true);
+                          _fetchSalonRating();
+                        }
+                      });
                     },
                   ),
 

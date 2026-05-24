@@ -39,46 +39,46 @@ class AppRoutes {
   static Route<dynamic> generate(RouteSettings settings) {
     switch (settings.name) {
       case decision:
-        return _page(const DecisionScreen());
+        return _page(const DecisionScreen(), settings);
 
       case login:
-        return _page(const LoginScreen());
+        return _page(const LoginScreen(), settings);
 
       case signup:
-        return _page(const SignupScreen());
+        return _page(const SignupScreen(), settings);
 
       case otp:
-        return _page(const OTPScreen());
+        return _page(const OTPScreen(), settings);
 
       case main:
-        return _page(const MainScreen());
+        return _page(const MainScreen(), settings);
 
       case onboarding:
-        return _page(const OnboardingScreen());
+        return _page(const OnboardingScreen(), settings);
 
       case notification:
-        return _page(const NotificationScreen());
+        return _page(const NotificationScreen(), settings);
 
       case notificationSettings:
-        return _page(const NotificationSettings());
+        return _page(const NotificationSettings(), settings);
 
       case appointments:
-        return _page(const AppointmentsScreen());
+        return _page(const AppointmentsScreen(), settings);
 
       case profileDetails:
-        return _page(const ProfileDetails());
+        return _page(const ProfileDetails(), settings);
 
       case savedAddress:
-        return _page(const SavedAddressScreen());
+        return _page(const SavedAddressScreen(), settings);
 
       case cart:
-        return _page(const CartScreen());
+        return _page(const CartScreen(), settings);
 
       case orders:
-        return _page(const OrdersScreen());
+        return _page(const OrdersScreen(), settings);
 
       case favourites:
-        return _page(const FavouritesScreen());
+        return _page(const FavouritesScreen(), settings);
 
       case product:
         final args = settings.arguments as Map<String, dynamic>;
@@ -91,14 +91,15 @@ class AppRoutes {
             product: product,
             salonName: salonName,
           ),
+          settings,
         );
 
       default:
-        return _page(const MainScreen());
+        return _page(const MainScreen(), settings);
     }
   }
 
-  static MaterialPageRoute _page(Widget child) {
-    return MaterialPageRoute(builder: (_) => child);
+  static MaterialPageRoute _page(Widget child, RouteSettings settings) {
+    return MaterialPageRoute(builder: (_) => child, settings: settings);
   }
 }

@@ -4,8 +4,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
+import 'package:probeauty_app/pages/salon_detail_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:probeauty_app/services/api_client.dart';
+import 'package:probeauty_app/services/salon_service.dart';
 
 class FavouritesScreen extends StatefulWidget {
   const FavouritesScreen({super.key});
@@ -19,7 +21,8 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
   String? _error;
   List<dynamic> _favourites = [];
 
-  String? _addingToCartId; // 👈 track loading per item
+  String? _addingToCartId; // 👈 track loading per product item
+  String? _openingSalonId; // 👈 track loading per salon item
 
   @override
   void initState() {
@@ -74,6 +77,7 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
       final resp = await ApiClient.get(
         "/api/v1/favourites",
         query: {
+          "type": "product",
           "page": "1",
           "limit": "20",
         },
@@ -297,9 +301,196 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       itemCount: _favourites.length,
       itemBuilder: (context, index) {
-        final product = _favourites[index]["product"];
+        final item = _favourites[index];
+        final String type = item["type"] ?? "product";
+
+        if (type == "salon") {
+          final salon = item["salon"];
+          final String salonId =
+              salon?["id"] ?? salon?["_id"] ?? item["itemId"] ?? "";
+          return _favouriteSalonCard(salon, salonId, index);
+        }
+
+        final product = item["product"];
         return _favouriteProductCard(product, index);
       },
+    );
+  }
+
+  // ==========================
+  // OPEN SALON DETAIL
+  // ==========================
+  Future<void> _openSalon(String salonId) async {
+    if (_openingSalonId == salonId) return;
+    setState(() => _openingSalonId = salonId);
+    try {
+      final salon = await SalonService.fetchSalonById(salonId);
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SalonDetailScreen(
+            id: salon["id"] ?? salon["_id"] ?? salonId,
+            name: salon["name"] ?? "",
+            address: salon["address"] ?? "",
+            image: salon["thumbnail"] ?? salon["image"] ?? "",
+            services: salon["services"] ?? [],
+            salonStaffList: salon["staff"] ?? [],
+            hours: salon["hours"] ?? {},
+          ),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Unable to load salon details. Please try again."),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _openingSalonId = null);
+    }
+  }
+
+  // ==========================
+  // SALON CARD
+  // ==========================
+  Widget _favouriteSalonCard(dynamic salon, String salonId, int index) {
+    final String name = salon?["name"] ?? "Salon";
+    final String address = salon?["address"] ?? "";
+    final String image = salon?["thumbnail"] ?? salon?["image"] ?? "";
+
+    final bool isOpening = _openingSalonId == salonId;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: AppColors.softIvory,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Image + remove button ──
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(14),
+                ),
+                child: image.isNotEmpty
+                    ? Image.network(
+                        image,
+                        height: 160,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          height: 160,
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.storefront,
+                              size: 48, color: Colors.white70),
+                        ),
+                      )
+                    : Container(
+                        height: 160,
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.storefront,
+                            size: 48, color: Colors.white70),
+                      ),
+              ),
+              Positioned(
+                top: 10,
+                right: 10,
+                child: GestureDetector(
+                  onTap: () => _removeFavourite(salonId, index),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.black26),
+                      color: AppColors.softIvory,
+                    ),
+                    child: const Icon(Icons.favorite, color: Colors.red),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // ── Info + Book now ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontFamily: "PoppinsMedium",
+                          fontSize: 14,
+                        ),
+                      ),
+                      if (address.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          address,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontFamily: "PoppinsRegular",
+                            fontSize: 12,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                ElevatedButton(
+                  onPressed: isOpening ? null : () => _openSalon(salonId),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.rusticSunset,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: isOpening
+                      ? const SizedBox(
+                          height: 14,
+                          width: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          "Book now",
+                          style: TextStyle(
+                            fontFamily: "PoppinsSemiBold",
+                            fontSize: 12,
+                            color: Colors.white,
+                          ),
+                        ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

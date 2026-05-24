@@ -20,6 +20,15 @@ class SalonProvider with ChangeNotifier {
     return _ratingCache[salonId];
   }
 
+  /// Removes the cached rating for [salonId] so the next
+  /// [fetchSalonRating] call goes back to the API.
+  void invalidateRating(String salonId) {
+    if (_ratingCache.containsKey(salonId)) {
+      _ratingCache.remove(salonId);
+      notifyListeners();
+    }
+  }
+
   Future<void> fetchSalonRating(String salonId) async {
     if (_ratingCache.containsKey(salonId)) return;
 
