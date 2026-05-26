@@ -601,6 +601,9 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
         "mobileNumber": "351#${_phoneController.text.trim()}",
       };
 
+      print("BODY");
+      print(body);
+
       final res = await ApiClient.post(
         "/api/v1/bookings/checkout",
         body: body,
@@ -659,6 +662,8 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
         );
       }
     } catch (e) {
+      print("ERROR");
+      print(e);
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
