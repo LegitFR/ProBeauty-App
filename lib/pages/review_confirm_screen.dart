@@ -569,24 +569,12 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
       final serviceIds =
           widget.selectedServices.map((s) => s["id"].toString()).toList();
 
-      String? staffId;
+      final List<String?> staffIds = widget.selectedServices.map((s) {
+        final staff = _staffForService(s["id"]);
+        return staff?["id"]?.toString();
+      }).toList();
 
-// Priority 1: single staff
-      if (widget.staff != null && widget.staff!["id"] != null) {
-        staffId = widget.staff!["id"].toString();
-      }
-
-// Priority 2: from mapping
-      else if (widget.staffMapping != null) {
-        for (var entry in widget.staffMapping!.values) {
-          if (entry != null && entry["id"] != null) {
-            staffId = entry["id"].toString();
-            break;
-          }
-        }
-      }
-
-      if (staffId == null) {
+      if (staffIds.every((id) => id == null)) {
         throw Exception(
           "Unable to process booking. Please select a staff member.",
         );
@@ -595,7 +583,7 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
       final body = {
         "salonId": widget.salonId,
         "serviceIds": serviceIds,
-        "staffId": staffId, // ✅ FIXED
+        "staffIds": staffIds, // ✅ FIXED
         "startTime": startTime,
         "paymentMethod": "MBWAY",
         "mobileNumber": "351#${_phoneController.text.trim()}",

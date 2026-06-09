@@ -5,6 +5,7 @@ import 'package:probeauty_app/pages/appointments_screen.dart';
 import 'package:probeauty_app/pages/cart_screen.dart';
 import 'package:probeauty_app/pages/decision_screen.dart';
 import 'package:probeauty_app/pages/favourites_screen.dart';
+import 'package:probeauty_app/pages/forgot_password_screen.dart';
 import 'package:probeauty_app/pages/login_screen.dart';
 import 'package:probeauty_app/pages/main_screen.dart';
 import 'package:probeauty_app/pages/notification_screen.dart';
@@ -34,10 +35,13 @@ class AppRoutes {
   static const orders = '/orders';
   static const favourites = '/favourites';
   static const product = '/product_screen';
+  static const forgotpassword = '/forgot_password';
 
   // Central route handler
   static Route<dynamic> generate(RouteSettings settings) {
     switch (settings.name) {
+      case forgotpassword:
+        return _page(const ForgotPasswordScreen(), settings);
       case decision:
         return _page(const DecisionScreen(), settings);
 

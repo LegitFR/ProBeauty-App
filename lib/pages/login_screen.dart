@@ -194,6 +194,8 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 children: [
                   TextField(
+                    style:
+                        TextStyle(fontFamily: "PoppinsRegular", fontSize: 15),
                     controller: _emailController,
                     focusNode: _emailFocus,
                     cursorColor: AppColors.rusticSunset,
@@ -206,6 +208,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   SizedBox(height: height * 0.025),
                   TextField(
+                    style:
+                        TextStyle(fontFamily: "PoppinsRegular", fontSize: 15),
                     controller: _passwordController,
                     focusNode: _passwordFocus,
                     obscureText: _obscurePassword,
@@ -226,7 +230,26 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(height: height * 0.05),
+
+                  SizedBox(height: height * 0.02),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/forgot_password');
+                      },
+                      child: const Text(
+                        "Forgot Password?",
+                        style: TextStyle(
+                          color: AppColors.rusticSunset,
+                          fontFamily: "PoppinsSemiBold",
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: height * 0.02),
                   SizedBox(
                     width: width * 0.65,
                     height: 45,

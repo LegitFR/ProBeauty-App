@@ -56,7 +56,7 @@ class _SignupScreenState extends State<SignupScreen> {
     if (_isLoading) return;
     final firstName = _firstNameController.text.trim();
     final lastName = _lastNameController.text.trim();
-    final contact = _contactController.text.trim();
+    String contact = _contactController.text.trim();
     final password = _passwordController.text.trim();
 
     if (firstName.isEmpty ||
@@ -80,18 +80,33 @@ class _SignupScreenState extends State<SignupScreen> {
       );
 
       if (!emailRegex.hasMatch(contact)) {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Please enter a valid email address."),
+          ),
+        );
+        return;
+      }
+    } else {
+      // Remove spaces entered by user
+      contact = contact.replaceAll(' ', '');
 
+      // Portugal numbers = 9 digits
+      final phoneRegex = RegExp(r'^\d{9}$');
+
+      if (!phoneRegex.hasMatch(contact)) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              "Please enter a valid email address.",
+              "Please enter a valid Portuguese phone number.",
             ),
           ),
         );
-
         return;
       }
+
+      // Add +351 before sending
+      contact = '+351$contact';
     }
 
     if (password.length < 6) {
@@ -294,7 +309,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     cursorColor: AppColors.rusticSunset,
                     decoration: _inputDecoration(
                       icon: Icons.call,
-                      hint: l10n.signupContactHint,
+                      hint: "Email or Phone Number",
                       isActive: _contactFocus.hasFocus ||
                           _contactController.text.isNotEmpty,
                     ),

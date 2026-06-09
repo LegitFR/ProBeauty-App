@@ -31,10 +31,21 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
     setState(() => isLoading = true);
 
     try {
-      final url = "https://maps.googleapis.com/maps/api/place/autocomplete/json"
-          "?input=$input&key=$apiKey&components=country:in";
-
-      final response = await http.get(Uri.parse(url));
+      final response = await http.post(
+        Uri.parse(
+          'https://places.googleapis.com/v1/places:autocomplete',
+        ),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': apiKey,
+          'X-Goog-FieldMask':
+              'suggestions.placePrediction.text.text,suggestions.placePrediction.placeId',
+        },
+        body: jsonEncode({
+          "input": input,
+          "includedRegionCodes": ["IN"],
+        }),
+      );
 
       if (!mounted) return;
 
@@ -42,35 +53,20 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
         final data = jsonDecode(response.body);
 
         setState(() {
-          places = data['predictions'];
+          places = data["suggestions"] ?? [];
           isLoading = false;
         });
+
+        print(data);
       } else {
         setState(() => isLoading = false);
 
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              "Unable to search locations right now.",
-            ),
-          ),
-        );
+        print(response.body);
       }
-    } catch (_) {
-      if (!mounted) return;
-
+    } catch (e) {
       setState(() => isLoading = false);
 
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Please check your internet connection and try again.",
-          ),
-        ),
-      );
+      print(e);
     }
   }
 
@@ -258,7 +254,8 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
 
                   return InkWell(
                     onTap: () {
-                      Navigator.pop(context, place["description"]);
+                      Navigator.pop(
+                          context, place["placePrediction"]["text"]["text"]);
                     },
                     child: Padding(
                       padding: EdgeInsets.symmetric(
@@ -272,7 +269,7 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              place["description"],
+                              place["placePrediction"]["text"]["text"],
                               style: const TextStyle(
                                 fontFamily: "PoppinsMedium",
                                 fontSize: 14,
