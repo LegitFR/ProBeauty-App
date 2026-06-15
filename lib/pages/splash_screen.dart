@@ -1,8 +1,6 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:lottie/lottie.dart';
 import '../resources/AppColors.dart';
 import 'decision_screen.dart';
 import 'main_screen.dart';
@@ -16,57 +14,74 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-  // bool _moveUp = false; //
-  late final AnimationController _lottieController;
-
-  static const double startProgress = 0.0;
-  static const double endProgress = 0.35;
+  late final AnimationController _ctrl;
+  late final Animation<double> _scale;
+  late final Animation<double> _opacity;
 
   @override
   void initState() {
     super.initState();
-    _lottieController = AnimationController(vsync: this);
+
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2200),
+    );
+
+    // Scale: 0.82 → 1.0, only in the first 45% of the timeline
+    _scale = Tween(begin: 0.82, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _ctrl,
+        curve: const Interval(0.0, 0.45, curve: Curves.easeOut),
+      ),
+    );
+
+    // Fade in 0→1 over first 35%, hold, then fade out 1→0 in the last 20%
+    _opacity = TweenSequence([
+      TweenSequenceItem(
+        tween: Tween(begin: 0.0, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeIn)),
+        weight: 35,
+      ),
+      TweenSequenceItem(
+        tween: ConstantTween(1.0),
+        weight: 45,
+      ),
+      TweenSequenceItem(
+        tween: Tween(begin: 1.0, end: 0.0)
+            .chain(CurveTween(curve: Curves.easeIn)),
+        weight: 20,
+      ),
+    ]).animate(_ctrl);
+
+    _ctrl.forward().then((_) => _navigate());
   }
 
-  /// 🔐 SESSION CHECK
-  Future<void> _decideNextScreen() async {
+  Future<void> _navigate() async {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString("accessToken");
-
     if (!mounted) return;
-
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         pageBuilder: (_, __, ___) =>
             (accessToken != null && accessToken.isNotEmpty)
                 ? const MainScreen()
                 : const DecisionScreen(),
-        transitionDuration: Duration.zero,
-        reverseTransitionDuration: Duration.zero,
+        transitionDuration: const Duration(milliseconds: 350),
+        transitionsBuilder: (_, anim, __, child) =>
+            FadeTransition(opacity: anim, child: child),
       ),
     );
   }
 
-  void _afterPartialAnimation() {
-    Future.delayed(const Duration(milliseconds: 1), () {
-      if (!mounted) return;
-
-      // ❌ Logo movement disabled
-      // setState(() => _moveUp = true);
-
-      Future.delayed(const Duration(milliseconds: 700), _decideNextScreen);
-    });
-  }
-
   @override
   void dispose() {
-    _lottieController.dispose();
+    _ctrl.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final logoSize = MediaQuery.of(context).size.width * 0.36;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -76,37 +91,20 @@ class _SplashScreenState extends State<SplashScreen>
       ),
       child: Scaffold(
         backgroundColor: AppColors.rusticSunset,
-        body: AnimatedAlign(
-          duration: const Duration(milliseconds: 700),
-          curve: Curves.easeInOutCubic,
-
-          // ❌ Fixed at center, no movement
-          // alignment: _moveUp ? const Alignment(0, -0.70) : Alignment.center,
-          alignment: Alignment.center,
-
-          child: SizedBox(
-            width: size.width * 0.9,
-            height: size.width * 0.9,
-            child: Lottie.asset(
-              'assets/lottie/probeauty_logo.json',
-              controller: _lottieController,
-              repeat: false,
-              onLoaded: (composition) {
-                _lottieController.duration = composition.duration;
-
-                /// jump to start
-                _lottieController.value = startProgress;
-
-                /// play only the required segment
-                _lottieController
-                    .animateTo(
-                      endProgress,
-                      duration:
-                          composition.duration * (endProgress - startProgress),
-                      curve: Curves.linear,
-                    )
-                    .then((_) => _afterPartialAnimation());
-              },
+        body: Center(
+          child: AnimatedBuilder(
+            animation: _ctrl,
+            builder: (_, __) => Opacity(
+              opacity: _opacity.value,
+              child: Transform.scale(
+                scale: _scale.value,
+                child: Image.asset(
+                  'assets/logo/logo_transparent.png',
+                  width: logoSize,
+                  height: logoSize,
+                  fit: BoxFit.contain,
+                ),
+              ),
             ),
           ),
         ),
