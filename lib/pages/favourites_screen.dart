@@ -8,6 +8,8 @@ import 'package:probeauty_app/pages/salon_detail_screen.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:probeauty_app/services/api_client.dart';
 import 'package:probeauty_app/services/salon_service.dart';
+import 'package:probeauty_app/pages/product_screen.dart';
+import 'package:probeauty_app/models/product.dart';
 
 class FavouritesScreen extends StatefulWidget {
   const FavouritesScreen({super.key});
@@ -106,11 +108,17 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
   // ==========================
   // REMOVE FROM FAVOURITES
   // ==========================
-  Future<void> _removeFavourite(String productId, int index) async {
+  Future<void> _removeFavourite(
+    String itemId,
+    String type,
+    int index,
+  ) async {
     try {
       final resp = await ApiClient.delete(
-        "/api/v1/favourites/$productId",
+        "/api/v1/favourites/$itemId?type=$type",
       );
+
+      print(resp.body);
 
       if (resp.statusCode == 200) {
         setState(() {
@@ -410,7 +418,11 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
                 top: 10,
                 right: 10,
                 child: GestureDetector(
-                  onTap: () => _removeFavourite(salonId, index),
+                  onTap: () => _removeFavourite(
+                    salonId,
+                    "salon",
+                    index,
+                  ),
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -509,84 +521,119 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
 
     final bool isAdding = _addingToCartId == productId;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.softIvory,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ProductScreen(
+              product: Product.fromJson(product),
+              salonName: salonName,
+            ),
           ),
-        ],
-      ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Stack(children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: image.isNotEmpty
-                ? Image.network(image,
-                    height: 160, width: double.infinity, fit: BoxFit.cover)
-                : Container(height: 160, color: Colors.grey[300]),
-          ),
-          Positioned(
-            top: 10,
-            right: 10,
-            child: GestureDetector(
-              onTap: () => _removeFavourite(productId, index),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.black26),
-                  color: AppColors.softIvory,
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.softIvory,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.12),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Stack(children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: image.isNotEmpty
+                  ? Image.network(
+                      image,
+                      height: 160,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) {
+                        return Image.asset(
+                          'assets/images/saloons/saloon1.png',
+                          height: 160,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        );
+                      },
+                    )
+                  : Image.asset(
+                      'assets/images/saloons/saloon1.png',
+                      height: 160,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+            ),
+            Positioned(
+              top: 10,
+              right: 10,
+              child: GestureDetector(
+                onTap: () => _removeFavourite(
+                  productId,
+                  "product",
+                  index,
                 ),
-                child: const Icon(Icons.favorite, color: Colors.red),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.black26),
+                    color: AppColors.softIvory,
+                  ),
+                  child: const Icon(Icons.favorite, color: Colors.red),
+                ),
               ),
             ),
-          ),
-        ]),
-        const SizedBox(height: 10),
-        Text(title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontFamily: "PoppinsMedium", fontSize: 14)),
-        const SizedBox(height: 4),
-        Text(salonName,
-            style: const TextStyle(
-                fontFamily: "PoppinsRegular",
-                fontSize: 12,
-                color: Colors.black54)),
-        const SizedBox(height: 6),
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text("€$price",
+          ]),
+          const SizedBox(height: 10),
+          Text(title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style:
-                  const TextStyle(fontFamily: "PoppinsSemiBold", fontSize: 16)),
-          ElevatedButton(
-            onPressed: isAdding ? null : () => _addToCart(productId),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                  const TextStyle(fontFamily: "PoppinsMedium", fontSize: 14)),
+          const SizedBox(height: 4),
+          Text(salonName,
+              style: const TextStyle(
+                  fontFamily: "PoppinsRegular",
+                  fontSize: 12,
+                  color: Colors.black54)),
+          const SizedBox(height: 6),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            Text("€$price",
+                style: const TextStyle(
+                    fontFamily: "PoppinsSemiBold", fontSize: 16)),
+            ElevatedButton(
+              onPressed: isAdding ? null : () => _addToCart(productId),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+              child: isAdding
+                  ? const SizedBox(
+                      height: 14,
+                      width: 14,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : Text(AppLocalizations.of(context)!.favouritesAddToCart,
+                      style: const TextStyle(
+                          fontFamily: "PoppinsSemiBold",
+                          fontSize: 12,
+                          color: Colors.white)),
             ),
-            child: isAdding
-                ? const SizedBox(
-                    height: 14,
-                    width: 14,
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2, color: Colors.white),
-                  )
-                : Text(AppLocalizations.of(context)!.favouritesAddToCart,
-                    style: const TextStyle(
-                        fontFamily: "PoppinsSemiBold",
-                        fontSize: 12,
-                        color: Colors.white)),
-          ),
+          ]),
         ]),
-      ]),
+      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../resources/AppColors.dart';
 import 'decision_screen.dart';
 import 'main_screen.dart';
@@ -38,8 +39,8 @@ class _SplashScreenState extends State<SplashScreen>
     // Fade in 0→1 over first 35%, hold, then fade out 1→0 in the last 20%
     _opacity = TweenSequence([
       TweenSequenceItem(
-        tween: Tween(begin: 0.0, end: 1.0)
-            .chain(CurveTween(curve: Curves.easeIn)),
+        tween:
+            Tween(begin: 0.0, end: 1.0).chain(CurveTween(curve: Curves.easeIn)),
         weight: 35,
       ),
       TweenSequenceItem(
@@ -47,8 +48,8 @@ class _SplashScreenState extends State<SplashScreen>
         weight: 45,
       ),
       TweenSequenceItem(
-        tween: Tween(begin: 1.0, end: 0.0)
-            .chain(CurveTween(curve: Curves.easeIn)),
+        tween:
+            Tween(begin: 1.0, end: 0.0).chain(CurveTween(curve: Curves.easeIn)),
         weight: 20,
       ),
     ]).animate(_ctrl);

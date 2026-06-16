@@ -421,55 +421,58 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     final double? lat = geo?.latitude;
     final double? lng = geo?.longitude;
 
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 25),
-      decoration: BoxDecoration(
-        color: AppColors.softIvory,
-        border: Border.all(color: Colors.black, width: 3),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Map image
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
-            child: lat != null && lng != null
-                ? Image.network(
-                    _staticMapUrl(lat, lng),
-                    width: double.infinity,
-                    height: screenHeight * 0.25,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, progress) {
-                      return child;
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return Image.asset(
-                        "assets/images/appointments/map.png",
-                        fit: BoxFit.cover,
-                      );
-                    },
-                  )
-                : Image.asset(
-                    "assets/images/appointments/map.png",
-                    fit: BoxFit.cover,
-                  ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AppointmentInfo(booking: booking),
           ),
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 25),
+        decoration: BoxDecoration(
+          color: AppColors.softIvory,
+          border: Border.all(
+            color: Colors.black,
+            width: 3,
+          ),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Map image
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+              child: lat != null && lng != null
+                  ? Image.network(
+                      _staticMapUrl(lat, lng),
+                      width: double.infinity,
+                      height: screenHeight * 0.25,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, progress) {
+                        return child;
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.asset(
+                          "assets/images/appointments/map.png",
+                          fit: BoxFit.cover,
+                        );
+                      },
+                    )
+                  : Image.asset(
+                      "assets/images/appointments/map.png",
+                      fit: BoxFit.cover,
+                    ),
+            ),
 
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => AppointmentInfo(booking: booking),
-                ),
-              );
-            },
-            child: Padding(
+            Padding(
               padding: const EdgeInsets.all(14.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -484,9 +487,13 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                       color: Colors.black,
                     ),
                   ),
-                  SizedBox(height: screenHeight * 0.02),
+                  SizedBox(
+                    height: screenHeight * 0.02,
+                  ),
                   Text(
-                    formatBookingDate(booking.startTime),
+                    formatBookingDate(
+                      booking.startTime,
+                    ),
                     maxLines: 1,
                     style: TextStyle(
                       fontSize: screenWidth * 0.035,
@@ -494,7 +501,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                       color: Colors.black,
                     ),
                   ),
-                  SizedBox(height: screenHeight * 0.02),
+                  SizedBox(
+                    height: screenHeight * 0.02,
+                  ),
                   Text(
                     l10n.appointmentsDurationPriceService(
                       service.durationMinutes,
@@ -508,14 +517,18 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                       color: Colors.black,
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(
+                    height: 14,
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       ElevatedButton.icon(
                         onPressed: () {},
-                        icon: const Icon(Icons.navigation_outlined,
-                            color: Colors.white),
+                        icon: const Icon(
+                          Icons.navigation_outlined,
+                          color: Colors.white,
+                        ),
                         label: Text(
                           l10n.appointmentsGetDirections,
                           style: TextStyle(
@@ -530,37 +543,18 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 18, vertical: 10),
+                            horizontal: 18,
+                            vertical: 10,
+                          ),
                         ),
                       ),
-                      // Container(
-                      //   decoration: const BoxDecoration(
-                      //     color: AppColors.lighterGreyTone,
-                      //     borderRadius: BorderRadius.all(Radius.circular(10)),
-                      //     boxShadow: [
-                      //       BoxShadow(
-                      //         color: Colors.black26,
-                      //         blurRadius: 3,
-                      //         offset: Offset(0, 3),
-                      //       ),
-                      //     ],
-                      //   ),
-                      //   child: IconButton(
-                      //     onPressed: () {},
-                      //     icon: const Icon(
-                      //       Icons.calendar_month_sharp,
-                      //       color: Colors.black,
-                      //       size: 22,
-                      //     ),
-                      //   ),
-                      // ),
                     ],
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

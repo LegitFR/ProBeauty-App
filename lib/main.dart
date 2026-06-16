@@ -15,6 +15,7 @@ import 'package:probeauty_app/providers/order_provider.dart';
 import 'package:probeauty_app/providers/product_provider.dart';
 import 'package:probeauty_app/providers/salon_provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
+import 'package:probeauty_app/widgets/success_animation.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -57,8 +58,7 @@ Future<void> initializeLocalNotifications() async {
   const AndroidInitializationSettings androidSettings =
       AndroidInitializationSettings('@mipmap/ic_launcher');
 
-  const DarwinInitializationSettings iosSettings =
-      DarwinInitializationSettings(
+  const DarwinInitializationSettings iosSettings = DarwinInitializationSettings(
     requestAlertPermission: false,
     requestBadgePermission: false,
     requestSoundPermission: false,
@@ -160,6 +160,19 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     final appLocale = context.watch<AppLocale>();
+
+    // return MaterialApp(
+    //   debugShowCheckedModeBanner: false,
+    //   home: AnimatedSuccessScreen(
+    //     title: "Appointment Booked!",
+    //     buttonText: "Continue booking",
+    //     successSvgPath: "assets/images/icons/success.svg",
+    //     onContinue: () {
+    //       Navigator.pop(context); // close overlay
+    //       Navigator.popUntil(context, (route) => route.isFirst);
+    //     },
+    //   ),
+    // );
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,

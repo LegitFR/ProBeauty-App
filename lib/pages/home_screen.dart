@@ -611,7 +611,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               // ADDRESS
                               Text(
                                 address.contains('\n') ? address : '$address\n',
-                                maxLines: 2,
+                                maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   fontFamily: "PoppinsRegular",
@@ -766,7 +766,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(
               title,
               textAlign: TextAlign.center,
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontFamily: "PoppinsRegular",
