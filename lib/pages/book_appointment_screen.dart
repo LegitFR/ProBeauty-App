@@ -216,6 +216,8 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
         },
       );
 
+      print(response.body);
+
       if (!mounted) return;
 
       if (response.statusCode == 200) {

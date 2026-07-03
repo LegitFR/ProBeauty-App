@@ -89,83 +89,111 @@ class _ProductScreenState extends State<ProductScreen> {
 
   Future<void> _checkFavouriteStatus() async {
     final productId = widget.product.id;
+
     if (productId == null) return;
 
     try {
       final resp = await ApiClient.get(
         "/api/v1/favourites/check/$productId",
+        query: {
+          "type": "product",
+        },
       );
 
       if (resp.statusCode == 200) {
-        final data = jsonDecode(resp.body);
-        final fav = data["data"]?["isFavourited"] ?? false;
-        if (mounted) setState(() => _isFavourited = fav);
+        final body = jsonDecode(resp.body);
+
+        if (mounted) {
+          setState(() {
+            _isFavourited = body["data"]?["isFavourited"] ?? false;
+          });
+        }
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint("Favourite check error : $e");
+    }
   }
 
   Future<void> _toggleFavourite() async {
     if (_favUpdating) return;
 
     final productId = widget.product.id;
+
     if (productId == null) return;
 
-    setState(() => _favUpdating = true);
+    setState(() {
+      _favUpdating = true;
+    });
 
     try {
-      late final response;
-
       if (_isFavourited) {
-        response = await ApiClient.delete(
+        final response = await ApiClient.delete(
           "/api/v1/favourites/$productId",
+          query: {
+            "type": "product",
+          },
         );
 
         if (response.statusCode == 200) {
-          if (mounted) setState(() => _isFavourited = false);
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          if (mounted) {
+            setState(() {
+              _isFavourited = false;
+            });
+          }
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                "Removed from favourites.",
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              const SnackBar(
+                content: Text(
+                  "Removed from favourites",
+                ),
               ),
-            ),
-          );
+            );
         }
       } else {
-        response = await ApiClient.post(
+        final response = await ApiClient.post(
           "/api/v1/favourites",
           body: {
-              "type": "product",
-              "itemId": productId
-            },
+            "type": "product",
+            "itemId": productId,
+          },
         );
 
-        if (response.statusCode == 201 || response.statusCode == 200) {
-          if (mounted) setState(() => _isFavourited = true);
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          if (mounted) {
+            setState(() {
+              _isFavourited = true;
+            });
+          }
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                "Added to favourites.",
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              const SnackBar(
+                content: Text(
+                  "Added to favourites",
+                ),
               ),
-            ),
-          );
+            );
         }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Unable to update favourites right now.",
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Unable to update favourites",
+            ),
           ),
-        ),
-      );
+        );
     } finally {
-      if (mounted) setState(() => _favUpdating = false);
+      if (mounted) {
+        setState(() {
+          _favUpdating = false;
+        });
+      }
     }
   }
 
@@ -622,12 +650,21 @@ class _ProductScreenState extends State<ProductScreen> {
                               ),
                             ],
                           ),
-                          child: Icon(
-                            _isFavourited
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            color: _isFavourited ? Colors.red : Colors.black,
-                          ),
+                          child: _favUpdating
+                              ? const SizedBox(
+                                  height: 18,
+                                  width: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Icon(
+                                  _isFavourited
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color:
+                                      _isFavourited ? Colors.red : Colors.black,
+                                ),
                         ),
                       ),
 

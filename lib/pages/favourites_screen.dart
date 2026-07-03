@@ -21,7 +21,9 @@ class FavouritesScreen extends StatefulWidget {
 class _FavouritesScreenState extends State<FavouritesScreen> {
   bool _loading = true;
   String? _error;
-  List<dynamic> _favourites = [];
+  int _selectedTab = 0; // 0 = Products, 1 = Salons
+  List<dynamic> _productFavourites = [];
+  List<dynamic> _salonFavourites = [];
 
   String? _addingToCartId; // 👈 track loading per product item
   String? _openingSalonId; // 👈 track loading per salon item
@@ -76,31 +78,41 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
   // ==========================
   Future<void> _fetchFavourites() async {
     try {
-      final resp = await ApiClient.get(
-        "/api/v1/favourites",
-        query: {
-          "type": "product",
-          "page": "1",
-          "limit": "20",
-        },
-      );
+      final responses = await Future.wait([
+        ApiClient.get(
+          "/api/v1/favourites",
+          query: {
+            "type": "product",
+            "page": "1",
+            "limit": "20",
+          },
+        ),
+        ApiClient.get(
+          "/api/v1/favourites",
+          query: {
+            "type": "salon",
+            "page": "1",
+            "limit": "20",
+          },
+        ),
+      ]);
 
-      if (resp.statusCode == 200) {
-        final body = jsonDecode(resp.body);
+      if (responses[0].statusCode == 200 && responses[1].statusCode == 200) {
+        final productBody = jsonDecode(responses[0].body);
+        final salonBody = jsonDecode(responses[1].body);
+
         setState(() {
-          _favourites = body["data"] ?? [];
+          _productFavourites = productBody["data"] ?? [];
+          _salonFavourites = salonBody["data"] ?? [];
           _loading = false;
         });
       } else {
-        setState(() {
-          _error = "Failed to load favourites";
-          _loading = false;
-        });
+        throw Exception("Failed to load favourites");
       }
     } catch (e) {
       setState(() {
-        _error = "Unable to load favourites right now. Please try again later.";
         _loading = false;
+        _error = "Unable to load favourites right now. Please try again later.";
       });
     }
   }
@@ -122,7 +134,11 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
 
       if (resp.statusCode == 200) {
         setState(() {
-          _favourites.removeAt(index);
+          if (type == "product") {
+            _productFavourites.removeAt(index);
+          } else {
+            _salonFavourites.removeAt(index);
+          }
         });
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -226,6 +242,65 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
     );
   }
 
+  Widget _segmentSelector() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedTab = 0),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: _selectedTab == 0
+                      ? AppColors.rusticSunset
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  "Products",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: "PoppinsMedium",
+                    color: _selectedTab == 0 ? Colors.white : Colors.black,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedTab = 1),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: _selectedTab == 1
+                      ? AppColors.rusticSunset
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  "Salons",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: "PoppinsMedium",
+                    color: _selectedTab == 1 ? Colors.white : Colors.black,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildBody() {
     // 1️⃣ LOADING → SKELETON
     if (_loading) {
@@ -278,50 +353,66 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
       );
     }
 
-    // 3️⃣ EMPTY (ONLY AFTER LOAD)
-    if (_favourites.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.favorite_border,
-              color: Colors.black45,
-              size: 38,
+    // 4️⃣ REAL DATA
+    final favourites =
+        _selectedTab == 0 ? _productFavourites : _salonFavourites;
+
+    if (favourites.isEmpty) {
+      return Column(
+        children: [
+          _segmentSelector(),
+          const Spacer(),
+          Icon(
+            _selectedTab == 0
+                ? Icons.shopping_bag_outlined
+                : Icons.storefront_outlined,
+            size: 45,
+            color: Colors.black45,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            _selectedTab == 0
+                ? "No favourite products yet"
+                : "No favourite salons yet",
+            style: const TextStyle(
+              fontFamily: "PoppinsMedium",
             ),
-            SizedBox(height: 10),
-            Text(
-              AppLocalizations.of(context)!.favouritesEmpty,
-              style: const TextStyle(
-                fontFamily: "PoppinsRegular",
-                fontSize: 14,
-                color: Colors.black54,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
+          ),
+          const Spacer(),
+        ],
       );
     }
 
-    // 4️⃣ REAL DATA
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      itemCount: _favourites.length,
-      itemBuilder: (context, index) {
-        final item = _favourites[index];
-        final String type = item["type"] ?? "product";
+    return Column(
+      children: [
+        _segmentSelector(),
+        Expanded(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            child: ListView.builder(
+              key: ValueKey(_selectedTab),
+              padding: const EdgeInsets.all(16),
+              itemCount: favourites.length,
+              itemBuilder: (_, index) {
+                if (_selectedTab == 0) {
+                  return _favouriteProductCard(
+                    favourites[index]["product"],
+                    index,
+                  );
+                }
 
-        if (type == "salon") {
-          final salon = item["salon"];
-          final String salonId =
-              salon?["id"] ?? salon?["_id"] ?? item["itemId"] ?? "";
-          return _favouriteSalonCard(salon, salonId, index);
-        }
+                final salon = favourites[index]["salon"];
 
-        final product = item["product"];
-        return _favouriteProductCard(product, index);
-      },
+                return _favouriteSalonCard(
+                  salon,
+                  salon["id"],
+                  index,
+                );
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -394,25 +485,24 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(14),
                 ),
-                child: image.isNotEmpty
-                    ? Image.network(
-                        image,
-                        height: 160,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          height: 160,
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.storefront,
-                              size: 48, color: Colors.white70),
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: image.isNotEmpty
+                      ? Image.network(
+                          image,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) {
+                            return Image.asset(
+                              "assets/images/saloons/saloon1.png",
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        )
+                      : Image.asset(
+                          "assets/images/saloons/saloon1.png",
+                          fit: BoxFit.cover,
                         ),
-                      )
-                    : Container(
-                        height: 160,
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.storefront,
-                            size: 48, color: Colors.white70),
-                      ),
+                ),
               ),
               Positioned(
                 top: 10,

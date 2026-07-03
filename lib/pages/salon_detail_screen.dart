@@ -370,41 +370,40 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                           ),
                         ),
                       ),
-                      // GestureDetector(
-                      //   onTap: _toggleFavourite,
-                      //   child: Container(
-                      //     padding: const EdgeInsets.all(8),
-                      //     decoration: BoxDecoration(
-                      //       shape: BoxShape.circle,
-                      //       border: Border.all(color: Colors.black26),
-                      //       color: AppColors.softIvory,
-                      //       boxShadow: [
-                      //         BoxShadow(
-                      //           color: Colors.black.withOpacity(0.15),
-                      //           blurRadius: 8,
-                      //           offset: const Offset(0, 2),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //     child: _favouriteLoading
-                      //         ? const SizedBox(
-                      //             width: 22,
-                      //             height: 22,
-                      //             child: CircularProgressIndicator(
-                      //               strokeWidth: 2,
-                      //               color: AppColors.rusticSunset,
-                      //             ),
-                      //           )
-                      //         : Icon(
-                      //             _isFavourited
-                      //                 ? Icons.favorite
-                      //                 : Icons.favorite_border,
-                      //             color: _isFavourited
-                      //                 ? Colors.red
-                      //                 : Colors.black,
-                      //           ),
-                      //   ),
-                      // ),
+                      GestureDetector(
+                        onTap: _toggleFavourite,
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.black26),
+                            color: AppColors.softIvory,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: _favouriteLoading
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.rusticSunset,
+                                  ),
+                                )
+                              : Icon(
+                                  _isFavourited
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color:
+                                      _isFavourited ? Colors.red : Colors.black,
+                                ),
+                        ),
+                      ),
                     ],
                   ),
 

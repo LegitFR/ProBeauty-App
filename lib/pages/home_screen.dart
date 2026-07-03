@@ -531,155 +531,174 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               child: Padding(
                 padding: EdgeInsets.only(right: width * 0.04),
-                child: Container(
+                child: SizedBox(
                   width: width * 0.65,
-                  decoration: BoxDecoration(
-                    color: AppColors.softIvory,
-                    borderRadius: cardRadius,
-                    border: Border.all(color: Colors.black, width: 4),
-                  ),
-                  child: Column(
-                    children: [
-                      // IMAGE
-                      Padding(
-                        padding: const EdgeInsets.all(6),
-                        child: ClipRRect(
-                          borderRadius: imageRadius,
-                          child: Image(
-                            image: img.startsWith('http')
-                                ? NetworkImage(img)
-                                : AssetImage(img) as ImageProvider,
-                            width: double.infinity,
-                            height: height * 0.125,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Image.asset(
-                              'assets/images/saloons/saloon1.png',
-                              width: double.infinity,
-                              fit: BoxFit.cover,
+                  height: height * 0.31,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.softIvory,
+                      borderRadius: cardRadius,
+                      border: Border.all(
+                        color: Colors.black,
+                        width: 4,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        // IMAGE
+                        Padding(
+                          padding: const EdgeInsets.all(6),
+                          child: ClipRRect(
+                            borderRadius: imageRadius,
+                            child: AspectRatio(
+                              aspectRatio: 16 / 9,
+                              child: Image(
+                                image: img.startsWith('http')
+                                    ? NetworkImage(img)
+                                    : AssetImage(img) as ImageProvider,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Image.asset(
+                                  'assets/images/saloons/saloon1.png',
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
 
-                      Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: width * 0.03,
-                            vertical: height * 0.01,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // NAME
-                              Text(
-                                name,
-                                maxLines: 1,
-                                style: TextStyle(
-                                  fontFamily: "PoppinsSemiBold",
-                                  fontSize: width * 0.04,
-                                ),
-                              ),
-
-                              SizedBox(height: height * 0.005),
-
-                              // ⭐ RATING + COUNT
-                              Row(
-                                children: [
-                                  ...List.generate(
-                                    5,
-                                    (i) => Icon(
-                                      Icons.star,
-                                      size: width * 0.035,
-                                      color: i < avgRating.floor()
-                                          ? AppColors.rusticSunset
-                                          : AppColors.greyTone,
-                                    ),
-                                  ),
-                                  SizedBox(width: width * 0.01),
-                                  Text(
-                                    "($totalReviews)",
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: width * 0.03,
+                              vertical: height * 0.01,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // NAME
+                                SizedBox(
+                                  height: 28,
+                                  child: Text(
+                                    name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
-                                      fontSize: width * 0.03,
-                                      fontFamily: "PoppinsRegular",
+                                      fontFamily: "PoppinsSemiBold",
+                                      fontSize: width * 0.04,
                                     ),
                                   ),
-                                ],
-                              ),
-
-                              SizedBox(height: height * 0.005),
-
-                              // ADDRESS
-                              Text(
-                                address.contains('\n') ? address : '$address\n',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontFamily: "PoppinsRegular",
-                                  fontSize: width * 0.032,
                                 ),
-                              ),
 
-                              SizedBox(height: height * 0.008),
+                                SizedBox(height: height * 0.005),
 
-                              // TAGS
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: width * 0.02,
-                                      vertical: height * 0.004,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.lighterGreyTone,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Text(
-                                      l10n.homeSalonLabel,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        fontFamily: "PoppinsRegular",
+                                // ⭐ RATING + COUNT
+                                SizedBox(
+                                  height: 20,
+                                  child: Row(
+                                    children: [
+                                      ...List.generate(
+                                        5,
+                                        (i) => Icon(
+                                          Icons.star,
+                                          size: width * 0.035,
+                                          color: i < avgRating.floor()
+                                              ? AppColors.rusticSunset
+                                              : AppColors.greyTone,
+                                        ),
                                       ),
+                                      SizedBox(width: width * 0.01),
+                                      Text(
+                                        "($totalReviews)",
+                                        style: TextStyle(
+                                          fontSize: width * 0.03,
+                                          fontFamily: "PoppinsRegular",
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                SizedBox(height: height * 0.005),
+
+                                // ADDRESS
+                                SizedBox(
+                                  height: 20,
+                                  child: Text(
+                                    address,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontFamily: "PoppinsRegular",
+                                      fontSize: width * 0.032,
                                     ),
                                   ),
-                                  SizedBox(width: width * 0.02),
-                                  Flexible(
-                                    child: Container(
+                                ),
+
+                                const Spacer(),
+
+                                // TAGS
+                                Row(
+                                  children: [
+                                    Container(
                                       padding: EdgeInsets.symmetric(
                                         horizontal: width * 0.02,
                                         vertical: height * 0.004,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: AppColors.rusticSunset,
+                                        color: AppColors.lighterGreyTone,
                                         borderRadius: BorderRadius.circular(12),
                                       ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Image.asset(
-                                            'assets/images/icons/discount_tag.png',
-                                            width: width * 0.035,
-                                          ),
-                                          SizedBox(width: width * 0.018),
-                                          Text(
-                                            l10n.homeSaveUpto("10"),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              fontSize: width * 0.03,
-                                              fontFamily: "PoppinsRegular",
-                                            ),
-                                          ),
-                                        ],
+                                      child: Text(
+                                        l10n.homeSalonLabel,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontFamily: "PoppinsRegular",
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              )
-                            ],
+                                    SizedBox(width: width * 0.02),
+                                    Flexible(
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: width * 0.02,
+                                          vertical: height * 0.004,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.rusticSunset,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Image.asset(
+                                              'assets/images/icons/discount_tag.png',
+                                              width: width * 0.035,
+                                            ),
+                                            SizedBox(width: width * 0.018),
+                                            Flexible(
+                                              child: Text(
+                                                l10n.homeSaveUpto("10"),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontSize: width * 0.03,
+                                                  fontFamily: "PoppinsRegular",
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

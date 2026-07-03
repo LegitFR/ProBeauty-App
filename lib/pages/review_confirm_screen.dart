@@ -441,7 +441,7 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
       body: body,
     );
 
-    print(body);
+    print(response.body);
 
     final json = jsonDecode(response.body);
 

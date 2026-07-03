@@ -23,7 +23,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   final TextEditingController _monthController = TextEditingController();
   final TextEditingController _yearController = TextEditingController();
 
-  String _selectedCountryCode = '+44';
+  final String _countryCode = '+351';
   // String? _selectedEmailOption;
 
   bool _saving = false;
@@ -73,8 +73,6 @@ class _ProfileDetailsState extends State<ProfileDetails> {
 
     final first = _firstNameController.text.trim();
     final email = _emailController.text.trim();
-    final day = _dayController.text.trim();
-    final year = _yearController.text.trim();
     final last = _lastNameController.text.trim();
     final phone = _phoneController.text.trim();
     final fullName = "$first $last".trim();
@@ -99,8 +97,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       return;
     }
 
-    if (phone.isNotEmpty && !RegExp(r'^[6-9]\d{9}$').hasMatch(phone)) {
-      _showMessage(l10n.profileInvalidPhone);
+    if (phone.isNotEmpty && !RegExp(r'^\d{9}$').hasMatch(phone)) {
+      _showMessage("Phone number must be exactly 9 digits.");
       return;
     }
 
@@ -250,154 +248,58 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   }
 
   Widget _buildPhoneField() {
-    return Row(
-      children: [
-        Container(
-          width: 95,
-          decoration: BoxDecoration(
-            color: AppColors.softIvory,
-            borderRadius: BorderRadius.circular(25),
-            border: Border.all(color: Colors.black87, width: 1.5),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              dropdownColor: AppColors.softIvory,
-              value: _selectedCountryCode,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              icon: const Icon(Icons.keyboard_arrow_down, size: 20),
-              items: [
-                '+44', // UK
-                '+33', // France
-                '+49', // Germany
-                '+39', // Italy
-                '+34', // Spain
-                '+31', // Netherlands
-                '+32', // Belgium
-                '+41', // Switzerland
-                '+43', // Austria
-                '+45', // Denmark
-                '+46', // Sweden
-                '+47', // Norway
-                '+48', // Poland
-                '+351', // Portugal
-                '+353', // Ireland
-                '+30', // Greece
-                '+420', // Czech Republic
-                '+36', // Hungary
-                '+40', // Romania
-                '+1', // US/Canada
-              ]
-                  .map((code) => DropdownMenuItem(
-                        value: code,
-                        child: Text(code),
-                      ))
-                  .toList(),
-              onChanged: (value) => setState(() {
-                _selectedCountryCode = value!;
-              }),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(child: _buildTextField(_phoneController)),
-      ],
-    );
-  }
-
-  Widget _buildDateFields() {
-    final l10n = AppLocalizations.of(context)!;
-    return Row(
-      children: [
-        Expanded(
-            flex: 2,
-            child: _buildDateTextField(_dayController, l10n.profileDayHint)),
-        const SizedBox(width: 12),
-        Expanded(flex: 2, child: _buildDateDropdown(l10n.profileMonthHint)),
-        const SizedBox(width: 12),
-        Expanded(
-            flex: 2,
-            child: _buildDateTextField(_yearController, l10n.profileYearHint)),
-      ],
-    );
-  }
-
-  Widget _buildDateTextField(TextEditingController controller, String hint) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.softIvory,
         borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: Colors.black87, width: 1.5),
-      ),
-      child: TextField(
-        cursorColor: AppColors.rusticSunset,
-        controller: controller,
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: const TextStyle(color: Colors.grey),
-          border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        border: Border.all(
+          color: Colors.black87,
+          width: 1.5,
         ),
       ),
-    );
-  }
-
-  Widget _buildDateDropdown(String hint) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.softIvory,
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: Colors.black87, width: 1.5),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          hint: Padding(
-            padding: const EdgeInsets.only(left: 14),
+      child: Row(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 18),
             child: Text(
-              hint,
-              style: const TextStyle(color: Colors.grey, fontSize: 14),
+              "+351",
+              style: const TextStyle(
+                fontFamily: "PoppinsMedium",
+                fontSize: 14,
+                color: Colors.black,
+              ),
             ),
           ),
-          items: const [],
-          onChanged: null,
-        ),
+          const SizedBox(width: 10),
+          Container(
+            width: 1,
+            height: 24,
+            color: Colors.black26,
+          ),
+          Expanded(
+            child: TextField(
+              controller: _phoneController,
+              keyboardType: TextInputType.phone,
+              cursorColor: AppColors.rusticSunset,
+              style: const TextStyle(
+                fontFamily: "PoppinsRegular",
+                fontSize: 14,
+                color: Colors.black,
+              ),
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                hintText: "912345678",
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
-
-  // Widget _buildDropdownField() {
-  //   final l10n = AppLocalizations.of(context)!;
-  //   return Container(
-  //     decoration: BoxDecoration(
-  //       color: AppColors.softIvory,
-  //       borderRadius: BorderRadius.circular(25),
-  //       border: Border.all(color: Colors.black87, width: 1.5),
-  //     ),
-  //     child: DropdownButtonHideUnderline(
-  //       child: DropdownButton<String>(
-  //         value: _selectedEmailOption,
-  //         hint: Padding(
-  //           padding: EdgeInsets.only(left: 15),
-  //           child: Text(
-  //             l10n.profileEmailOptionLabel,
-  //             style: const TextStyle(color: Colors.grey),
-  //           ),
-  //         ),
-  //         icon: const Icon(Icons.keyboard_arrow_down, size: 20),
-  //         isExpanded: true,
-  //         items: ['Option 1', 'Option 2', 'Option 3']
-  //             .map((opt) => DropdownMenuItem(
-  //                   value: opt,
-  //                   child: Text(opt),
-  //                 ))
-  //             .toList(),
-  //         onChanged: (value) => setState(() {
-  //           _selectedEmailOption = value;
-  //         }),
-  //       ),
-  //     ),
-  //   );
-  // }
 
   Widget _buildSaveButton() {
     final l10n = AppLocalizations.of(context)!;

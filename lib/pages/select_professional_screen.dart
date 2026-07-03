@@ -75,6 +75,8 @@ class _SelectProfessionalScreenState extends State<SelectProfessionalScreen> {
         },
       );
 
+      print(response.body);
+
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
 
