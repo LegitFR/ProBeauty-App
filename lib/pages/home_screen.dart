@@ -1,9 +1,12 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:convert';
+
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import '../services/api_client.dart';
 import 'package:probeauty_app/l10n/app_localizations.dart';
 import 'package:probeauty_app/pages/explore_results_screen.dart';
 import 'package:probeauty_app/pages/salon_detail_screen.dart';
@@ -22,11 +25,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentOfferIndex = 0;
+  // ==========================
+  // FAVOURITE STATE
+  // ==========================
+  final Map<String, bool> _favourites = {};
+  final Set<String> _loadingFavourites = {};
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
+    Future.microtask(() async {
       final salonProvider = context.read<SalonProvider>();
       final offerProvider = context.read<OfferProvider>();
 
@@ -39,7 +47,140 @@ class _HomeScreenState extends State<HomeScreen> {
       } else {
         offerProvider.fetchActiveOffers(showLoader: false);
       }
+
+      await _loadFavourites();
     });
+  }
+
+  Future<void> _loadFavourites() async {
+    try {
+      final resp = await ApiClient.get(
+        "/api/v1/favourites",
+        query: {
+          "type": "salon",
+          "page": "1",
+          "limit": "100",
+        },
+      );
+
+      if (resp.statusCode == 200) {
+        final body = jsonDecode(resp.body);
+        final List items = body["data"] ?? [];
+
+        final favs = <String, bool>{};
+
+        for (final item in items) {
+          final salon = item["salon"];
+          final id = salon?["id"] ?? salon?["_id"] ?? item["itemId"];
+
+          if (id != null) {
+            favs[id] = true;
+          }
+        }
+
+        if (mounted) {
+          setState(() {
+            _favourites.addAll(favs);
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
+// ==========================
+// TOGGLE FAVOURITE
+// ==========================
+  Future<void> _toggleFavourite(String salonId) async {
+    if (_loadingFavourites.contains(salonId)) return;
+
+    final l10n = AppLocalizations.of(context)!;
+    final wasLiked = _favourites[salonId] ?? false;
+
+    // Optimistic update
+    setState(() {
+      _favourites[salonId] = !wasLiked;
+      _loadingFavourites.add(salonId);
+    });
+
+    try {
+      if (!wasLiked) {
+        // ➕ ADD to favourites
+        final resp = await ApiClient.post(
+          "/api/v1/favourites",
+          body: {
+            "type": "salon",
+            "itemId": salonId,
+          },
+        );
+
+        if (resp.statusCode == 200 || resp.statusCode == 201) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.salonAddedToFavourites),
+            ),
+          );
+        } else {
+          setState(() {
+            _favourites[salonId] = wasLiked;
+          });
+
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.salonAddToFavouritesFailed),
+            ),
+          );
+        }
+      } else {
+        // ➖ REMOVE from favourites
+        final resp = await ApiClient.delete(
+          "/api/v1/favourites/$salonId",
+          query: {
+            "type": "salon",
+          },
+        );
+
+        if (resp.statusCode == 200) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.favouritesRemovedSuccess),
+            ),
+          );
+        } else {
+          setState(() {
+            _favourites[salonId] = wasLiked;
+          });
+
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.favouritesRemoveFailed),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      setState(() {
+        _favourites[salonId] = wasLiked;
+      });
+
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.favouritesError(e.toString()),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingFavourites.remove(salonId);
+        });
+      }
+    }
   }
 
   @override
@@ -487,6 +628,8 @@ class _HomeScreenState extends State<HomeScreen> {
             final salon = provider.salons[index];
 
             final String id = salon["id"] ?? "";
+
+            final bool isFavourite = _favourites[id] ?? false;
             final String name = salon["name"] ?? "Salon";
             final String address = salon["address"] ?? "Unknown location";
             final List services =
@@ -548,21 +691,53 @@ class _HomeScreenState extends State<HomeScreen> {
                         // IMAGE
                         Padding(
                           padding: const EdgeInsets.all(6),
-                          child: ClipRRect(
-                            borderRadius: imageRadius,
-                            child: AspectRatio(
-                              aspectRatio: 16 / 9,
-                              child: Image(
-                                image: img.startsWith('http')
-                                    ? NetworkImage(img)
-                                    : AssetImage(img) as ImageProvider,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Image.asset(
-                                  'assets/images/saloons/saloon1.png',
-                                  fit: BoxFit.cover,
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: imageRadius,
+                                child: AspectRatio(
+                                  aspectRatio: 16 / 9,
+                                  child: Image(
+                                    image: img.startsWith('http')
+                                        ? NetworkImage(img)
+                                        : AssetImage(img) as ImageProvider,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Image.asset(
+                                        'assets/images/saloons/saloon1.png'),
+                                  ),
                                 ),
                               ),
-                            ),
+                              Positioned(
+                                top: 10,
+                                right: 10,
+                                child: GestureDetector(
+                                  onTap: () => _toggleFavourite(id),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: AppColors.softIvory,
+                                      border: Border.all(color: Colors.black26),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.15),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Icon(
+                                      isFavourite
+                                          ? Icons.favorite
+                                          : Icons.favorite_border,
+                                      color: isFavourite
+                                          ? Colors.red
+                                          : Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
 

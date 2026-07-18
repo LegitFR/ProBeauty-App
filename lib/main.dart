@@ -15,7 +15,6 @@ import 'package:probeauty_app/providers/order_provider.dart';
 import 'package:probeauty_app/providers/product_provider.dart';
 import 'package:probeauty_app/providers/salon_provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
-import 'package:probeauty_app/widgets/success_animation.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
