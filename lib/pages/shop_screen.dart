@@ -1,5 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:convert';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
@@ -13,6 +15,8 @@ import 'package:probeauty_app/providers/product_provider.dart';
 import 'package:probeauty_app/resources/AppColors.dart';
 import 'package:provider/provider.dart';
 
+import '../services/api_client.dart';
+
 class ShopScreen extends StatefulWidget {
   const ShopScreen({super.key});
 
@@ -23,17 +27,21 @@ class ShopScreen extends StatefulWidget {
 class _ShopScreenState extends State<ShopScreen> {
   int _currentProductOfferIndex = 0;
   final TextEditingController _searchController = TextEditingController();
+  final Map<String, bool> _favourites = {};
+  final Set<String> _loadingFavourites = {};
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
+    Future.microtask(() async {
       final productProvider = context.read<ProductProvider>();
       final offerProvider = context.read<OfferProvider>();
 
       if (productProvider.products.isEmpty) {
         productProvider.fetchProducts();
       }
+
+      await _loadFavourites();
 
       // Silent refresh for offers
       if (offerProvider.offers.isEmpty) {
@@ -42,6 +50,94 @@ class _ShopScreenState extends State<ShopScreen> {
         offerProvider.fetchActiveOffers(showLoader: false);
       }
     });
+  }
+
+  Future<void> _loadFavourites() async {
+    try {
+      final resp = await ApiClient.get(
+        "/api/v1/favourites",
+        query: {
+          "type": "product",
+          "page": "1",
+          "limit": "100",
+        },
+      );
+
+      if (resp.statusCode == 200) {
+        final body = jsonDecode(resp.body);
+        final List items = body["data"] ?? [];
+
+        final favs = <String, bool>{};
+
+        for (final item in items) {
+          final product = item["product"];
+
+          final id = product?["id"] ?? product?["_id"] ?? item["itemId"];
+
+          if (id != null) {
+            favs[id] = true;
+          }
+        }
+
+        if (mounted) {
+          setState(() {
+            _favourites.addAll(favs);
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _toggleFavourite(String productId) async {
+    if (_loadingFavourites.contains(productId)) return;
+
+    final wasLiked = _favourites[productId] ?? false;
+
+    setState(() {
+      _favourites[productId] = !wasLiked;
+      _loadingFavourites.add(productId);
+    });
+
+    try {
+      if (!wasLiked) {
+        final resp = await ApiClient.post(
+          "/api/v1/favourites",
+          body: {
+            "type": "product",
+            "itemId": productId,
+          },
+        );
+
+        if (!(resp.statusCode == 200 || resp.statusCode == 201)) {
+          setState(() {
+            _favourites[productId] = wasLiked;
+          });
+        }
+      } else {
+        final resp = await ApiClient.delete(
+          "/api/v1/favourites/$productId",
+          query: {
+            "type": "product",
+          },
+        );
+
+        if (resp.statusCode != 200) {
+          setState(() {
+            _favourites[productId] = wasLiked;
+          });
+        }
+      }
+    } catch (_) {
+      setState(() {
+        _favourites[productId] = wasLiked;
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingFavourites.remove(productId);
+        });
+      }
+    }
   }
 
   @override
@@ -577,32 +673,34 @@ class _ShopScreenState extends State<ShopScreen> {
       itemCount: provider.products.length,
       itemBuilder: (context, index) {
         final p = provider.products[index];
+        final bool isFavourite = _favourites[p.id] ?? false;
         final image = p.images.isNotEmpty ? p.images[0] : null;
         final salonName =
             provider.salonNames[p.salonId] ?? l10n.shopLoadingSalon;
 
         return GestureDetector(
-          onTap: () {
-            Navigator.pushNamed(
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                '/product_screen',
+                arguments: {
+                  "product": p,
+                  "salonName": salonName,
+                },
+              );
+            },
+            child: specialOfferCard(
               context,
-              '/product_screen',
-              arguments: {
-                "product": p,
-                "salonName": salonName,
-              },
-            );
-          },
-          child: specialOfferCard(
-            context,
-            width,
-            brand: salonName,
-            productName: p.title ?? 'Product',
-            price: '€${p.price ?? "-"}',
-            oldPrice: '',
-            discount: '',
-            imageUrl: image,
-          ),
-        );
+              width,
+              brand: salonName,
+              productName: p.title ?? 'Product',
+              price: '€${p.price ?? "-"}',
+              oldPrice: '',
+              discount: '',
+              imageUrl: image,
+              isFavourite: isFavourite,
+              onFavouriteTap: () => _toggleFavourite(p.id!),
+            ));
       },
     );
   }
@@ -657,6 +755,8 @@ class _ShopScreenState extends State<ShopScreen> {
     required String price,
     required String oldPrice,
     required String discount,
+    required bool isFavourite,
+    required VoidCallback onFavouriteTap,
     String? imageUrl,
   }) {
     return Container(
@@ -674,25 +774,50 @@ class _ShopScreenState extends State<ShopScreen> {
         children: [
           /// IMAGE
           Padding(
-            padding: const EdgeInsets.all(12),
-            child: AspectRatio(
-              aspectRatio: 1.4,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(14),
-                child: imageUrl != null
-                    ? Image.network(
-                        imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Image.asset(
-                          'assets/images/saloons/error.png',
-                          width: double.infinity,
-                          fit: BoxFit.cover,
+              padding: const EdgeInsets.all(12),
+              child: AspectRatio(
+                aspectRatio: 1.4,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: imageUrl != null
+                            ? Image.network(
+                                imageUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Image.asset(
+                                  'assets/images/saloons/error.png',
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : const Icon(Icons.image, size: 60),
+                      ),
+                    ),
+                    Positioned(
+                      top: 10,
+                      right: 10,
+                      child: GestureDetector(
+                        onTap: onFavouriteTap,
+                        child: Container(
+                          padding: const EdgeInsets.all(7),
+                          decoration: const BoxDecoration(
+                            color: AppColors.softIvory,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            isFavourite
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: isFavourite ? Colors.red : Colors.black,
+                            size: 20,
+                          ),
                         ),
-                      )
-                    : const Icon(Icons.image, size: 60),
-              ),
-            ),
-          ),
+                      ),
+                    ),
+                  ],
+                ),
+              )),
 
           /// CONTENT
           Padding(
