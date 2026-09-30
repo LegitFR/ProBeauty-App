@@ -11,14 +11,29 @@ class TreatmentSearchScreen extends StatefulWidget {
 class _TreatmentSearchScreenState extends State<TreatmentSearchScreen> {
   TextEditingController controller = TextEditingController();
 
+  // "services" are the services grouped under a category. They are not shown
+  // in the list, but searching for one of them surfaces its category.
   final List<Map<String, dynamic>> treatments = [
     {"title": "Hair & styling", "icon": Icons.content_cut},
     {"title": "Nails", "icon": Icons.back_hand},
-    {"title": "Eyebrows & eyelashes", "icon": Icons.remove_red_eye},
+    {
+      "title": "Beauty",
+      "icon": Icons.auto_awesome,
+      "services": [
+        "Eyebrows & eyelashes",
+        "Facial & Skincare",
+        "Makeup",
+        "Hair removal",
+      ],
+    },
     {"title": "Massage", "icon": Icons.spa},
     {"title": "Barbering", "icon": Icons.face},
-    {"title": "Hair removal", "icon": Icons.clean_hands},
-    {"title": "Facials & skincare", "icon": Icons.self_improvement},
+    {"title": "SPA & Sauna", "icon": Icons.hot_tub},
+    {
+      "title": "Others",
+      "icon": Icons.more_horiz,
+      "services": ["Solário", "Fitness", "Nutrition", "Tattoo"],
+    },
   ];
 
   List<Map<String, dynamic>> get filteredTreatments {
@@ -28,11 +43,12 @@ class _TreatmentSearchScreenState extends State<TreatmentSearchScreen> {
       return treatments;
     }
 
-    return treatments
-        .where(
-          (t) => t["title"].toString().toLowerCase().contains(query),
-        )
-        .toList();
+    return treatments.where((t) {
+      final services = (t["services"] as List<String>?) ?? const <String>[];
+
+      return t["title"].toString().toLowerCase().contains(query) ||
+          services.any((s) => s.toLowerCase().contains(query));
+    }).toList();
   }
 
   @override
