@@ -4,7 +4,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:http/http.dart' as http;
 import 'package:probeauty_app/models/cart_item.dart';
 import 'package:probeauty_app/providers/address_provider.dart';
 import 'package:probeauty_app/routes/app_routes.dart';
@@ -33,32 +32,6 @@ class _CartScreenState extends State<CartScreen> {
       context.read<CartProvider>().fetchCart();
       context.read<AddressProvider>().fetchAddresses();
     });
-  }
-
-  Future<String?> pollMbWayWebhook({
-    required String orderId,
-    required String requestId,
-    required dynamic amount,
-  }) async {
-    try {
-      final response = await ApiClient.get(
-        "/api/v1/webhooks/ifthenpay/mbway",
-        query: {
-          "orderId": orderId,
-          "requestId": requestId,
-          "amount": amount.toString(),
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data["status"];
-      }
-    } catch (e) {
-      debugPrint("Webhook polling error: $e");
-    }
-
-    return null;
   }
 
   Future<String?> getOrderPaymentStatus(String orderId) async {
@@ -211,10 +184,6 @@ class _CartScreenState extends State<CartScreen> {
 
                           final payment = result["payment"];
                           final orderId = result["orderId"];
-                          final requestId = payment["requestId"];
-                          final amount = payment["amount"]; // check if exists
-
-                          print(orderId);
 
 // ✅ MBWAY message
                           ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -228,37 +197,37 @@ class _CartScreenState extends State<CartScreen> {
                             ),
                           );
 
-// ✅ Poll status
+// ✅ Poll status via GET /api/v1/orders/:id/payment, which triggers a
+// provider status refresh on the backend for pending MB WAY payments.
                           int attempts = 0;
                           String? status;
 
                           do {
                             await Future.delayed(const Duration(seconds: 3));
 
-                            await pollMbWayWebhook(
-                              orderId: orderId,
-                              requestId: requestId,
-                              amount: amount,
-                            );
-
-                            status = await pollMbWayWebhook(
-                              orderId: orderId,
-                              requestId: requestId,
-                              amount: amount,
-                            );
+                            status = await getOrderPaymentStatus(orderId);
 
                             attempts++;
-                          } while (status != null &&
-                              status.toUpperCase() == "PAYMENT_PENDING" &&
+                          } while (status?.toLowerCase() == "pending" &&
                               attempts < 15);
 
-                          if (status != null &&
-                              status.toUpperCase() == "CONFIRMED") {
+                          if (status?.toLowerCase() == "succeeded") {
                             await cart.clearCart();
 
                             if (mounted) {
                               await _showSuccessOverlay();
                             }
+                          } else {
+                            if (!mounted) return;
+
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  "Payment could not be confirmed. If you approved it in the MB WAY app, please check your orders shortly.",
+                                ),
+                              ),
+                            );
                           }
                         } catch (e) {
                           if (!mounted) return;

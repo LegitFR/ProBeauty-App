@@ -534,27 +534,23 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
     );
   }
 
-  Future<String?> pollMbWayWebhook({
-    required String bookingId,
-    required String requestId,
-    required dynamic amount,
-  }) async {
+  Future<String?> getBookingPaymentStatus(String bookingId) async {
     try {
       final response = await ApiClient.get(
-        "/api/v1/webhooks/ifthenpay/mbway",
-        query: {
-          "orderId": bookingId,
-          "requestId": requestId,
-          "amount": amount.toString(),
-        },
+        "/api/v1/bookings/$bookingId/payment",
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return data["status"];
+
+        final payments = data["data"];
+
+        if (payments != null && payments.isNotEmpty) {
+          return payments[0]["status"];
+        }
       }
     } catch (e) {
-      debugPrint("Webhook polling error: $e");
+      debugPrint("Payment status error: $e");
     }
 
     return null;
@@ -606,9 +602,6 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
       final payment = json["data"]["payment"];
       final bookingId = json["data"]["booking"]["id"];
 
-      final requestId = payment["requestId"];
-      final amt = payment["amount"];
-
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -619,25 +612,20 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
         ),
       );
 
-      // 🔥 POLLING
+      // 🔥 POLLING via GET /api/v1/bookings/:id/payment, which triggers a
+      // provider status refresh on the backend for pending MB WAY payments.
       int attempts = 0;
       String? status;
 
       do {
         await Future.delayed(const Duration(seconds: 3));
 
-        status = await pollMbWayWebhook(
-          bookingId: bookingId,
-          requestId: requestId,
-          amount: amt,
-        );
+        status = await getBookingPaymentStatus(bookingId);
 
         attempts++;
-      } while (status != null &&
-          status.toUpperCase() == "PAYMENT_PENDING" &&
-          attempts < 15);
+      } while (status?.toLowerCase() == "pending" && attempts < 15);
 
-      if (status != null && (status == "SUCCESS" || status == "000")) {
+      if (status?.toLowerCase() == "succeeded") {
         await _showSuccessOverlay();
       } else {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
