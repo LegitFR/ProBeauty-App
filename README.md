@@ -83,11 +83,14 @@ Example `.env` file:
 # API CONFIGURATION
 # =========================================================
 
-# Production API URL
-# API_BASE_URL=http://vps-9ebf5d76.vps.ovh.net:5000
+# Production API URL (https://api.probeautyapp.com/api/v1)
+# NOTE: set the host only, without the /api/v1 suffix. The app already
+# prefixes every endpoint with /api/v1, so including it here would produce
+# /api/v1/api/v1/... and break all requests.
+API_BASE_URL=https://api.probeautyapp.com
 
 # Development / Ngrok API URL
-API_BASE_URL=https://628a-2405-201-e057-a867-e0ea-a675-6b3a-396b.ngrok-free.app
+# API_BASE_URL=https://628a-2405-201-e057-a867-e0ea-a675-6b3a-396b.ngrok-free.app
 
 
 # =========================================================
