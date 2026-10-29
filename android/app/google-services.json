@@ -38,6 +38,14 @@
           }
         },
         {
+          "client_id": "568953432506-u1tftku1gn4joj82v6mkbij9mnckm8u6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.probeautyapp",
+            "certificate_hash": "1cff8f32a6ea7f6c5d460f7e3fade3f42abca8db"
+          }
+        },
+        {
           "client_id": "568953432506-v5m9hael5f57p6vjnsi72l6puokukc6c.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
